@@ -1,0 +1,120 @@
+
+" Options
+set encoding=utf8
+set clipboard=unnamedplus " Enables the clipboard between Vim/Neovim and other applications.
+set completeopt=noinsert,menuone,noselect " Modifies the auto-complete menu to behave more like an IDE.
+"set cursorline " Highlights the current line in the editor
+set hidden " Hide unused buffers
+set autoindent " Indent a new line
+set mouse=a " Allow to use the mouse in the editor
+set number " Shows the line numbers
+set splitbelow splitright " Change the split screen behavior
+set title " Show file title
+set wildmenu " Show a more advance menu
+set guifont=hack_nerd_font:h11
+"set cc=100 " Show at 80 column a border for good code style                      
+filetype plugin indent on   " Allow auto-indenting depending on file type
+syntax on
+"set spell " enable spell check (may need to download language package)
+set ttyfast " Speed up scrolling in Vim`:wq
+
+highlight CursorLineNr ctermfg=LightGray
+let g:kite_supported_languages = ['python', 'javascript']
+let g:localvimrc_sandbox = 0
+
+call plug#begin('~/.vim/plugged')
+Plug 'morhetz/gruvbox'
+Plug 'vim-airline/vim-airline'
+Plug 'doums/darcula'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'ryanoasis/vim-devicons'
+Plug 'scrooloose/nerdcommenter'
+Plug 'sheerun/vim-polyglot'
+Plug 'jiangmiao/auto-pairs'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'tpope/vim-fugitive'
+Plug '/vie/vim-flake8'
+Plug 'davidhalter/jedi-vim'
+Plug 'vim-scripts/indentpython.vim'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'PhilRunninger/nerdtree-visual-selection'
+Plug '/MarcWeber/vim-addon-local-vimrc'
+" Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
+Plug 'junegunn/vim-easy-align'
+" Any valid git URL is allowed
+Plug 'https://github.com/junegunn/vim-github-dashboard.git'
+" Multiple Plug commands can be written in a single line using | separators
+Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+" On-demand loading
+Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
+Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
+Plug 'miyakogi/conoline.vim'
+Plug 'ryanoasis/vim-devicons'
+Plug 'embear/vim-localvimrc'
+call plug#end()
+
+"colorscheme gruvbox
+let g:bargreybars_auto=0
+let g:airline_solorized_bg='dark'
+let g:airline_powerline_fonts=1
+let g:airline#extension#tabline#enable=1
+let g:airline#extension#tabline#left_sep=' '
+let g:airline#extension#tabline#left_alt_sep='|'
+let g:airline#extension#tabline#formatter='unique_tail'
+let NERDTreeQuitOnOpen=1
+
+let g:tex_comment_nospell=1
+let g:WebDevIconsUnicodeDecorateFolderNodes = 1
+let g:WebDevIconsUnicodeDecorateFolderNodeDefaultSymbol = '#'
+let g:WebDevIconsUnicodeDecorateFileNodesExtensionSymbols = {}
+let g:WebDevIconsUnicodeDecorateFileNodesExtensionSymbols['nerdtree'] = '#'
+
+
+#autocmd vimenter * NERDTree
+autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+map <C-n> :NERDTreeToggle<CR>
+
+colorscheme darcula " set Pycharm colortheme
+set termguicolors
+let g:lightline = { 'colorscheme': 'darcula'  }
+
+let g:conoline_color_normal_light = 'guibg=#333333 guifg=#dddddd'
+let g:conoline_color_insert_light = 'guibg=black guifg=lightgrey'
+
+set nospell
+
+let g:NERDTreeDirArrowExpandable="+"
+let g:NERDTreeDirArrowCollapsible="~"
+
+" Ctrl T um Datei in neuem Tab zu öffnen
+let NERDTreeMapOpenInTab='\r'
+let NERDTreeMapOpenInTab='<ENTER>'
+
+" Ctrl b um zur definition zu springen
+set mouse=a
+let g:jedi#goto_command = "<C-b>"
+
+" :term
+" :ctrl+w :hide
+" F12 zum wiederöffen
+source ~/.vim/pack/vimcharm/start/load_terminal.vim
+map <F12> :call LoadTerminal()<CR>
+
+" code folding
+
+set foldmethod=indent
+set foldlevelstart=99
+
+nnoremap + :res +5<CR>
+nnoremap - :res -5<CR>
+
+"autosaving
+let g:auto_save = 1                                                                                
+let g:auto_save_events = ["InsertLeave", "TextChanged"] 
+
+let g:ale_set_highlights = 0
+
+au BufWrite * :Autoformat
+
+" let g:ale_python_flake8_options = '--max-line-length=150'
