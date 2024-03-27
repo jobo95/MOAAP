@@ -10,8 +10,21 @@ from src.utils import *
 
 class Object_container(list):
 
-    # def __init__(self, iterable):
-    #    super().__init__(str(item) for item in iterable)
+    
+
+    def __init__(self, iterable):
+        for item in iterable:
+            if not isinstance(item,xr.Dataset):
+                raise TypeError("Object container can only be initialized with a sequence that only contains xarray Datasets")
+
+        super().__init__(iterable)
+
+    def append(self, item: xr.Dataset) -> None:
+        if not isinstance(item, xr.Dataset):
+            raise TypeError(
+                "Object container can only append xarray Dataset objects")
+        return super().append(item)
+
     def sel_season(self, season):
         return Object_container([x for x in self if pd.to_datetime(x.get.start_date).month in season])
 
@@ -28,7 +41,7 @@ class Object_container(list):
         return np.max([getattr(x.get, attr) for x in self])
 
     def quantile(self, attr, quant):
-        return np.quantile([x.get.mean(attr) for x in self],quant)
+        return np.quantile([x.get.mean(attr) for x in self], quant)
 
     def count(self):
         return len(self)
@@ -39,52 +52,77 @@ class Object_container(list):
 
     def filter_by_mean(self, threshold, attr, above=True):
         if above:
-            
-            return   Object_container([x for x in self  if x.get.mean(attr) > threshold])
+
+            return Object_container([x for x in self  if x.get.mean(attr) > threshold])
         else:
-            return   Object_container([x for x in self  if x.get.mean(attr) < threshold])
-        
+            return Object_container([x for x in self  if x.get.mean(attr) < threshold])
 
 
-def create_obj_from_dict(dict_, key, input_path, input_file_name_temp, start_date, end_date, input_field_grid,  nc_correct=True):
+def create_obj_from_dict(dict_, key, input_path, input_file_name_temp, start_date, end_date, input_field_grid,  nc_correct=True, load_coordinates=False):
     if nc_correct:
         end_date = end_date+relativedelta.relativedelta(months=1)
-
-    ds = xr.Dataset(
-        data_vars=dict(
-            id_=key,
-
-            nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
-            size=(['times'], dict_[key]['size']*1e-6 ),#* units('km^2')),
-
-            total_IVT=(['times'], dict_[key]['tot']),# * units('kg/m/s')),
-            mean_IVT=(['times'], dict_[key]['mean']),# * units('kg/m/s')),
-            max_IVT=(['times'], dict_[key]['max']),# * units('kg/m/s')),
-            min_IVT=(['times'], dict_[key]['min']),# * units('kg/m/s')),
-
-            mass_center_rlat=(['times'], dict_[key]['mass_center_loc'][:, 0]),
-            mass_center_rlon=(['times'], dict_[key]['mass_center_loc'][:, 1]),
-
-
-            track_rlat=(['times'], dict_[key]['track'][:, 0]),
-            track_rlon=(['times'], dict_[key]['track'][:, 1]),
-            # track_rot = (['times'], np.array([grid_point(lat,lon) for lat,lon in zip(dict_[key]['track'][:,0],dict_[key]['track'][:,1])])),
-
-
-            speed=(['times'], np.insert(
-                dict_[key]['speed'], 0, np.nan)),# * units('m/s')),
-            rlats=(['times'], get_coordinates(
-                key, dict_, input_field_grid)[0]),
-            rlons=(['times'], get_coordinates(
-                key, dict_, input_field_grid)[1]),
-            # regular_lats=(['times'], get_coordinates(key, dict_,regular_coords=True)[0]),
-            # regular_lons=(['times'], get_coordinates(key, dict_,regular_coords=True)[1])
-
-        ),
-        coords=dict(
-            times=dict_[key]['times']
+    
+    if load_coordinates:
+        ds = xr.Dataset(
+            data_vars=dict(
+                id_=key,
+    
+                nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
+                size=(['times'], dict_[key]['size']*1e-6 ),  # * units('km^2')),
+    
+                total_IVT=(['times'], dict_[key]['tot']),  # * units('kg/m/s')),
+                mean_IVT=(['times'], dict_[key]['mean']),  # * units('kg/m/s')),
+                max_IVT=(['times'], dict_[key]['max']),  # * units('kg/m/s')),
+                min_IVT=(['times'], dict_[key]['min']),  # * units('kg/m/s')),
+    
+                mass_center_rlat=(['times'], dict_[key]['mass_center_loc'][:, 0]),
+                mass_center_rlon=(['times'], dict_[key]['mass_center_loc'][:, 1]),
+    
+                track_rlat=(['times'], dict_[key]['track'][:, 0]),
+                track_rlon=(['times'], dict_[key]['track'][:, 1]),
+    
+                speed=(['times'], np.insert(
+                    dict_[key]['speed'], 0, np.nan)),  # * units('m/s')),
+                rlats=(['times'], get_coordinates(
+                    key, dict_, input_field_grid)[0]),
+                rlons=(['times'], get_coordinates(
+                    key, dict_, input_field_grid)[1]),
+    
+            ),
+            coords=dict(
+                times=dict_[key]['times']
+            )
         )
-    )
+
+    else:
+        ds = xr.Dataset(
+            data_vars=dict(
+                id_=key,
+    
+                nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
+                size=(['times'], dict_[key]['size']*1e-6 ),  # * units('km^2')),
+    
+                total_IVT=(['times'], dict_[key]['tot']),  # * units('kg/m/s')),
+                mean_IVT=(['times'], dict_[key]['mean']),  # * units('kg/m/s')),
+                max_IVT=(['times'], dict_[key]['max']),  # * units('kg/m/s')),
+                min_IVT=(['times'], dict_[key]['min']),  # * units('kg/m/s')),
+    
+                mass_center_rlat=(['times'], dict_[key]['mass_center_loc'][:, 0]),
+                mass_center_rlon=(['times'], dict_[key]['mass_center_loc'][:, 1]),
+    
+                track_rlat=(['times'], dict_[key]['track'][:, 0]),
+                track_rlon=(['times'], dict_[key]['track'][:, 1]),
+                speed=(['times'], np.insert(
+                    dict_[key]['speed'], 0, np.nan)),  # * units('m/s')),
+                # regular_lats=(['times'], get_coordinates(key, dict_,regular_coords=True)[0]),
+                # regular_lons=(['times'], get_coordinates(key, dict_,regular_coords=True)[1])
+    
+            ),
+            coords=dict(
+                times=dict_[key]['times']
+            )
+        )
+
 
     return ds
 
@@ -120,20 +158,31 @@ class Accessor:
     def speed(self):
         return self._obj.speed
 
+
     @property
-    def track_rlat(self):
+    def track_coord(self, rotated=True):
+        lon = self._obj.track_rlon
+        lat = self._obj.track_rlat
+
+        if rotated:
+            return lat,lon
+
+        return convert_to_regcoord(lat,lon)
+
+    @property
+    def track_lat(self, rotated=True):
         return self._obj.track_rlat
 
     @property
-    def track_rlon(self):
+    def track_lon(self,rotated=True):
         return self._obj.track_rlon
 
     @property
-    def mass_center_rlon(self):
+    def mass_center_lon(self,rotated=True):
         return self._obj.mass_center_rlon
 
     @property
-    def mass_center_rlat(self):
+    def mass_center_lat(self,rotated=True):
         return self._obj.mass_center_rlat
 
     @property
@@ -146,15 +195,18 @@ class Accessor:
 
     @property
     def regular_lat_origin(self):
-        return self.regular_lats.sel(times=self.times[0])
+        return float(self.regular_lats.sel(times=self.times[0]))
 
     @property
     def rlat_origin(self):
-        return self._obj.track_rlat.sel(times=self._obj.times[0])
+        return float(self._obj.track_rlat.sel(times=self._obj.times[0]).values)
 
     @property
     def rlon_origin(self):
-        return self._obj.track_rlon.sel(times=self._obj.times[0])
+        return self._obj.track_rlon.sel(times=self._obj.times[0]).values
+
+    #@cached_property
+
 
     # @property
     # def mean(self):

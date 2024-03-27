@@ -20,7 +20,7 @@ class Season(Enum):
     SPRING = (3,4,5)
     SUMMER = (6,7,8)
     AUTUMN = (9,10,11)
-    ALL = (1,2,3,4,5,6,7,8,9,10,11,12)
+    #ALL = (1,2,3,4,5,6,7,8,9,10,11,12)
                         
                         
     def __getitem__(self, index):

@@ -50,7 +50,7 @@ def cleanup_dicts(output_path,
 
 
 
-    obj_dict = get_dict_from_pkl(input_name)
+    obj_dict = load_pkl(input_name)
     dict_bak = dict(obj_dict)
 
     print(f'clean up {output_path}{type_}_{output_file_name_temp}_{get_datetime_str(file_start_date)}-{get_datetime_str(file_end_date)}')
@@ -72,21 +72,11 @@ def cleanup_dicts(output_path,
         output_name = f'{output_path}{type_}_{output_file_name_temp}_{get_datetime_str(file_start_date)}-{get_datetime_str(file_end_date)}'
 
     print ("clean up finished")
-    save_dict_as_pkl(obj_dict, output_name= output_name+'_corrected')
+    save_as_pkl(obj_dict, output_name= output_name+'_corrected')
 
     print ("remove old pickle file")
    # os.remove(f'{input_name}.pkl')
                     
                 
-def get_dict_from_pkl(output_name):
-
-    with open(output_name+'.pkl', 'rb') as pickle_file:
-        ob_dict = pickle.load(pickle_file)
-    return ob_dict
-
-def save_dict_as_pkl(dict_, output_name):
-                
-    with open(output_name+'.pkl', 'wb') as handle:
-        pickle.dump(dict_, handle, protocol=pickle.HIGHEST_PROTOCOL)
-        
+       
  

@@ -24,3 +24,16 @@ def create_datetime_lists(first_year, last_year, months=7, correct_last_endtime=
 
 def get_datetime_str(datetime):
     return datetime.strftime("%Y_%m_%d")
+
+
+def load_pkl(output_name):
+
+    with open(output_name+'.pkl', 'rb') as pickle_file:
+        ob_dict = pickle.load(pickle_file)
+    return ob_dict
+
+def save_as_pkl(dict_, output_name):
+                
+    with open(output_name+'.pkl', 'wb') as handle:
+        pickle.dump(dict_, handle, protocol=pickle.HIGHEST_PROTOCOL)
+ 
