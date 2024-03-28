@@ -53,7 +53,7 @@ def cleanup_dicts(output_path,
     obj_dict = load_pkl(input_name)
     dict_bak = dict(obj_dict)
 
-    print(f'clean up {output_path}{type_}_{output_file_name_temp}_{get_datetime_str(file_start_date)}-{get_datetime_str(file_end_date)}')
+    print(f'clean up {output_path}{type_}_{output_file_name_temp}_{get_datetime_str(file_start_date)}-{get_datetime_str(file_end_date)}.pkl')
 
     for i, key in enumerate(dict_bak.keys()):
         obj_start_date =  dict_bak[key]['times'][0]

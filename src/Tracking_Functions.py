@@ -830,7 +830,7 @@ def BreakupObjects(
     DATA,  # 3D matrix [time,lat,lon] containing the objects
     min_tsteps,  # minimum lifetime in data timesteps
     dT,# time step in hours
-    obj_history = True,  # calculates how object start and end
+    obj_history = False,  # calculates how object start and end
     ):  
 
     start = time.perf_counter()

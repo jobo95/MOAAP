@@ -4,8 +4,9 @@ import xarray as xr
 import pandas as pd
 from metpy.units import units
 from dateutil import relativedelta
-
+from functools import cached_property
 from src.utils import *
+from src.GridPoints import *
 
 
 class Object_container(list):
@@ -75,8 +76,8 @@ def create_obj_from_dict(dict_, key, input_path, input_file_name_temp, start_dat
                 max_IVT=(['times'], dict_[key]['max']),  # * units('kg/m/s')),
                 min_IVT=(['times'], dict_[key]['min']),  # * units('kg/m/s')),
     
-                mass_center_rlat=(['times'], dict_[key]['mass_center_loc'][:, 0]),
-                mass_center_rlon=(['times'], dict_[key]['mass_center_loc'][:, 1]),
+                mass_center_idy=(['times'], dict_[key]['mass_center_loc'][:, 0]),
+                mass_center_idx=(['times'], dict_[key]['mass_center_loc'][:, 1]),
     
                 track_rlat=(['times'], dict_[key]['track'][:, 0]),
                 track_rlon=(['times'], dict_[key]['track'][:, 1]),
@@ -107,8 +108,8 @@ def create_obj_from_dict(dict_, key, input_path, input_file_name_temp, start_dat
                 max_IVT=(['times'], dict_[key]['max']),  # * units('kg/m/s')),
                 min_IVT=(['times'], dict_[key]['min']),  # * units('kg/m/s')),
     
-                mass_center_rlat=(['times'], dict_[key]['mass_center_loc'][:, 0]),
-                mass_center_rlon=(['times'], dict_[key]['mass_center_loc'][:, 1]),
+                mass_center_idy=(['times'], dict_[key]['mass_center_loc'][:, 0]),
+                mass_center_idx=(['times'], dict_[key]['mass_center_loc'][:, 1]),
     
                 track_rlat=(['times'], dict_[key]['track'][:, 0]),
                 track_rlon=(['times'], dict_[key]['track'][:, 1]),
@@ -160,30 +161,30 @@ class Accessor:
 
 
     @property
-    def track_coord(self, rotated=True):
-        lon = self._obj.track_rlon
-        lat = self._obj.track_rlat
+    def track_rlat(self):
+        return self._obj.track_rlat.values
+
+    @property
+    def track_rlon(self):
+        return self._obj.track_rlon.values
+
+    def track(self,rotated : bool):
+        ls = [RotatedGridPoint(x,y) for x,y in zip(self.track_rlat, self.track_rlon)]
 
         if rotated:
-            return lat,lon
+            return ls
+    
+        return [x.to_regular() for x in ls] 
 
-        return convert_to_regcoord(lat,lon)
-
-    @property
-    def track_lat(self, rotated=True):
-        return self._obj.track_rlat
 
     @property
-    def track_lon(self,rotated=True):
-        return self._obj.track_rlon
+    def mass_center_idx(self):
+        return self._obj.mass_center_idx.values
 
     @property
-    def mass_center_lon(self,rotated=True):
-        return self._obj.mass_center_rlon
+    def mass_center_idy(self):
+        return self._obj.mass_center_idy.values
 
-    @property
-    def mass_center_lat(self,rotated=True):
-        return self._obj.mass_center_rlat
 
     @property
     def total_IVT(self):
@@ -193,19 +194,22 @@ class Accessor:
     def size(self):
         return self._obj.size
 
-    @property
-    def regular_lat_origin(self):
-        return float(self.regular_lats.sel(times=self.times[0]))
+    #@property
+    #def regular_lat_origin(self):
+    #    return float(self.regular_lats.sel(times=self.times[0]))
+
+    #@property
+    #def rlat_origin(self):
+    #    return float(self._obj.track_rlat.sel(times=self._obj.times[0]).values)
+
+    #@property
+    #def rlon_origin(self):
+    #    return self._obj.track_rlon.sel(times=self._obj.times[0]).values
 
     @property
-    def rlat_origin(self):
-        return float(self._obj.track_rlat.sel(times=self._obj.times[0]).values)
+    def origin(self):
+        return self._obj.track.sel(times=self._obj.times[0]) 
 
-    @property
-    def rlon_origin(self):
-        return self._obj.track_rlon.sel(times=self._obj.times[0]).values
-
-    #@cached_property
 
 
     # @property
