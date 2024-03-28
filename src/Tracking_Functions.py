@@ -5033,7 +5033,6 @@ def moaap(
                                     Time) # JLa: added object_split, Time
                                            # JRie added object_split_info)
 
-        print (object_split_info)
         #moaap.var_IVT_objects=IVT_objects
         #moaap.var_IVT=IVT
         moaap.var_OutputFolder=OutputFolder+'IVT_'+str(StartDay.year)+str(StartDay.month).zfill(2)+'_'+SetupString

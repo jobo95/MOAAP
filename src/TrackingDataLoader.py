@@ -81,8 +81,8 @@ class TrackingDataLoader():
 
         ds = xr.open_dataset(path+filename)
 
-        # if rm_nc:
-        #    os.remove(self.scratch_path+self.filename_merged)
+        if rm_nc:
+            os.remove(self.scratch_path+self.filename_merged)
 
         ds_sel = ds.sel(time=self._create_seltime_array(ds))
         del (ds)
@@ -96,7 +96,7 @@ class TrackingDataLoader():
 
         return self.time_sel
 
-    @ staticmethod
+    @staticmethod
     def _create_time_array(ds):
 
         return np.array(pd.DataFrame(ds.time.values, columns=['Datetime'])['Datetime'].values.astype('datetime64[s]').tolist())
