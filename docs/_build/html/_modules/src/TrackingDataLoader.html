@@ -1,0 +1,413 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>src.TrackingDataLoader &mdash; MOAAP-Tracking-Analysis  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> MOAAP-Tracking-Analysis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">src</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MOAAP-Tracking-Analysis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>src.TrackingDataLoader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for src.TrackingDataLoader</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+<span class="kn">from</span> <span class="nn">cdo</span> <span class="kn">import</span> <span class="n">Cdo</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">dateutil</span> <span class="kn">import</span> <span class="n">relativedelta</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+
+
+<div class="viewcode-block" id="TrackingDataLoader"><a class="viewcode-back" href="../../src.html#src.TrackingDataLoader.TrackingDataLoader">[docs]</a><span class="k">class</span> <span class="nc">TrackingDataLoader</span><span class="p">:</span>
+    <span class="c1">#####TODO Tracking DataLoader flexibler machen####</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that loads and prepares input data for the MOAAP Tracking algorithm. Currently loads data in chunks of 7 months. (from January to August and from July to February respectively)</span>
+<span class="sd">    Assumes that the input data are fiven in files that contain yearly data of the form:</span>
+
+<span class="sd">    {path}/{variable}/{variable}_{year}010100-{year}23123_{suffix}{file_type},</span>
+<span class="sd">    so for instance {path}/IVTu/IVTu_1986010100-1986123123_remapped_3x.nc</span>
+
+<span class="sd">    If the dates of a data chunk range from 1.1-1.8, one single input file is simply loaded and the dates properly selected.</span>
+<span class="sd">    As chunks with date ranging from 1.7-1.2 require data from two consecutive years, two yearly input files are first merged and accordingly the dates afterwards  properly selected.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">scratch_path</span> <span class="o">=</span> <span class="s2">&quot;/work/aa0238/a271093/scratch/&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">variable</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">file_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;nc&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Tracking DataLoader</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            variable (str): Variable of intrest (e.g. IVTu)</span>
+<span class="sd">            path (str): General data directory path.\n\n</span>
+<span class="sd">            start_date (datetime, optional): Start date of Tracking data chunk. Defaults to None.</span>
+<span class="sd">            end_date (datetime, optional): End date of Tracking data chunk. Defaults to None.</span>
+<span class="sd">            suffix (str, optional): _description_. Defaults to &quot;&quot;.</span>
+<span class="sd">            file_type (str, optional): File Ending of input files. Defaults to &quot;nc&quot;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_variable</span> <span class="o">=</span> <span class="n">variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="n">start_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="n">end_date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span> <span class="o">=</span> <span class="n">suffix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_type</span> <span class="o">=</span> <span class="n">file_type</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set Start date of Tracking data chunk</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AttributeError: end_date has to be explicitly set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;start_date has to be set.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span>
+
+    <span class="nd">@start_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set start date of Tracking data chunk</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            date (datetime): start date</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: start date has to be of type datetime.datetime.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;start_date has to be a datetime.datetime object&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span> <span class="o">=</span> <span class="n">date</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;End date of data chunk</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AttributeError: end_date has to be explicitly set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;end_date has to be set.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span>
+
+    <span class="nd">@end_date</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">end_date</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="n">datetime</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set end date of Tracking data chunk</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            date (datetime): end date</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: end date has to be of type datetime.datetime.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;end_date has to be a datetime.datetime object&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span> <span class="o">=</span> <span class="n">date</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">year_start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get start year of data chunk</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_date</span><span class="o">.</span><span class="n">year</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">year_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get end year of data chunk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_date</span><span class="o">.</span><span class="n">year</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">path_var</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get directory path to variables&#39; input files</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable</span><span class="si">}</span><span class="s2">/&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filename_year1</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get filename of the first year.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">year_start</span><span class="si">}</span><span class="s2">010100-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">year_start</span><span class="si">}</span><span class="s2">123123_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_type</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filename_year2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get filename of the second year. Same as filename_year2 for date range (1.1-1.8)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">year_end</span><span class="si">}</span><span class="s2">010100-</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">year_end</span><span class="si">}</span><span class="s2">123123_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_type</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">filename_merged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get file name of merged netcdf file (only if date 1.7-1.2)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;merged</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_variable</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">year_start</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">year_end</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_suffix</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_type</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<div class="viewcode-block" id="TrackingDataLoader.load_datasets"><a class="viewcode-back" href="../../src.html#src.TrackingDataLoader.TrackingDataLoader.load_datasets">[docs]</a>    <span class="k">def</span> <span class="nf">load_datasets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rm_nc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            rm_nc (bool, optional): Remove merged netCDF4 files finally. Defaults to True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            xr.Dataset: Dataset containing the input data for the Tracking algorithm, selected according to the specified data range</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># if date range 1.7-1.2 merge netcdf input files of two consecutive years</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">year_start</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">year_end</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">merge_ncfiles</span><span class="p">()</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_merged</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scratch_path</span>
+
+        <span class="c1"># if date range 1.1-1.8 simply use one netcdf input file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_year1</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_var</span>
+
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">open_dataset</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rm_nc</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch_path</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_merged</span><span class="p">)</span>
+
+        <span class="n">ds_sel</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_create_seltime_array</span><span class="p">(</span><span class="n">ds</span><span class="p">))</span>
+        <span class="k">del</span> <span class="n">ds</span>
+
+        <span class="k">return</span> <span class="n">ds_sel</span></div>
+
+    <span class="k">def</span> <span class="nf">_create_seltime_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_time_array</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_sel</span> <span class="o">=</span> <span class="n">time</span><span class="p">[(</span><span class="n">time</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">time</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_sel</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_create_time_array</span><span class="p">(</span><span class="n">ds</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Datetime&quot;</span><span class="p">])[</span><span class="s2">&quot;Datetime&quot;</span><span class="p">]</span>
+            <span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;datetime64[s]&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="TrackingDataLoader.merge_ncfiles"><a class="viewcode-back" href="../../src.html#src.TrackingDataLoader.TrackingDataLoader.merge_ncfiles">[docs]</a>    <span class="k">def</span> <span class="nf">merge_ncfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Merge netcdf files of two consecutive and save merged file in scratch path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch_path</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_merged</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">):</span>
+
+            <span class="n">cdo</span> <span class="o">=</span> <span class="n">Cdo</span><span class="p">()</span>
+
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Mergetime </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path_var</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_year1</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path_var</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_year2</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch_path</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_merged</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">cdo</span><span class="o">.</span><span class="n">mergetime</span><span class="p">(</span>
+                <span class="nb">input</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path_var</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_year1</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path_var</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_year2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">output</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scratch_path</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename_merged</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2024, Johannes Riebold.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

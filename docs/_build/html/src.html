@@ -1,0 +1,1428 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>src package &mdash; MOAAP-Tracking-Analysis  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="src" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> MOAAP-Tracking-Analysis
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">src package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.Corrections">src.Corrections module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.Corrections.cleanup_dicts"><code class="docutils literal notranslate"><span class="pre">cleanup_dicts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Corrections.correct_nc_file"><code class="docutils literal notranslate"><span class="pre">correct_nc_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.Enumerations">src.Enumerations module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.Enumerations.Month"><code class="docutils literal notranslate"><span class="pre">Month</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Enumerations.Season"><code class="docutils literal notranslate"><span class="pre">Season</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.GridPoints">src.GridPoints module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.GridPoints.Domain"><code class="docutils literal notranslate"><span class="pre">Domain</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.GridPoints.GridPoint"><code class="docutils literal notranslate"><span class="pre">GridPoint</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.GridPoints.RegularGridPoint"><code class="docutils literal notranslate"><span class="pre">RegularGridPoint</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.GridPoints.RotatedGridPoint"><code class="docutils literal notranslate"><span class="pre">RotatedGridPoint</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.GridPoints.get_Gridpoint_field"><code class="docutils literal notranslate"><span class="pre">get_Gridpoint_field()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.TrackingDataLoader">src.TrackingDataLoader module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.TrackingDataLoader.TrackingDataLoader"><code class="docutils literal notranslate"><span class="pre">TrackingDataLoader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.Tracking_Functions">src.Tracking_Functions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.BreakupObjects"><code class="docutils literal notranslate"><span class="pre">BreakupObjects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.ConnectLon"><code class="docutils literal notranslate"><span class="pre">ConnectLon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.ConnectLon_on_timestep"><code class="docutils literal notranslate"><span class="pre">ConnectLon_on_timestep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.DistanceCoord"><code class="docutils literal notranslate"><span class="pre">DistanceCoord()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.Feature_Calculation"><code class="docutils literal notranslate"><span class="pre">Feature_Calculation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.KFfilter"><code class="docutils literal notranslate"><span class="pre">KFfilter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.MCStracking"><code class="docutils literal notranslate"><span class="pre">MCStracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.MultiObjectIdentification"><code class="docutils literal notranslate"><span class="pre">MultiObjectIdentification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.ObjectCharacteristics"><code class="docutils literal notranslate"><span class="pre">ObjectCharacteristics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.ReadERA5"><code class="docutils literal notranslate"><span class="pre">ReadERA5()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.ReadERA5_2D"><code class="docutils literal notranslate"><span class="pre">ReadERA5_2D()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.ar_850hpa_tracking"><code class="docutils literal notranslate"><span class="pre">ar_850hpa_tracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.ar_check"><code class="docutils literal notranslate"><span class="pre">ar_check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.ar_ivt_tracking"><code class="docutils literal notranslate"><span class="pre">ar_ivt_tracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.calc_grid_distance_area"><code class="docutils literal notranslate"><span class="pre">calc_grid_distance_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.calc_object_characteristics"><code class="docutils literal notranslate"><span class="pre">calc_object_characteristics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.calculate_area_objects"><code class="docutils literal notranslate"><span class="pre">calculate_area_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.clean_up_objects"><code class="docutils literal notranslate"><span class="pre">clean_up_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.col_identification"><code class="docutils literal notranslate"><span class="pre">col_identification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.cy_acy_psl_tracking"><code class="docutils literal notranslate"><span class="pre">cy_acy_psl_tracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.cy_acy_z500_tracking"><code class="docutils literal notranslate"><span class="pre">cy_acy_z500_tracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.detect_local_minima"><code class="docutils literal notranslate"><span class="pre">detect_local_minima()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.frontal_identification"><code class="docutils literal notranslate"><span class="pre">frontal_identification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.haversine"><code class="docutils literal notranslate"><span class="pre">haversine()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.interp_weights"><code class="docutils literal notranslate"><span class="pre">interp_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.interpolate"><code class="docutils literal notranslate"><span class="pre">interpolate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.interpolate_numba"><code class="docutils literal notranslate"><span class="pre">interpolate_numba()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.is_land"><code class="docutils literal notranslate"><span class="pre">is_land()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.jetstream_tracking"><code class="docutils literal notranslate"><span class="pre">jetstream_tracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.mcs_pr_tracking"><code class="docutils literal notranslate"><span class="pre">mcs_pr_tracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.mcs_tb_tracking"><code class="docutils literal notranslate"><span class="pre">mcs_tb_tracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.minimum_bounding_rectangle"><code class="docutils literal notranslate"><span class="pre">minimum_bounding_rectangle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.moaap"><code class="docutils literal notranslate"><span class="pre">moaap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.overlapping_objects"><code class="docutils literal notranslate"><span class="pre">overlapping_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.radialdistance"><code class="docutils literal notranslate"><span class="pre">radialdistance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.remove_small_short_objects"><code class="docutils literal notranslate"><span class="pre">remove_small_short_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.smooth_uniform"><code class="docutils literal notranslate"><span class="pre">smooth_uniform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.tc_tracking"><code class="docutils literal notranslate"><span class="pre">tc_tracking()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.timer"><code class="docutils literal notranslate"><span class="pre">timer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.Tracking_Functions.track_tropwaves"><code class="docutils literal notranslate"><span class="pre">track_tropwaves()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.plot_funcs">src.plot_funcs module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.plot_funcs.plot_unstructured_rotated_grid"><code class="docutils literal notranslate"><span class="pre">plot_unstructured_rotated_grid()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.utils">src.utils module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.utils.count_objs_grid_points"><code class="docutils literal notranslate"><span class="pre">count_objs_grid_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.utils.create_datetime_lists"><code class="docutils literal notranslate"><span class="pre">create_datetime_lists()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.utils.get_datetime_str"><code class="docutils literal notranslate"><span class="pre">get_datetime_str()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.utils.load_pkl"><code class="docutils literal notranslate"><span class="pre">load_pkl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.utils.save_as_pkl"><code class="docutils literal notranslate"><span class="pre">save_as_pkl()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src.xarray_util">src.xarray_util module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#src.xarray_util.Accessor"><code class="docutils literal notranslate"><span class="pre">Accessor</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.xarray_util.ObjectContainer"><code class="docutils literal notranslate"><span class="pre">ObjectContainer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#src.xarray_util.create_obj_from_dict"><code class="docutils literal notranslate"><span class="pre">create_obj_from_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-src">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MOAAP-Tracking-Analysis</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">src</a> &raquo;</li>
+        
+      <li>src package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/src.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="src-package">
+<h1>src package<a class="headerlink" href="#src-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-src.Corrections">
+<span id="src-corrections-module"></span><h2>src.Corrections module<a class="headerlink" href="#module-src.Corrections" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Corrections.cleanup_dicts">
+<span class="sig-prename descclassname"><span class="pre">src.Corrections.</span></span><span class="sig-name descname"><span class="pre">cleanup_dicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_name_temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_processed_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/Corrections.html#cleanup_dicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Corrections.cleanup_dicts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Corrections.correct_nc_file">
+<span class="sig-prename descclassname"><span class="pre">src.Corrections.</span></span><span class="sig-name descname"><span class="pre">correct_nc_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_name_temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_start_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_end_date</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_processed_date</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/Corrections.html#correct_nc_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Corrections.correct_nc_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-src.Enumerations">
+<span id="src-enumerations-module"></span><h2>src.Enumerations module<a class="headerlink" href="#module-src.Enumerations" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.Enumerations.Month">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.Enumerations.</span></span><span class="sig-name descname"><span class="pre">Month</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Enumerations.html#Month"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Enumerations.Month" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.APRIL">
+<span class="sig-name descname"><span class="pre">APRIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#src.Enumerations.Month.APRIL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.AUGUST">
+<span class="sig-name descname"><span class="pre">AUGUST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#src.Enumerations.Month.AUGUST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.DECEMBER">
+<span class="sig-name descname"><span class="pre">DECEMBER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#src.Enumerations.Month.DECEMBER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.FEBRUARY">
+<span class="sig-name descname"><span class="pre">FEBRUARY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#src.Enumerations.Month.FEBRUARY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.JANUARY">
+<span class="sig-name descname"><span class="pre">JANUARY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#src.Enumerations.Month.JANUARY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.JULY">
+<span class="sig-name descname"><span class="pre">JULY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#src.Enumerations.Month.JULY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.JUNE">
+<span class="sig-name descname"><span class="pre">JUNE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#src.Enumerations.Month.JUNE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.MARCH">
+<span class="sig-name descname"><span class="pre">MARCH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#src.Enumerations.Month.MARCH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.MAY">
+<span class="sig-name descname"><span class="pre">MAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#src.Enumerations.Month.MAY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.NOVEMBER">
+<span class="sig-name descname"><span class="pre">NOVEMBER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#src.Enumerations.Month.NOVEMBER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.OCTOBER">
+<span class="sig-name descname"><span class="pre">OCTOBER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#src.Enumerations.Month.OCTOBER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Month.SEPTEMBER">
+<span class="sig-name descname"><span class="pre">SEPTEMBER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#src.Enumerations.Month.SEPTEMBER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.Enumerations.Season">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.Enumerations.</span></span><span class="sig-name descname"><span class="pre">Season</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Enumerations.html#Season"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Enumerations.Season" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Season.AUTUMN">
+<span class="sig-name descname"><span class="pre">AUTUMN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(9,</span> <span class="pre">10,</span> <span class="pre">11)</span></em><a class="headerlink" href="#src.Enumerations.Season.AUTUMN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Season.SPRING">
+<span class="sig-name descname"><span class="pre">SPRING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(3,</span> <span class="pre">4,</span> <span class="pre">5)</span></em><a class="headerlink" href="#src.Enumerations.Season.SPRING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Season.SUMMER">
+<span class="sig-name descname"><span class="pre">SUMMER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(6,</span> <span class="pre">7,</span> <span class="pre">8)</span></em><a class="headerlink" href="#src.Enumerations.Season.SUMMER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.Enumerations.Season.WINTER">
+<span class="sig-name descname"><span class="pre">WINTER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">(12,</span> <span class="pre">1,</span> <span class="pre">2)</span></em><a class="headerlink" href="#src.Enumerations.Season.WINTER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-src.GridPoints">
+<span id="src-gridpoints-module"></span><h2>src.GridPoints module<a class="headerlink" href="#module-src.GridPoints" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.GridPoints.Domain">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.GridPoints.</span></span><span class="sig-name descname"><span class="pre">Domain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_sw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.GridPoints.RegularGridPoint" title="src.GridPoints.RegularGridPoint"><span class="pre">RegularGridPoint</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_nw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.GridPoints.RegularGridPoint" title="src.GridPoints.RegularGridPoint"><span class="pre">RegularGridPoint</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_ne</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.GridPoints.RegularGridPoint" title="src.GridPoints.RegularGridPoint"><span class="pre">RegularGridPoint</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_se</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#src.GridPoints.RegularGridPoint" title="src.GridPoints.RegularGridPoint"><span class="pre">RegularGridPoint</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/GridPoints.html#Domain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.GridPoints.Domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.GridPoints.</span></span><span class="sig-name descname"><span class="pre">GridPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/GridPoints.html#GridPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.GridPoints.GridPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Parrent class for grid points.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint.grid_field">
+<span class="sig-name descname"><span class="pre">grid_field</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xarray.Dataset&gt;</span> <span class="pre">Dimensions:</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(time:</span> <span class="pre">12,</span> <span class="pre">rlat:</span> <span class="pre">194,</span> <span class="pre">rlon:</span> <span class="pre">193,</span> <span class="pre">nv:</span> <span class="pre">4)</span> <span class="pre">Coordinates:</span>&#160;&#160;&#160;&#160; <span class="pre">lat</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(rlat,</span> <span class="pre">rlon)</span> <span class="pre">float32</span> <span class="pre">47.63</span> <span class="pre">47.83</span> <span class="pre">48.03</span> <span class="pre">...</span> <span class="pre">53.04</span> <span class="pre">52.85</span> <span class="pre">52.66</span>&#160;&#160;&#160;&#160; <span class="pre">lon</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(rlat,</span> <span class="pre">rlon)</span> <span class="pre">float32</span> <span class="pre">137.6</span> <span class="pre">137.8</span> <span class="pre">138.1</span> <span class="pre">...</span> <span class="pre">-39.35</span> <span class="pre">-39.62</span>&#160;&#160; <span class="pre">*</span> <span class="pre">rlat</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(rlat)</span> <span class="pre">float32</span> <span class="pre">-24.2</span> <span class="pre">-23.9</span> <span class="pre">-23.6</span> <span class="pre">-23.3</span> <span class="pre">...</span> <span class="pre">32.8</span> <span class="pre">33.1</span> <span class="pre">33.4</span> <span class="pre">33.7</span>&#160;&#160; <span class="pre">*</span> <span class="pre">rlon</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(rlon)</span> <span class="pre">float32</span> <span class="pre">-29.9</span> <span class="pre">-29.6</span> <span class="pre">-29.3</span> <span class="pre">-29.0</span> <span class="pre">...</span> <span class="pre">26.8</span> <span class="pre">27.1</span> <span class="pre">27.4</span> <span class="pre">27.7</span>&#160;&#160; <span class="pre">*</span> <span class="pre">time</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">(time)</span> <span class="pre">datetime64[ns]</span> <span class="pre">2014-01-31T23:00:00</span> <span class="pre">...</span> <span class="pre">2014-12-31T23...</span> <span class="pre">Dimensions</span> <span class="pre">without</span> <span class="pre">coordinates:</span> <span class="pre">nv</span> <span class="pre">Data</span> <span class="pre">variables:</span>&#160;&#160;&#160;&#160; <span class="pre">IVT_85perc</span>&#160;&#160;&#160; <span class="pre">(time,</span> <span class="pre">rlat,</span> <span class="pre">rlon)</span> <span class="pre">float32</span> <span class="pre">...</span>&#160;&#160;&#160;&#160; <span class="pre">lat_bnds</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">(rlat,</span> <span class="pre">rlon,</span> <span class="pre">nv)</span> <span class="pre">float32</span> <span class="pre">...</span>&#160;&#160;&#160;&#160; <span class="pre">lon_bnds</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">(rlat,</span> <span class="pre">rlon,</span> <span class="pre">nv)</span> <span class="pre">float32</span> <span class="pre">...</span>&#160;&#160;&#160;&#160; <span class="pre">rotated_pole</span>&#160; <span class="pre">|S1</span> <span class="pre">...</span> <span class="pre">Attributes:</span> <span class="pre">(12/18)</span>&#160;&#160;&#160;&#160; <span class="pre">CDI:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Climate</span> <span class="pre">Data</span> <span class="pre">Interface</span> <span class="pre">version</span> <span class="pre">2.0.5</span> <span class="pre">(https://...</span>&#160;&#160;&#160;&#160; <span class="pre">Conventions:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">CF-1.4</span>&#160;&#160;&#160;&#160; <span class="pre">source:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Unknown&#64;Unknown</span>&#160;&#160;&#160;&#160; <span class="pre">institution:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Alfred</span> <span class="pre">Wegener</span> <span class="pre">Institute</span> <span class="pre">for</span> <span class="pre">Polar</span> <span class="pre">and</span> <span class="pre">Marine</span> <span class="pre">...</span>&#160;&#160;&#160;&#160; <span class="pre">title:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">ICON-CLM</span> <span class="pre">for</span> <span class="pre">PolarRES</span>&#160;&#160;&#160;&#160; <span class="pre">history:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Wed</span> <span class="pre">Mar</span>&#160; <span class="pre">6</span> <span class="pre">19:17:16</span> <span class="pre">2024:</span> <span class="pre">ncks</span> <span class="pre">-d</span> <span class="pre">rlon,0,,3</span> <span class="pre">-d...</span>&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...</span>&#160;&#160;&#160;&#160; <span class="pre">contact:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">jan.landwehrs&#64;awi.de</span>&#160;&#160;&#160;&#160; <span class="pre">icon-clm_version:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2.6.6</span>&#160;&#160;&#160;&#160; <span class="pre">creation_date:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">2023-12-24</span> <span class="pre">13:12:41</span> <span class="pre">CET</span>&#160;&#160;&#160;&#160; <span class="pre">cdo_openmp_thread_number:</span>&#160; <span class="pre">8</span>&#160;&#160;&#160;&#160; <span class="pre">CDO:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Climate</span> <span class="pre">Data</span> <span class="pre">Operators</span> <span class="pre">version</span> <span class="pre">2.0.5</span> <span class="pre">(https://...</span>&#160;&#160;&#160;&#160; <span class="pre">NCO:</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">netCDF</span> <span class="pre">Operators</span> <span class="pre">version</span> <span class="pre">5.0.6</span> <span class="pre">(Homepage</span> <span class="pre">=</span> <span class="pre">htt...</span></em><a class="headerlink" href="#src.GridPoints.GridPoint.grid_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint.input_field_grid">
+<span class="sig-name descname"><span class="pre">input_field_grid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/work/aa0238/a271093/data/input/IVT_85_percentiles_CNMR_control_3dx3dy.nc'</span></em><a class="headerlink" href="#src.GridPoints.GridPoint.input_field_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint.lat">
+<span class="sig-name descname"><span class="pre">lat</span></span><a class="headerlink" href="#src.GridPoints.GridPoint.lat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint.lon">
+<span class="sig-name descname"><span class="pre">lon</span></span><a class="headerlink" href="#src.GridPoints.GridPoint.lon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint.regular_lat_grid">
+<span class="sig-name descname"><span class="pre">regular_lat_grid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([[47.628674,</span> <span class="pre">47.829224,</span> <span class="pre">48.028698,</span> <span class="pre">...,</span> <span class="pre">49.45723</span> <span class="pre">,</span> <span class="pre">49.26611</span> <span class="pre">,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">49.0738</span>&#160; <span class="pre">],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[47.83168</span> <span class="pre">,</span> <span class="pre">48.033485,</span> <span class="pre">48.234226,</span> <span class="pre">...,</span> <span class="pre">49.672123,</span> <span class="pre">49.479713,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">49.28612</span> <span class="pre">],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[48.03374</span> <span class="pre">,</span> <span class="pre">48.23681</span> <span class="pre">,</span> <span class="pre">48.438816,</span> <span class="pre">...,</span> <span class="pre">49.88611</span> <span class="pre">,</span> <span class="pre">49.692413,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">49.497528],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[51.607002,</span> <span class="pre">51.80693</span> <span class="pre">,</span> <span class="pre">52.005905,</span> <span class="pre">...,</span> <span class="pre">53.43429</span> <span class="pre">,</span> <span class="pre">53.24283</span> <span class="pre">,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">53.05029</span> <span class="pre">],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[51.425346,</span> <span class="pre">51.62379</span> <span class="pre">,</span> <span class="pre">51.821274,</span> <span class="pre">...,</span> <span class="pre">53.238594,</span> <span class="pre">53.048653,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">52.85763</span> <span class="pre">],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[51.242443,</span> <span class="pre">51.439407,</span> <span class="pre">51.635406,</span> <span class="pre">...,</span> <span class="pre">53.04169</span> <span class="pre">,</span> <span class="pre">52.853268,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">52.66376</span> <span class="pre">]],</span> <span class="pre">dtype=float32)</span></em><a class="headerlink" href="#src.GridPoints.GridPoint.regular_lat_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint.regular_lon_grid">
+<span class="sig-name descname"><span class="pre">regular_lon_grid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([[</span> <span class="pre">137.57164</span> <span class="pre">,</span>&#160; <span class="pre">137.84842</span> <span class="pre">,</span>&#160; <span class="pre">138.12796</span> <span class="pre">,</span> <span class="pre">...,</span> <span class="pre">-140.26532</span> <span class="pre">,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-139.96463</span> <span class="pre">,</span> <span class="pre">-139.6669</span>&#160; <span class="pre">],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[</span> <span class="pre">137.24326</span> <span class="pre">,</span>&#160; <span class="pre">137.52048</span> <span class="pre">,</span>&#160; <span class="pre">137.80052</span> <span class="pre">,</span> <span class="pre">...,</span> <span class="pre">-139.94257</span> <span class="pre">,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-139.64111</span> <span class="pre">,</span> <span class="pre">-139.34267</span> <span class="pre">],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[</span> <span class="pre">136.9123</span>&#160; <span class="pre">,</span>&#160; <span class="pre">137.18994</span> <span class="pre">,</span>&#160; <span class="pre">137.47046</span> <span class="pre">,</span> <span class="pre">...,</span> <span class="pre">-139.61694</span> <span class="pre">,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-139.31477</span> <span class="pre">,</span> <span class="pre">-139.01564</span> <span class="pre">],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[</span>&#160; <span class="pre">42.252213,</span>&#160;&#160; <span class="pre">42.00648</span> <span class="pre">,</span>&#160;&#160; <span class="pre">41.75764</span> <span class="pre">,</span> <span class="pre">...,</span>&#160; <span class="pre">-39.83466</span> <span class="pre">,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-40.107307,</span>&#160; <span class="pre">-40.376602],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[</span>&#160; <span class="pre">41.868557,</span>&#160;&#160; <span class="pre">41.62297</span> <span class="pre">,</span>&#160;&#160; <span class="pre">41.37431</span> <span class="pre">,</span> <span class="pre">...,</span>&#160; <span class="pre">-39.453857,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-39.72603</span> <span class="pre">,</span>&#160; <span class="pre">-39.994892],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[</span>&#160; <span class="pre">41.487946,</span>&#160;&#160; <span class="pre">41.242554,</span>&#160;&#160; <span class="pre">40.99412</span> <span class="pre">,</span> <span class="pre">...,</span>&#160; <span class="pre">-39.076534,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">-39.34818</span> <span class="pre">,</span>&#160; <span class="pre">-39.616566]],</span> <span class="pre">dtype=float32)</span></em><a class="headerlink" href="#src.GridPoints.GridPoint.regular_lon_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint.rotated_lat_grid">
+<span class="sig-name descname"><span class="pre">rotated_lat_grid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([[-24.2,</span> <span class="pre">-24.2,</span> <span class="pre">-24.2,</span> <span class="pre">...,</span> <span class="pre">-24.2,</span> <span class="pre">-24.2,</span> <span class="pre">-24.2],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[-23.9,</span> <span class="pre">-23.9,</span> <span class="pre">-23.9,</span> <span class="pre">...,</span> <span class="pre">-23.9,</span> <span class="pre">-23.9,</span> <span class="pre">-23.9],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[-23.6,</span> <span class="pre">-23.6,</span> <span class="pre">-23.6,</span> <span class="pre">...,</span> <span class="pre">-23.6,</span> <span class="pre">-23.6,</span> <span class="pre">-23.6],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[</span> <span class="pre">33.1,</span>&#160; <span class="pre">33.1,</span>&#160; <span class="pre">33.1,</span> <span class="pre">...,</span>&#160; <span class="pre">33.1,</span>&#160; <span class="pre">33.1,</span>&#160; <span class="pre">33.1],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[</span> <span class="pre">33.4,</span>&#160; <span class="pre">33.4,</span>&#160; <span class="pre">33.4,</span> <span class="pre">...,</span>&#160; <span class="pre">33.4,</span>&#160; <span class="pre">33.4,</span>&#160; <span class="pre">33.4],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[</span> <span class="pre">33.7,</span>&#160; <span class="pre">33.7,</span>&#160; <span class="pre">33.7,</span> <span class="pre">...,</span>&#160; <span class="pre">33.7,</span>&#160; <span class="pre">33.7,</span>&#160; <span class="pre">33.7]],</span> <span class="pre">dtype=float32)</span></em><a class="headerlink" href="#src.GridPoints.GridPoint.rotated_lat_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.GridPoint.rotated_lon_grid">
+<span class="sig-name descname"><span class="pre">rotated_lon_grid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([[-29.9,</span> <span class="pre">-29.6,</span> <span class="pre">-29.3,</span> <span class="pre">...,</span>&#160; <span class="pre">27.1,</span>&#160; <span class="pre">27.4,</span>&#160; <span class="pre">27.7],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[-29.9,</span> <span class="pre">-29.6,</span> <span class="pre">-29.3,</span> <span class="pre">...,</span>&#160; <span class="pre">27.1,</span>&#160; <span class="pre">27.4,</span>&#160; <span class="pre">27.7],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[-29.9,</span> <span class="pre">-29.6,</span> <span class="pre">-29.3,</span> <span class="pre">...,</span>&#160; <span class="pre">27.1,</span>&#160; <span class="pre">27.4,</span>&#160; <span class="pre">27.7],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">...,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[-29.9,</span> <span class="pre">-29.6,</span> <span class="pre">-29.3,</span> <span class="pre">...,</span>&#160; <span class="pre">27.1,</span>&#160; <span class="pre">27.4,</span>&#160; <span class="pre">27.7],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[-29.9,</span> <span class="pre">-29.6,</span> <span class="pre">-29.3,</span> <span class="pre">...,</span>&#160; <span class="pre">27.1,</span>&#160; <span class="pre">27.4,</span>&#160; <span class="pre">27.7],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[-29.9,</span> <span class="pre">-29.6,</span> <span class="pre">-29.3,</span> <span class="pre">...,</span>&#160; <span class="pre">27.1,</span>&#160; <span class="pre">27.4,</span>&#160; <span class="pre">27.7]],</span> <span class="pre">dtype=float32)</span></em><a class="headerlink" href="#src.GridPoints.GridPoint.rotated_lon_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.GridPoints.RegularGridPoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.GridPoints.</span></span><span class="sig-name descname"><span class="pre">RegularGridPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/GridPoints.html#RegularGridPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.GridPoints.RegularGridPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.GridPoints.GridPoint" title="src.GridPoints.GridPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridPoint</span></code></a></p>
+<p>Class that represents grid points in a regular lon-lat coordinate system.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.RegularGridPoint.lat">
+<span class="sig-name descname"><span class="pre">lat</span></span><a class="headerlink" href="#src.GridPoints.RegularGridPoint.lat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.RegularGridPoint.lon">
+<span class="sig-name descname"><span class="pre">lon</span></span><a class="headerlink" href="#src.GridPoints.RegularGridPoint.lon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.GridPoints.RegularGridPoint.to_rotated">
+<span class="sig-name descname"><span class="pre">to_rotated</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#src.GridPoints.RotatedGridPoint" title="src.GridPoints.RotatedGridPoint"><span class="pre">RotatedGridPoint</span></a></span></span><a class="reference internal" href="_modules/src/GridPoints.html#RegularGridPoint.to_rotated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.GridPoints.RegularGridPoint.to_rotated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert to rotated Gridpoint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Corresponding rotated grid point instance</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#src.GridPoints.RotatedGridPoint" title="src.GridPoints.RotatedGridPoint">RotatedGridPoint</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.GridPoints.RotatedGridPoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.GridPoints.</span></span><span class="sig-name descname"><span class="pre">RotatedGridPoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/GridPoints.html#RotatedGridPoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.GridPoints.RotatedGridPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#src.GridPoints.GridPoint" title="src.GridPoints.GridPoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridPoint</span></code></a></p>
+<p>Class that represents grid points in a rotated coordinate system.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.RotatedGridPoint.lat">
+<span class="sig-name descname"><span class="pre">lat</span></span><a class="headerlink" href="#src.GridPoints.RotatedGridPoint.lat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.GridPoints.RotatedGridPoint.lon">
+<span class="sig-name descname"><span class="pre">lon</span></span><a class="headerlink" href="#src.GridPoints.RotatedGridPoint.lon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.GridPoints.RotatedGridPoint.to_regular">
+<span class="sig-name descname"><span class="pre">to_regular</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#src.GridPoints.RegularGridPoint" title="src.GridPoints.RegularGridPoint"><span class="pre">RegularGridPoint</span></a></span></span><a class="reference internal" href="_modules/src/GridPoints.html#RotatedGridPoint.to_regular"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.GridPoints.RotatedGridPoint.to_regular" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert to regular Gridpoint</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Corresponding regular grid point instance</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#src.GridPoints.RegularGridPoint" title="src.GridPoints.RegularGridPoint">RegularGridPoint</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.GridPoints.get_Gridpoint_field">
+<span class="sig-prename descclassname"><span class="pre">src.GridPoints.</span></span><span class="sig-name descname"><span class="pre">get_Gridpoint_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/GridPoints.html#get_Gridpoint_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.GridPoints.get_Gridpoint_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-src.TrackingDataLoader">
+<span id="src-trackingdataloader-module"></span><h2>src.TrackingDataLoader module<a class="headerlink" href="#module-src.TrackingDataLoader" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.TrackingDataLoader.</span></span><span class="sig-name descname"><span class="pre">TrackingDataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'nc'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/TrackingDataLoader.html#TrackingDataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that loads and prepares input data for the MOAAP Tracking algorithm. Currently loads data in chunks of 7 months. (from January to August and from July to February respectively)
+Assumes that the input data are fiven in files that contain yearly data of the form:</p>
+<p>{path}/{variable}/{variable}_{year}010100-{year}23123_{suffix}{file_type},
+so for instance {path}/IVTu/IVTu_1986010100-1986123123_remapped_3x.nc</p>
+<p>If the dates of a data chunk range from 1.1-1.8, one single input file is simply loaded and the dates properly selected.
+As chunks with date ranging from 1.7-1.2 require data from two consecutive years, two yearly input files are first merged and accordingly the dates afterwards  properly selected.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.end_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">datetime</span></em><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.end_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>End date of data chunk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AttributeError</strong> – end_date has to be explicitly set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.filename_merged">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filename_merged</span></span><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.filename_merged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get file name of merged netcdf file (only if date 1.7-1.2)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.filename_year1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filename_year1</span></span><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.filename_year1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get filename of the first year.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.filename_year2">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">filename_year2</span></span><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.filename_year2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get filename of the second year. Same as filename_year2 for date range (1.1-1.8)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.load_datasets">
+<span class="sig-name descname"><span class="pre">load_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rm_nc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dataset</span></span></span><a class="reference internal" href="_modules/src/TrackingDataLoader.html#TrackingDataLoader.load_datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.load_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rm_nc</strong> (<em>bool</em><em>, </em><em>optional</em>) – Remove merged netCDF4 files finally. Defaults to True.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataset containing the input data for the Tracking algorithm, selected according to the specified data range</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xr.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.merge_ncfiles">
+<span class="sig-name descname"><span class="pre">merge_ncfiles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/TrackingDataLoader.html#TrackingDataLoader.merge_ncfiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.merge_ncfiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge netcdf files of two consecutive and save merged file in scratch path.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.path_var">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">path_var</span></span><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.path_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get directory path to variables’ input files</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.scratch_path">
+<span class="sig-name descname"><span class="pre">scratch_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/work/aa0238/a271093/scratch/'</span></em><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.scratch_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.start_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_date</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">datetime</span></em><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.start_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Start date of Tracking data chunk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>AttributeError</strong> – end_date has to be explicitly set.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.year_end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">year_end</span></span><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.year_end" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get end year of data chunk</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.TrackingDataLoader.TrackingDataLoader.year_start">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">year_start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#src.TrackingDataLoader.TrackingDataLoader.year_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get start year of data chunk</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-src.Tracking_Functions">
+<span id="src-tracking-functions-module"></span><h2>src.Tracking_Functions module<a class="headerlink" href="#module-src.Tracking_Functions" title="Permalink to this heading">¶</a></h2>
+<p>Tracking_Functions.py</p>
+<p>This file contains the tracking fuctions for the object
+identification and tracking of precipitation areas, cyclones,
+clouds, and moisture streams</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.BreakupObjects">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">BreakupObjects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DATA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_tsteps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_history</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#BreakupObjects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.BreakupObjects" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.ConnectLon">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">ConnectLon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#ConnectLon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.ConnectLon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.ConnectLon_on_timestep">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">ConnectLon_on_timestep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#ConnectLon_on_timestep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.ConnectLon_on_timestep" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function connects objects over the date line on a time-step by
+time-step basis, which makes it different from the ConnectLon function.
+This function is needed when long-living objects are first split into
+smaller objects using the BreakupObjects function.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.DistanceCoord">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">DistanceCoord</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Lo1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">La1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lo2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">La2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#DistanceCoord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.DistanceCoord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.Feature_Calculation">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">Feature_Calculation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DATA_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dLon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dLat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gridspacing</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#Feature_Calculation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.Feature_Calculation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">KFfilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tim_taper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>class for wavenumber-frequency filtering for WK99 and WKH00</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.decompose_antisymm">
+<span class="sig-name descname"><span class="pre">decompose_antisymm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.decompose_antisymm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.decompose_antisymm" title="Permalink to this definition">¶</a></dt>
+<dd><p>decompose attribute data to sym and antisym component</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.eig0filter">
+<span class="sig-name descname"><span class="pre">eig0filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.55</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.eig0filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.eig0filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>n&gt;=0 eastward inertio gravirt wave filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>day</strong> (<em>'fmin/fmax' -- unit is cycle per</em>) – </p></li>
+<li><p><strong>westward</strong> (<em>'kmin/kmax' -- zonal wave number. negative is</em>) – eastward</p></li>
+<li><p><strong>is</strong> (<em>positive</em>) – eastward</p></li>
+<li><p><strong>depth</strong> (<em>'hmin/hmax' -- equivalent</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.erfilter">
+<span class="sig-name descname"><span class="pre">erfilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.erfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.erfilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>equatorial wave filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>day</strong> (<em>'fmin/fmax' -- unit is cycle per</em>) – </p></li>
+<li><p><strong>number</strong> (<em>'n'         -- meridional mode</em>) – </p></li>
+<li><p><strong>depth</strong> (<em>'hmin/hmax' -- equivalent</em>) – </p></li>
+<li><p><strong>number</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.igfilter">
+<span class="sig-name descname"><span class="pre">igfilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.igfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.igfilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>n&gt;=1 inertio gravirt wave filter. default is n=1 WIG.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>day</strong> (<em>'fmin/fmax' -- unit is cycle per</em>) – </p></li>
+<li><p><strong>westward</strong> (<em>'kmin/kmax' -- zonal wave number. negative is</em>) – eastward</p></li>
+<li><p><strong>is</strong> (<em>positive</em>) – eastward</p></li>
+<li><p><strong>depth</strong> (<em>'hmin/hmax' -- equivalent</em>) – </p></li>
+<li><p><strong>number</strong> (<em>'n'         -- meridional mode</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.kelvinfilter">
+<span class="sig-name descname"><span class="pre">kelvinfilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">14</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.kelvinfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.kelvinfilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>kelvin wave filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>day</strong> (<em>'fmin/fmax' -- unit is cycle per</em>) – </p></li>
+<li><p><strong>number</strong> (<em>'kmin/kmax' -- zonal wave</em>) – </p></li>
+<li><p><strong>depth</strong> (<em>'hmin/hmax' --equivalent</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.kfmask">
+<span class="sig-name descname"><span class="pre">kfmask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.kfmask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.kfmask" title="Permalink to this definition">¶</a></dt>
+<dd><p>return wavenumber-frequency mask for wavefilter method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>--</strong> (<em>'kmin/kmax'</em>) – </p></li>
+<li><p><strong>--</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.mrgfilter">
+<span class="sig-name descname"><span class="pre">mrgfilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.mrgfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.mrgfilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>mixed Rossby gravity wave</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>day</strong> (<em>'fmin/fmax' -- unit is cycle per</em>) – </p></li>
+<li><p><strong>westward</strong> (<em>'kmin/kmax' -- zonal wave number. negative is</em>) – eastward</p></li>
+<li><p><strong>is</strong> (<em>positive</em>) – eastward</p></li>
+<li><p><strong>depth</strong> (<em>'hmin/hmax' -- equivalent</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.tdfilter">
+<span class="sig-name descname"><span class="pre">tdfilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-6</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.tdfilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.tdfilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>KTH05 TD-type filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>day</strong> (<em>'fmin/fmax' -- unit is cycle per</em>) – </p></li>
+<li><p><strong>westward</strong> (<em>'kmin/kmax' -- zonal wave number. negative is</em>) – eastward</p></li>
+<li><p><strong>is</strong> (<em>positive</em>) – eastward</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.Tracking_Functions.KFfilter.wavefilter">
+<span class="sig-name descname"><span class="pre">wavefilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#KFfilter.wavefilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.KFfilter.wavefilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>apply wavenumber-frequency filtering by original mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>array</strong> (<em>'mask' -- 2D boolean</em>) – is False (True member to be zero)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.MCStracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">MCStracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bt_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nc_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DataOutDir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DataName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#MCStracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.MCStracking" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to track MCS from precipitation and brightness temperature</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.MultiObjectIdentification">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">MultiObjectIdentification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DATA_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DataName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">OutputFolder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SmoothSigmaP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pthreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimePR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaPR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeMS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaMS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinMSthreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.13</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeCY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MaxPresAnCY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeACY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinPresAnACY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaFR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">front_treshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SmoothSigmaC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cthreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">241</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IVTtrheshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeIVT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_MinLen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_Lat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_width_lenght_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_Pmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">995</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_lat_genesis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_lat_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_deltaT_core</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_T850min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">285</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_minBT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">241</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_Minsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_minPR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL_MaxT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">215</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL_Area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_minTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#MultiObjectIdentification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.MultiObjectIdentification" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.ObjectCharacteristics">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">ObjectCharacteristics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PR_objectsFull</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PR_orig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SaveFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TIME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gridspacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#ObjectCharacteristics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.ObjectCharacteristics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.ReadERA5">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">ReadERA5</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TIME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">REGION</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#ReadERA5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.ReadERA5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.ReadERA5_2D">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">ReadERA5_2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TIME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">REGION</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#ReadERA5_2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.ReadERA5_2D" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.ar_850hpa_tracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">ar_850hpa_tracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">VapTrans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinMSthreshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeMS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaMS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectLon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#ar_850hpa_tracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.ar_850hpa_tracking" title="Permalink to this definition">¶</a></dt>
+<dd><p>function to track mosture streams and ARS according to 850 hPa moisture flux</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.ar_check">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">ar_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objects_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_width_lenght_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_MinLen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#ar_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.ar_check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.ar_ivt_tracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">ar_ivt_tracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">IVT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IVTtrheshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeIVT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectLon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#ar_ivt_tracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.ar_ivt_tracking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.calc_grid_distance_area">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">calc_grid_distance_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#calc_grid_distance_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.calc_grid_distance_area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to calculate grid parameters
+It uses haversine function to approximate distances
+It approximates the first row and column to the sencond
+because coordinates of grid cell center are assumed
+lat, lon: input coordinates(degrees) 2D [y,x] dimensions
+dx: distance (m)
+dy: distance (m)
+area: area of grid cell (m2)
+grid_distance: average grid distance over the domain (m)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.calc_object_characteristics">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">calc_object_characteristics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_cell_area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_tsteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict_keys_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_merge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#calc_object_characteristics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.calc_object_characteristics" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.calculate_area_objects">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">calculate_area_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objects_id_pr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_cell_area</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#calculate_area_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.calculate_area_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the area of each object during their lifetime
+one area value for each object and each timestep it exist</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.clean_up_objects">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">clean_up_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DATA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_tsteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj_splitmerge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#clean_up_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.clean_up_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to remove objects that are too short lived
+and to numerrate the object from 1…N</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.col_identification">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">col_identification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cy_z500_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Frontal_Diagnostic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#col_identification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.col_identification" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.cy_acy_psl_tracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">cy_acy_psl_tracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MaxPresAnCY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeCY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinPresAnACY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeACY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gridspacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectLon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#cy_acy_psl_tracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.cy_acy_psl_tracking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.cy_acy_z500_tracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">cy_acy_z500_tracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeCY</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gridspacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectLon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#cy_acy_z500_tracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.cy_acy_z500_tracking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.detect_local_minima">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">detect_local_minima</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#detect_local_minima"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.detect_local_minima" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an array and detects the troughs using the local maximum filter.
+Returns a boolean mask of the troughs (i.e. 1 when
+the pixel’s value is the neighborhood maximum, 0 otherwise)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.frontal_identification">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">frontal_identification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Frontal_Diagnostic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">front_treshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaFR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Area</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#frontal_identification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.frontal_identification" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.haversine">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">haversine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#haversine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.haversine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the great circle distance between two points
+on the earth (specified in decimal degrees)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.interp_weights">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">interp_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#interp_weights"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.interp_weights" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.interpolate">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vtx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wts</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.interpolate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.interpolate_numba">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">interpolate_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-32768</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#interpolate_numba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.interpolate_numba" title="Permalink to this definition">¶</a></dt>
+<dd><p>return array interpolated along time-axis to fill missing values</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.is_land">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">is_land</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#is_land"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.is_land" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.jetstream_tracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">jetstream_tracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uv200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">js_min_anomaly</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeJS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Gridspacing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectLon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#jetstream_tracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.jetstream_tracking" title="Permalink to this definition">¶</a></dt>
+<dd><p>function to track jetstream objects</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.mcs_pr_tracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">mcs_pr_tracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SmoothSigmaP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pthreshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimePR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_minPR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_Minsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL_Area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL_MaxT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_minTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaPR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectLon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#mcs_pr_tracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.mcs_pr_tracking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.mcs_tb_tracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">mcs_tb_tracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SmoothSigmaC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pthreshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL_Area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL_MaxT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cthreshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeC</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_minPR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_minTime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_Minsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectLon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#mcs_tb_tracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.mcs_tb_tracking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.minimum_bounding_rectangle">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">minimum_bounding_rectangle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#minimum_bounding_rectangle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.minimum_bounding_rectangle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the smallest bounding rectangle for a set of points.
+Returns a set of points representing the corners of the bounding box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> – an nx2 matrix of coordinates</p>
+</dd>
+<dt class="field-even">Rval<span class="colon">:</span></dt>
+<dd class="field-even"><p>an nx2 matrix of coordinates</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.moaap">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">moaap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v850</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u850</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t850</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q850</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ivte</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ivtn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z500</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v200</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u200</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DataName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">OutputFolder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regular_Lat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regular_Lon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SmoothSigmaP</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pthreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimePR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaPR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeMS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaMS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinMSthreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.13</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeCY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MaxPresAnCY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeACY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinPresAnACY</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaFR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">front_treshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">SmoothSigmaC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cthreshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">241</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinAreaC</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">IVTtrheshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeIVT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_MinLen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_Lat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AR_width_lenght_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_Pmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">995</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_lat_genesis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_lat_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_deltaT_core</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_T850min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">285</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_minBT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">241</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_Minsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_minPR</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL_MaxT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">215</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CL_Area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MCS_minTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">js_min_anomaly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MinTimeJS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tropwave_minTime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">48</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dict_keys_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#moaap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.moaap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.overlapping_objects">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">overlapping_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Object1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Object2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Data_to_mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#overlapping_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.overlapping_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that finds all Objects1 that overlap with
+objects in Object2</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.radialdistance">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">radialdistance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#radialdistance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.radialdistance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.remove_small_short_objects">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">remove_small_short_objects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objects_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_area</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">objects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#remove_small_short_objects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.remove_small_short_objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the object is large enough during enough time steps
+and removes objects that do not meet this condition
+area_object: array of lists with areas of each objects during their lifetime [objects[tsteps]]
+min_area: minimum area of the object (km2)
+min_time: minimum time with the object large enough (hours)
+DT: time step of input data [hours]
+objects: object slices - speeds up processing if provided</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.smooth_uniform">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">smooth_uniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_smoot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xy_smooth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#smooth_uniform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.smooth_uniform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to spatiotemporal smooth atmospheric fiels even
+if they contain missing data</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.tc_tracking">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">tc_tracking</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">CY_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t850</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">C_objects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_lat_genesis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_deltaT_core</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_T850min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_Pmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TC_lat_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#tc_tracking"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.tc_tracking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.timer">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">timer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#timer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.timer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.Tracking_Functions.track_tropwaves">
+<span class="sig-prename descclassname"><span class="pre">src.Tracking_Functions.</span></span><span class="sig-name descname"><span class="pre">track_tropwaves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connectLon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/Tracking_Functions.html#track_tropwaves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.Tracking_Functions.track_tropwaves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identifies and tracks four types of tropical waves from
+hourly precipitation data:
+Mixed Rossby Gravity Waves
+n&gt;=0 Eastward Inertio Gravirt Wave
+Kelvin Waves
+and n&gt;=1 Inertio Gravirt Wave</p>
+</dd></dl>
+
+</section>
+<section id="module-src.plot_funcs">
+<span id="src-plot-funcs-module"></span><h2>src.plot_funcs module<a class="headerlink" href="#module-src.plot_funcs" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.plot_funcs.plot_unstructured_rotated_grid">
+<span class="sig-prename descclassname"><span class="pre">src.plot_funcs.</span></span><span class="sig-name descname"><span class="pre">plot_unstructured_rotated_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">7,</span> <span class="pre">9,</span> <span class="pre">12,</span> <span class="pre">15,</span> <span class="pre">20,</span> <span class="pre">25,</span> <span class="pre">30]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subplts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(4,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cbar_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Blues'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/plot_funcs.html#plot_unstructured_rotated_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.plot_funcs.plot_unstructured_rotated_grid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot data field over the regional ICON domain using rotated coordinates.
+Functions uses tricontourf, so it requires (unordered) 1-D arrays as input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lon</strong> (<em>ArrayLike</em>) – 1-D array of size N with longitudes</p></li>
+<li><p><strong>lat</strong> (<em>ArrayLike</em>) – 1-D array of size N with latitudes</p></li>
+<li><p><strong>z</strong> (<em>ArrayLike</em>) – 1-D array of size N</p></li>
+<li><p><strong>fig</strong> – Figure instance</p></li>
+<li><p><strong>levels</strong> (<em>int</em><em> or </em><em>array-like</em>) – Number and position of contour lines. Default to [1, 2, 3, 5,7,9,12,15,20,25,30].</p></li>
+<li><p><strong>subplts</strong> (<em>tuple</em>) – number/shape of subplots. Default to (4,1).</p></li>
+<li><p><strong>pad</strong> (<em>float</em>) – padding to align the colorbar</p></li>
+<li><p><strong>index</strong> (<em>int</em>) – index for subplots.</p></li>
+<li><p><strong>title</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set title. Defaults to None.</p></li>
+<li><p><strong>cbar_label</strong> (<em>bool</em><em>, </em><em>optional</em>) – Add colorbar. Defaults to ‘’.</p></li>
+<li><p><strong>cmap</strong> (<em>str</em><em>,</em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.utils">
+<span id="src-utils-module"></span><h2>src.utils module<a class="headerlink" href="#module-src.utils" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="src.utils.count_objs_grid_points">
+<span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">count_objs_grid_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">objs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/utils.html#count_objs_grid_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.utils.count_objs_grid_points" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>objs</strong> (<a class="reference internal" href="#src.xarray_util.ObjectContainer" title="src.xarray_util.ObjectContainer"><em>ObjectContainer</em></a>) – Object Container with tracking objects.</p></li>
+<li><p><strong>normalization_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Defaults to 24, converts the count unit to days in case of hourly input data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1-D array of longitudes
+-lat: 1-D array of latitudes
+-z: 1-D array of count values</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>-lon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.utils.create_datetime_lists">
+<span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">create_datetime_lists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first_year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_year</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">months</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_last_endtime</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/utils.html#create_datetime_lists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.utils.create_datetime_lists" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Creates two lists with 1-month overlap</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>first_year</strong> (<em>datetime</em>) – First year</p></li>
+<li><p><strong>last_year</strong> (<em>datetime</em>) – Last year</p></li>
+<li><p><strong>months</strong> (<em>int</em><em>, </em><em>optional</em>) – time step in months between subseuent dates. Defaults to 7.</p></li>
+<li><p><strong>correct_last_endtime</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, set. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>start_date_list</p></li>
+<li><p>end_date_list</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.utils.get_datetime_str">
+<span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">get_datetime_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/src/utils.html#get_datetime_str"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.utils.get_datetime_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert datetime object to string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dt</strong> (<em>datetime</em>) – datetime object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>String of datetime object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.utils.load_pkl">
+<span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">load_pkl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/src/utils.html#load_pkl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.utils.load_pkl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load pickle file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_name</strong> (<em>str</em>) – Name of the pickle file (without .pkl suffix)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>nested dictionary with Tracking Object Information.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.utils.save_as_pkl">
+<span class="sig-prename descclassname"><span class="pre">src.utils.</span></span><span class="sig-name descname"><span class="pre">save_as_pkl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/utils.html#save_as_pkl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.utils.save_as_pkl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save (dict) objects as pickle file-</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict</strong> (<em>dict</em>) – Object to be saved</p></li>
+<li><p><strong>output_name</strong> (<em>str</em>) – Name of saved pickle file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src.xarray_util">
+<span id="src-xarray-util-module"></span><h2>src.xarray_util module<a class="headerlink" href="#module-src.xarray_util" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.xarray_util.</span></span><span class="sig-name descname"><span class="pre">Accessor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xarray_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#Accessor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.Accessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Add some additional accessors to the xr.Datasets</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#src.xarray_util.Accessor.duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.mass_center_idx">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mass_center_idx</span></span><a class="headerlink" href="#src.xarray_util.Accessor.mass_center_idx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.mass_center_idy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mass_center_idy</span></span><a class="headerlink" href="#src.xarray_util.Accessor.mass_center_idy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.max">
+<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#Accessor.max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.Accessor.max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#Accessor.mean"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.Accessor.mean" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.median">
+<span class="sig-name descname"><span class="pre">median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#Accessor.median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.Accessor.median" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.min">
+<span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#Accessor.min"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.Accessor.min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.nc_file">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nc_file</span></span><a class="headerlink" href="#src.xarray_util.Accessor.nc_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.origin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">origin</span></span><a class="headerlink" href="#src.xarray_util.Accessor.origin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.size">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">size</span></span><a class="headerlink" href="#src.xarray_util.Accessor.size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.speed">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">speed</span></span><a class="headerlink" href="#src.xarray_util.Accessor.speed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.start_date">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_date</span></span><a class="headerlink" href="#src.xarray_util.Accessor.start_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.total_IVT">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_IVT</span></span><a class="headerlink" href="#src.xarray_util.Accessor.total_IVT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.track">
+<span class="sig-name descname"><span class="pre">track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rotated</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#Accessor.track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.Accessor.track" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.track_lat">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">track_lat</span></span><a class="headerlink" href="#src.xarray_util.Accessor.track_lat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="src.xarray_util.Accessor.track_lon">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">track_lon</span></span><a class="headerlink" href="#src.xarray_util.Accessor.track_lon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">src.xarray_util.</span></span><span class="sig-name descname"><span class="pre">ObjectContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></p>
+<p>Custom list-like class, which elements are xr.dataset objects and contain information about different Tracking Objects.
+Implements  custom  methods to conveniently access and compute statistics of attributes of Tracking objects.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append Tracking</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>item</strong> (<em>xr.Dataset</em>) – Tracking Object to append</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – If appended Tracking object is not a xr.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.count" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Number of Tracking objects in Container</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.filter_by_median">
+<span class="sig-name descname"><span class="pre">filter_by_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">above</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#src.xarray_util.ObjectContainer" title="src.xarray_util.ObjectContainer"><span class="pre">ObjectContainer</span></a></span></span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.filter_by_median"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.filter_by_median" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select only those Tracking Objects in Container which attributes’ median value are below/above a certain threshold</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>threshold</strong> (<em>float</em>) – Treshold value</p></li>
+<li><p><strong>attr</strong> (<em>str</em>) – Attribute name</p></li>
+<li><p><strong>above</strong> (<em>bool</em><em>, </em><em>optional</em>) – Select only objects with attriubte median value above threshold. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Selected Tracking objects</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Object_container</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.get_attributes">
+<span class="sig-name descname"><span class="pre">get_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span></span></span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.get_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.get_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get  a specific attribute from all Tracking objects in Container.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attr</strong> (<em>str</em>) – Attribute name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List with attribute values of individual Tracking Objects</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.max">
+<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the attributes’ maximum value among all Tracking objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attr</strong> (<em>str</em>) – Attribute name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>max value</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.obj_means">
+<span class="sig-name descname"><span class="pre">obj_means</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.obj_means"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.obj_means" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate mean values of attribute for each individual Tracking object in Container.’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attr</strong> (<em>str</em>) – Attribute name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>attribute’s mean value for each individual Tracking object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Array-like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.obj_medians">
+<span class="sig-name descname"><span class="pre">obj_medians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.obj_medians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.obj_medians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate median values of attribute for each individual Tracking object in Container.’</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>attr</strong> (<em>str</em>) – Attribute name</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>attribute’s mean value for each individual Tracking object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Array-like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.quantile">
+<span class="sig-name descname"><span class="pre">quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quant</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.quantile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.quantile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute quantile of attribute over all Tracking Objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attr</strong> (<em>str</em>) – Attribute name</p></li>
+<li><p><strong>quant</strong> (<em>float</em>) – quantile</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>quantile of attribute</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.sel_season">
+<span class="sig-name descname"><span class="pre">sel_season</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">season</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#src.xarray_util.ObjectContainer" title="src.xarray_util.ObjectContainer"><span class="pre">ObjectContainer</span></a></span></span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.sel_season"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.sel_season" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select tracking objects that start in a specific season</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>season</strong> (<em>Enum</em><em> or </em><em>list-like</em>) – Season to be selected</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>ObjectContainer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="src.xarray_util.ObjectContainer.sortby">
+<span class="sig-name descname"><span class="pre">sortby</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reversel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#ObjectContainer.sortby"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.ObjectContainer.sortby" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="src.xarray_util.create_obj_from_dict">
+<span class="sig-prename descclassname"><span class="pre">src.xarray_util.</span></span><span class="sig-name descname"><span class="pre">create_obj_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/src/xarray_util.html#create_obj_from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#src.xarray_util.create_obj_from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create Tracking object xr.Dataset from Dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict</strong> (<em>dict</em>) – Dictionary that contains different attributes of a particular Tracking object</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – Id of the Tracking object</p></li>
+<li><p><strong>load_coordinates</strong> (<em>bool</em><em>, </em><em>optional</em>) – Load Tracking objects’ Grid points into Dataset. Memory intense. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dataset that contains characteristics of tracking object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>xr.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-src">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-src" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="modules.html" class="btn btn-neutral float-left" title="src" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2024, Johannes Riebold.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
