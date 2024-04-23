@@ -1,15 +1,12 @@
 from __future__ import annotations
 import xarray as xr
 import numpy as np
-from abc import ABC
 
 
 class GridPoint:
     """
     Parrent class for grid points.
     """
-
-    __slots__ = ("lat", "lon")
 
     input_field_grid = (
         "/work/aa0238/a271093/data/input/IVT_85_percentiles_CNMR_control_3dx3dy.nc"
@@ -24,6 +21,20 @@ class GridPoint:
     # corresponding lat and lon array of rotated coordinates
     rotated_lat_grid = xr.broadcast(grid_field.rlon, grid_field.rlat)[1].values.T
     rotated_lon_grid = xr.broadcast(grid_field.rlon, grid_field.rlat)[0].values.T
+
+    def __new__(cls, lat, lon):
+        if cls is GridPoint:
+            raise TypeError(
+                "Can only create Regular-or Rotated Gridpoint instances, no instances of the GridPoint parent class."
+            )
+
+        coord = (lat, lon)
+        if coord in cls._instances:
+            return cls._instances[coord]
+        else:
+            instance = super().__new__(cls)
+            cls._instances[coord] = instance
+            return instance
 
     def __init__(self, lat, lon):
         self.lat = lat
@@ -47,7 +58,7 @@ class RegularGridPoint(GridPoint):
     Class that represents grid points in a regular lon-lat coordinate system.
     """
 
-    __slots__ = ("lat", "lon")
+    _instances = {}
 
     def __init__(self, lat, lon):
 
@@ -77,7 +88,7 @@ class RotatedGridPoint(GridPoint):
     Class that represents grid points in a rotated coordinate system.
     """
 
-    __slots__ = ("lat", "lon")
+    _instances = {}
 
     def to_regular(self) -> RegularGridPoint:
         """Convert to regular Gridpoint
