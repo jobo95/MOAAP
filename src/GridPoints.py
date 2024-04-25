@@ -23,6 +23,10 @@ class GridPoint:
     rotated_lon_grid = xr.broadcast(grid_field.rlon, grid_field.rlat)[0].values.T
 
     def __new__(cls, lat, lon):
+        """
+        Forbid creation of GridPoint instances and check whether some Grid point instance has already been created and exists in memory
+        """
+
         if cls is GridPoint:
             raise TypeError(
                 "Can only create Regular-or Rotated Gridpoint instances, no instances of the GridPoint parent class."
@@ -110,31 +114,38 @@ class Domain:
     ######TODO######
     def __init__(
         self,
-        p_sw: RegularGridPoint,
-        p_nw: RegularGridPoint,
-        p_ne: RegularGridPoint,
-        p_se: RegularGridPoint,
+        north: float,
+        south: float,
+        east: float,
+        west: float,
     ):
 
-        if (
-            not isinstance(p_sw, RegularGridPoint)
-            or not isinstance(p_nw, RegularGridPoint)
-            or not isinstance(p_se, RegularGridPoint)
-            or not isinstance(p_ne, RegularGridPoint)
-        ):
-
-            raise TypeError("Domain corners have to be instances of RegularGridPoint.")
-
-        self.p_sw = p_sw
-        self.p_nw = p_nw
-        self.p_ne = p_ne
-        self.p_se = p_se
+        self.south = south
+        self.north = north
+        self.east = east
+        self.west = west
 
     def __contains__(self, p: RegularGridPoint):
 
-        # if not isinstance(p, RegularGridPoint):
-        #    raise TypeError("Can only check if RegularGridPoint objects are located within the domain.")
-        pass
+        if not isinstance(p, RegularGridPoint):
+            raise TypeError(
+                "Can only check if RegularGridPoint objects are located within the domain."
+            )
+        if self.east > self.west:
+            return (
+                p.lat > self.south
+                and p.lat < self.north
+                and p.lon > self.west
+                and p.lon < self.east
+            )
+
+        else:
+            return (
+                p.lat > self.south
+                and p.lat < self.north
+                and abs(p.lon) > self.west
+                and abs(p.lon) > self.east
+            )
 
 
 def get_Gridpoint_field(key, dict_):

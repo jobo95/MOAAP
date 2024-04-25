@@ -1,4 +1,5 @@
 from enum import Enum, IntEnum
+from src.GridPoints import Domain
 
 
 class Month(IntEnum):
@@ -25,3 +26,8 @@ class Season(Enum):
 
     def __getitem__(self, index):
         return self._value_[index]
+
+
+class Domains(Enum):
+    NORTH_ATLANTIC = Domain(north=60, south=40, east=0, west=-60)
+    NORTH_PACIFIC = Domain(north=60, south=40, east=-160, west=160)
