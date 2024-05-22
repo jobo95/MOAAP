@@ -79,10 +79,15 @@ class RegularGridPoint(GridPoint):
         Returns:
             RotatedGridPoint: Corresponding rotated grid point instance
         """
-       
-        crs_target=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
-        crs_source=ccrs.PlateCarree()
-        lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
+        lat_idx = np.argwhere(GridPoint.regular_lat_grid == self.lat)[0, 0]
+        lon_idx = np.argwhere(GridPoint.regular_lon_grid == self.lon)[0, 1]
+
+        lat = GridPoint.rotated_lat_grid[lat_idx, lon_idx]
+        lon = GridPoint.rotated_lon_grid[lat_idx, lon_idx]
+        
+        #crs_target=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
+        #crs_source=ccrs.PlateCarree()
+        #lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
         return RotatedGridPoint(lat, lon)
 
 
@@ -100,10 +105,15 @@ class RotatedGridPoint(GridPoint):
             RegularGridPoint: Corresponding regular grid point instance
         """
 
+        lat_idx = np.argwhere(GridPoint.rotated_lat_grid == self.lat)[0, 0]
+        lon_idx = np.argwhere(GridPoint.rotated_lon_grid == self.lon)[0, 1]
 
-        crs_source=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
-        crs_target=ccrs.PlateCarree()
-        lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
+        lat = GridPoint.regular_lat_grid[lat_idx, lon_idx]
+        lon = GridPoint.regular_lon_grid[lat_idx, lon_idx]
+
+        #crs_source=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
+        #crs_target=ccrs.PlateCarree()
+        #lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
         return RegularGridPoint(lat, lon)
 
 

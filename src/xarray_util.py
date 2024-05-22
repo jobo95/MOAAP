@@ -8,6 +8,7 @@ from src.utils import *
 from src.GridPoints import *
 from typing import Sequence
 from numpy.typing import ArrayLike
+from src.Enumerations import Domains
 
 
 class ObjectContainer(list):
@@ -129,7 +130,7 @@ class ObjectContainer(list):
         """
         return len(self)
 
-    def sortby(self, attr, reversel=False):
+    def sortby(self, attr, reverse=False):
 
         return self.sort(reverse=reverse, key=lambda x: getattr(x.get, attr))
 
@@ -151,8 +152,20 @@ class ObjectContainer(list):
             return ObjectContainer([x for x in self if x.get.median(attr) < threshold])
 
     def seltimesteps(self, time_slice:slice) -> ObjectContainer:
+        """Select timesteps from individual objects
+
+        Args:
+            time_slice (slice): time indices to be selected
+
+        """
         
         return ObjectContainer([x.isel(times=time_slice) for x in self])
+    
+    def sel_by_domain(self, domain: Domains, origin :bool=True) -> ObjectContainer:
+        if origin:
+            return ObjectContainer([x for x in self if x.get.regular_track[0] in domain.value])
+        else:
+            return ObjectContainer([x for x in self if x.get.regular_track[-1] in domain.value])
 
 @xr.register_dataset_accessor("get")
 class Accessor:
@@ -193,14 +206,7 @@ class Accessor:
     def speed(self):
         return self._obj.speed.values
 
-    @property
-    def track_lat(self):
-        return [x.lat for x in self._obj.track.values]
-
-    @property
-    def track_lon(self):
-        return [x.lon for x in self._obj.track.values]
-
+   
     def track(self, rotated: bool = True):
 
         ls = self._obj.track.values
@@ -209,7 +215,14 @@ class Accessor:
             return ls
         else:
             return [x.to_regular() for x in ls]
+        
+    @property
+    def rotated_track(self):
+        return self._obj.get.track(rotated=True)
 
+    @property
+    def regular_track(self):
+        return self._obj.get.track(rotated=False)
     @property
     def mass_center_idx(self):
         return self._obj.mass_center_idx.values
@@ -265,10 +278,10 @@ def create_obj_from_dict(
                 mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
                 # track_rlat=(['times'], dict_[key]['track'][:, 0]),
                 # track_rlon=(['times'], dict_[key]['track'][:, 1]),
-                # track=(
-                #    ["times"],
-                #    [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
-                # ),
+                 track=(
+                    ["times"],
+                    [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
+                 ),
                 speed=(
                     ["times"],
                     np.insert(dict_[key]["speed"], 0, np.nan),
@@ -296,10 +309,10 @@ def create_obj_from_dict(
                 mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
                 # track_rlat=(['times'], dict_[key]['track'][:, 0]),
                 # track_rlon=(['times'], dict_[key]['track'][:, 1]),
-                # track=(
-                #    ["times"],
-                #    [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
-                # ),
+                 track=(
+                    ["times"],
+                    [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
+                 ),
                 speed=(
                     ["times"],
                     np.insert(dict_[key]["speed"], 0, np.nan),
