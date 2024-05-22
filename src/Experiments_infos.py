@@ -80,13 +80,17 @@ class ICON_CNRM_CONTROL(ICONExperiment):
     path_raw :str= "/work/aa0049/a271109/spice-v2.1/chain/work/polarres_wp3_cmip_CNRM/post/yearly/"
     
     slp_path_raw: str = f"{path_raw}PMSL/"
+    FI250p_path_raw: str = f"{path_raw}FI250p/"
+    FI500p_path_raw: str = f"{path_raw}FI500p/"
     FI700p_path_raw: str = f"{path_raw}FI700p/"
-    FI850p_path_raw: str = f"{path_raw}FI8500p/"
-    
+    FI850p_path_raw: str = f"{path_raw}FI850p/"
+
+
+
     path_raw_gcm: str = (
         "/pool/data/CMIP6/data/CMIP/CNRM-CERFACS/CNRM-ESM2-1/historical/r1i1p1f2/day/"
     )
-    slp_file_gcm_raw: str = (
+    slp_files_raw_gcm: str = (
         f"{path_raw_gcm}psl/gr/v20181206/psl_day_CNRM-ESM2-1_historical_r1i1p1f2_gr_18500101-20141231.nc"
     )
     
