@@ -150,6 +150,9 @@ class ObjectContainer(list):
         else:
             return ObjectContainer([x for x in self if x.get.median(attr) < threshold])
 
+    def seltimesteps(self, time_slice:slice) -> ObjectContainer:
+        
+        return ObjectContainer([x.isel(times=time_slice) for x in self])
 
 @xr.register_dataset_accessor("get")
 class Accessor:
