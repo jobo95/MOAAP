@@ -41,7 +41,7 @@ def plot_unstructured_rotated_grid(
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=crs_arctic)
+    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0,90))
 
     # ax = plt.axes(projection=crs_arctic)
 
@@ -97,7 +97,7 @@ def plot_contourf_rotated_grid(
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=crs_arctic)
+    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0,90))
 
     # ax = plt.axes(projection=crs_arctic)
     xx,yy = np.meshgrid(lon, lat)
@@ -133,5 +133,40 @@ def plot_contourf_rotated_grid(
 
     # plt.show()
     
+def plot_tracks_rotated_grid(tracks, fig, index,levels = [1,2,3,4,5], title=None, cbar_label=None, subplts=(4, 1)):
     
+    pole_lon = 0
+    pole_lat = 6.55
+    crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
+
+    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0,90))
+
+    # ax = plt.axes(projection=crs_arctic)
+    ax.set_extent([-180, 180, 58, 90], crs=ccrs.PlateCarree())
+    ax.add_feature(cartopy.feature.OCEAN, color="white", zorder=0)
+    ax.add_feature(
+        cartopy.feature.LAND,
+        color="lightgray",
+        zorder=0,
+        linewidth=0.5,
+        edgecolor="black",
+    )
+    ax.gridlines(
+        linewidth=0.5,
+        color="gray",
+        xlocs=range(-180, 180, 45),
+        ylocs=range(-90, 90, 10),
+        linestyle=":",
+    )  # draw_labels=True,
+    ax.coastlines(linewidth=0.3, color="black")
+    
+    for track in tracks:
+        lons=[x.lon for x in track]
+        lats=[x.lat for x in track]
+        
+        ax.plot(lons, lats, lw=1, transform=crs_arctic)
+        ax.plot(lons, lats, marker='o',markersize=1, transform=crs_arctic)
+    
+
+
 
