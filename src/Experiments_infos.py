@@ -1,20 +1,43 @@
 from dataclasses import dataclass
 from typing import Tuple
+import glob
 
 
 @dataclass
 class ICONExperiment:
     scratch_path: str = "/work/aa0238/a271093/scratch/"
     slp_aac_name: str = "slp_daymean_1984-2015_remapped_3x_aac.nc"
-    clustering_target_grid: str = (
+    reginal_30km_target_grid: str = (
         "/work/aa0238/a271093/data/regridding_files/ICON_rotated_grid_33x33km.nc"
     )
+    clustering_target_grid :str= "/work/aa0238/a271093/data/regridding_files/NH_-90_90_20_88_reglonlat_1degree.nc"
     IVT_thresh_path = "/work/aa0238/a271093/data/input/"
 
     slp_nc: str = "PMSL"
     lat_nc: str = "lat"
     lon_nc: str = "lon"
     time_nc: str = "time"
+
+@dataclass
+class SSP_EXPERIMENT:
+    year_start: int = 2015
+    year_end: int = 2100
+    
+@dataclass
+class CONTROL_EXPERIMENT:
+    year_start: int = 1984
+    year_end: int = 2014
+@dataclass 
+class CNRM_EXPERIMENT:
+    
+    control_aac_file_del29feb :str = "/work/aa0238/a271093/data/clustering/CNRM_control/CNRM_ICON_control_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_"
+    control_aac_file :str = "/work/aa0238/a271093/data/clustering/CNRM_control/CNRM_ICON_control_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_"
+
+@dataclass 
+class NorESM_EXPERIMENT:
+    
+    control_aac_file_del29feb :str = "/work/aa0238/a271093/data/clustering/NorESM_control/NORESM_ICON_control_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_"
+    control_aac_file :str = "/work/aa0238/a271093/data/clustering/NorESM_control/NORESM_ICON_control_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_"
 
 
 @dataclass
@@ -27,8 +50,8 @@ class ICON_ERA5(ICONExperiment):
 
 
 @dataclass
-class ICON_NorESM_CONTROL(ICONExperiment):
-    exp_name: str = "regional ICON forced by NorESM"
+class ICON_NorESM_CONTROL(ICONExperiment, CONTROL_EXPERIMENT, NorESM_EXPERIMENT):	
+    exp_name: str = "NORESM_ICON_control"
     
 
     path: str = (
@@ -67,11 +90,13 @@ class ICON_NorESM_CONTROL(ICONExperiment):
     IVTobj_out_path: str = (
         "/work/aa0238/a271093/results/MOAAP/IVT_Tracking/NorESM_control_remapped_3x/"
     )
+    clustering_data_path: str = "/work/aa0238/a271093/data/clustering/NorESM_control/"
+    clustering_data_file: str = ""
 
 
 @dataclass
-class ICON_CNRM_CONTROL(ICONExperiment):
-    exp_name: str = "regional ICON forced by CNRM"
+class ICON_CNRM_CONTROL(ICONExperiment, CONTROL_EXPERIMENT, CNRM_EXPERIMENT):
+    exp_name: str = "CNRM_ICON_control"
     path: str =  "/work/aa0238/a271093/data/Jan_runs/ICON_CNRM_control/CNRM_control_remapped_3x/"
     
     
@@ -103,10 +128,37 @@ class ICON_CNRM_CONTROL(ICONExperiment):
     IVTobj_out_path: str = (
         "/work/aa0238/a271093/results/MOAAP/IVT_Tracking/CNRM_control_remapped_3x/"
     )
+    clustering_data_path: str = "/work/aa0238/a271093/data/clustering/CNRM_control/"
 
 
 @dataclass
+class ICON_NorESM_SSP(ICONExperiment, NorESM_EXPERIMENT, SSP_EXPERIMENT):
+    exp_name: str = "NorESM_ICON_SSP"
+    
+    path_raw:str = "/work/aa0049/a271109/spice-v2.2/chain/work/polarres_wp3_cmip_NorESM_ssp370/post/yearly/"
+    path_raw_gcm: str = '/pool/data/CMIP6/data/ScenarioMIP/NCC/NorESM2-MM/ssp370/r1i1p1f1/day/'
+    gph_path_raw_gcm: str =f"{path_raw_gcm}zg/gn/v20191108/"
+    gph_files_raw_gcm: Tuple[str] = tuple(sorted(glob.glob(gph_path_raw_gcm+'*')))
+    clustering_data_path: str = "/work/aa0238/a271093/data/clustering/NorESM_ssp/"
+    
+
+class ICON_CNRM_SSP(ICONExperiment, CNRM_EXPERIMENT, SSP_EXPERIMENT):
+    exp_name: str = "CNRM_ICON_SSP"
+    
+    path_raw:str = "/work/aa0049/a271109/spice-v2.2/chain/work/polarres_wp3_cmip_CNRM_ssp370/post/yearly/"
+    path_raw_gcm: str = '/pool/data/CMIP6/data/ScenarioMIP/CNRM-CERFACS/CNRM-ESM2-1/ssp370/r1i1p1f2/day/'
+    gph_path_raw_gcm: str =f"{path_raw_gcm}zg/gr/v20190328/"
+    
+    gph_files_raw_gcm: Tuple[str] = tuple(sorted(glob.glob(gph_path_raw_gcm+'*')))
+    clustering_data_path: str = "/work/aa0238/a271093/data/clustering/CNRM_ssp/"
+    
+
+    
+@dataclass
 class ERA5(ICONExperiment):
+    exp_name: str = "ERA5"
+    year_start: int = 1984
+    year_end: int = 2014
     slp_path: str = (
         "/work/aa0238/a271093/data/ERA5/1984-2014/remapped_ICON_reg_30km/slp/"
     )
@@ -115,11 +167,19 @@ class ERA5(ICONExperiment):
     )
     slp_nc: str = "psl"
 
+    gph_path_raw_gcm:str="/work/bm1159/XCES/data4xces/reanalysis/reanalysis/ECMWF/IFS/ERA5/day/atmos/zg/r1i1p1-070000Pa/"
+    gph_files_raw_gcm: Tuple[str] = tuple(sorted(glob.glob(gph_path_raw_gcm+'*')))
+    clustering_data_path: str = "/work/aa0238/a271093/data/clustering/ERA5/"
+
+    control_aac_file_del29feb :str = "/work/aa0238/a271093/data/clustering/ERA5/ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_"
+    control_aac_file :str = "/work/aa0238/a271093/data/clustering/ERA5/ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_"
 
 @dataclass
 class Data:
-    ICONEXP = ICONExperiment
-    ICON_ERA5_EXP = ICON_ERA5
-    ICON_NORESM_EXP = ICON_NorESM_CONTROL
-    ICON_CNRM_EXP = ICON_CNRM_CONTROL
+    #ICONEXP = ICONExperiment
+    #ICON_ERA5_EXP = ICON_ERA5
+    ICON_NORESM_CONTROL = ICON_NorESM_CONTROL
+    ICON_CNRM_CONTROL = ICON_CNRM_CONTROL
+    ICON_CNRM_SSP = ICON_CNRM_SSP
+    ICON_NORESM_SSP = ICON_NorESM_SSP #ICON_CNRM_EXP = ICON_CNRM_CONTROL
     ERA5 = ERA5

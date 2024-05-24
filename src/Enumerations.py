@@ -1,5 +1,6 @@
 from enum import Enum, IntEnum
 from src.GridPoints import Domain
+from src.Experiments_infos import *
 
 
 class Month(IntEnum):
@@ -18,15 +19,24 @@ class Month(IntEnum):
 
 
 class Season(Enum):
-    WINTER = (12, 1, 2)
-    SPRING = (3, 4, 5)
-    SUMMER = (6, 7, 8)
-    AUTUMN = (9, 10, 11)
+    DJF = (12, 1, 2)
+    MAM = (3, 4, 5)
+    JJA = (6, 7, 8)
+    SON = (9, 10, 11)
     # ALL = (1,2,3,4,5,6,7,8,9,10,11,12)
 
     def __getitem__(self, index):
         return self._value_[index]
+    
+class Experiments(Enum):
+    ICON_CNRM_CONTROL = ICON_CNRM_CONTROL
+    ICON_NORESM_CONTROL = ICON_NorESM_CONTROL
+    ICON_CNRM_SSP = ICON_CNRM_SSP
+    ICON_NORESM_SSP = ICON_NorESM_SSP #ICON_CNRM_EXP = ICON_CNRM_CONTROL
+    ERA5 = ERA5
 
+    def __getitem__(self, index):
+        return self._value_[index]
 
 class Domains(Enum):
     NORTH_ATLANTIC = Domain(north=60, south=40, east=0, west=-60)

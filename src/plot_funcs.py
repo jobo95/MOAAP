@@ -97,7 +97,7 @@ def plot_contourf_rotated_grid(
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0,90))
+    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.NorthPolarStereo())
 
     # ax = plt.axes(projection=crs_arctic)
     xx,yy = np.meshgrid(lon, lat)
