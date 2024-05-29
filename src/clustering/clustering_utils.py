@@ -9,10 +9,11 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
+import xarray as xr
+from src.utils import load_pkl,save_as_pkl
 
 def cosine_cor(data,lat,lon):
     cos = np.sqrt(np.cos((np.pi/180)*(np.abs(lat))))
-    print (lon.size)
     t = 0
     for k in range(data.shape[1]):
         data[:, k] = data[:, k]*cos[t]
@@ -32,6 +33,18 @@ def inv_cosine_cor(data,lat,lon):
         if k >= (t + 1)*lon[:].size:
             t = t + 1
     return data
+
+def load_clustering_data(path_in:str, file_name:str):
+    data_xr =xr.load_dataset(path_in+file_name)
+    data_aux = np.squeeze(data_xr.zg.values)
+
+    data_ar = np.reshape(data_aux,(data_aux.shape[0], data_aux.shape[1]*data_aux.shape[2])) 
+    
+    lat = data_xr.lat.values
+    lon = data_xr.lon.values
+    time_frame = data_xr.time.values
+    
+    return lat,lon,time_frame,data_ar
 
 
 def plot_cluster(plot_dat,lat,lon,plot_size=(15,9),plot_shape=[5,1],cbar_size=1.0,cbar_ticks=[-20, -10, -5, -3, -2, -1, 1, 2, 3, 5, 10, 20],font_size=9,unit='hPa',color_lev = [-20, -10, -5, -3, -2, -1, 1, 2, 3, 5, 10, 20],square=False,cmap='seismic',set_title=True,titles = None):
@@ -112,6 +125,7 @@ def plot_cluster_3D(plot_dat,lat,lon,plot_size=(15,9),plot_shape=[5,1],cbar_size
 
         
         #ax.set_title("EOF "+str(j+1)+"\n "+str(titles[j])+"%",size=font_size*2.6,fontweight="bold")
+        ax.set_title(titles[j],size=font_size)
         ax.coastlines(linewidth=0.5,color='black',resolution='50m')
         #ax.gridlines(zorder=4)
         ax.set_global()

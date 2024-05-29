@@ -40,11 +40,11 @@ for EXP in Experiments:
         #merge raw files, select years and months, select level,remap to target grid
         if exp.exp_name == "ERA5":
             cdo.remapbil(exp.clustering_target_grid,
-                    input= f'-selmon,{months}  -selyear,{year_start}/{year_end}  -mergetime  '+" ".join(exp.gph_files_raw_gcm),
+                    input= f'-selmon,{months}  -selyear,{year_start}/{year_end}  -fillmiss -mergetime  '+" ".join(exp.gph_files_raw_gcm),
                     output = f"{out_string}.nc")
         else:
             cdo.remapbil(exp.clustering_target_grid,
-                    input= f'-selmon,{months}  -selyear,{year_start}/{year_end} -sellevel,{level} -mergetime  '+" ".join(exp.gph_files_raw_gcm),
+                    input= f'-selmon,{months}  -selyear,{year_start}/{year_end} -fillmiss -sellevel,{level} -mergetime  '+" ".join(exp.gph_files_raw_gcm),
                     output = f"{out_string}.nc")
 
 
