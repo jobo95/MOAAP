@@ -2,7 +2,9 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy
 from numpy.typing import ArrayLike
+from typing import List
 import numpy as np
+from src.Enumerations import Domains
 
 
 def plot_unstructured_rotated_grid(
@@ -17,6 +19,7 @@ def plot_unstructured_rotated_grid(
     title="",
     cbar_label=None,
     cmap="Blues",
+    plot_domains: dict[Domains, str]= None,
 ):
     """
     Plot data field over the regional ICON domain using rotated coordinates.
@@ -71,6 +74,16 @@ def plot_unstructured_rotated_grid(
         cmap=cmap,
         transform=crs_arctic,
     )
+    if plot_domains:
+        for domain, color in plot_domains.items():
+            d=domain.value 
+            plt.plot(np.linspace(d.west,d.west),np.linspace(d.south,d.north), transform=ccrs.PlateCarree(), color=color, linewidth=2, )
+            plt.plot(np.linspace(d.west,d.east),np.linspace(d.north,d.north), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
+            plt.plot(np.linspace(d.east,d.east),np.linspace(d.north,d.south), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
+            plt.plot(np.linspace(d.east,d.west),np.linspace(d.south,d.south), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
+        
+    
+    
     cbar = plt.colorbar(plot, ax=ax, pad=pad)
     cbar.set_label(cbar_label)
     plt.title(title)
@@ -133,7 +146,7 @@ def plot_contourf_rotated_grid(
 
     # plt.show()
     
-def plot_tracks_rotated_grid(tracks, fig, index,levels = [1,2,3,4,5], title=None, cbar_label=None, subplts=(4, 1)):
+def plot_tracks_rotated_grid(tracks, fig, index,levels = [1,2,3,4,5], title=None, cbar_label=None, subplts=(4, 1),plot_domains : dict[str,Domains]={}):
     
     pole_lon = 0
     pole_lat = 6.55
@@ -166,6 +179,15 @@ def plot_tracks_rotated_grid(tracks, fig, index,levels = [1,2,3,4,5], title=None
         
         ax.plot(lons, lats, lw=1, transform=crs_arctic)
         ax.plot(lons, lats, marker='o',markersize=1, transform=crs_arctic)
+        
+    
+    if plot_domains:
+        for domain, color in plot_domains.items():
+            d=domain.value 
+            plt.plot(np.linspace(d.west,d.west),np.linspace(d.south,d.north), transform=ccrs.PlateCarree(), color=color, linewidth=2, )
+            plt.plot(np.linspace(d.west,d.east),np.linspace(d.north,d.north), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
+            plt.plot(np.linspace(d.east,d.east),np.linspace(d.north,d.south), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
+            plt.plot(np.linspace(d.east,d.west),np.linspace(d.south,d.south), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
     
 
 

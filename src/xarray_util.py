@@ -4,11 +4,15 @@ import xarray as xr
 import pandas as pd
 from metpy.units import units
 from dateutil import relativedelta
-from src.utils import *
+from src.utils import load_pkl, create_datetime_lists, get_datetime_str
+
+from datetime import datetime
+import cftime
 from src.GridPoints import *
 from typing import Sequence
 from numpy.typing import ArrayLike
 from src.Enumerations import Domains
+import dask 
 
 
 class ObjectContainer(list):
@@ -45,8 +49,8 @@ class ObjectContainer(list):
 
         """
 
-        if not isinstance(item, xr.Dataset):
-            raise TypeError("Object container can only append xarray Dataset objects")
+        #if not isinstance(item, xr.Dataset):
+        #    raise TypeError("Object container can only append xarray Dataset objects")
         return super().append(item)
 
     def sel_season(self, season) -> ObjectContainer:
@@ -150,6 +154,19 @@ class ObjectContainer(list):
             return ObjectContainer([x for x in self if x.get.median(attr) > threshold])
         else:
             return ObjectContainer([x for x in self if x.get.median(attr) < threshold])
+        
+    def filter_by_attr_category(self, attr, category) -> ObjectContainer:
+        q033 = self.quantile(attr=attr, quant = 0.33)
+        q066 = self.quantile(attr=attr, quant = 0.66)
+        
+        if category == 'Small':
+            return self.filter_by_median(threshold = q033, attr = attr, above=False)
+        
+        if category == 'Medium':
+            return self.filter_by_median(threshold = q033, attr = attr, above=True).filter_by_median(threshold = q066, attr = attr, above=False)
+        
+        if category == 'Large':
+            return self.filter_by_median(threshold = q066, attr = attr, above=True)
 
     def seltimesteps(self, time_slice:slice) -> ObjectContainer:
         """Select timesteps from individual objects
@@ -166,6 +183,22 @@ class ObjectContainer(list):
             return ObjectContainer([x for x in self if x.get.regular_track[0] in domain.value])
         else:
             return ObjectContainer([x for x in self if x.get.regular_track[-1] in domain.value])
+
+    def sel_by_regime(self, regime_name: str) -> ObjectContainer:
+        BMU = pd.read_csv(regime_path)
+        date_strings =list( BMU[BMU.cluster_name == regime_name].time.values)
+        
+        cftime_dates = [cftime.DatetimeNoLeap(datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').year,
+                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').month,
+                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').day,
+                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').hour,
+                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').minute,
+                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').second)
+               for date_string in date_strings]
+        
+        return ObjectContainer
+
+        
 
 @xr.register_dataset_accessor("get")
 class Accessor:
@@ -287,6 +320,7 @@ def create_obj_from_dict(
                     np.insert(dict_[key]["speed"], 0, np.nan),
                 ),  # * units('m/s')),
                 gridpoints=(["times"], get_Gridpoint_field(key, dict_)),
+                cluster = (["times"], get_cluster(),
             ),
             coords=dict(times=dict_[key]["times"]),
         )
@@ -322,3 +356,33 @@ def create_obj_from_dict(
         )
 
     return ds
+
+def load_tracking_objects(input_path, input_file_name_temp, type_, first_year, last_year,load_coordinates=False):
+    
+    start_date_list, end_date_list = create_datetime_lists(first_year,last_year, months=6, correct_last_endtime=False) 
+    first_processed_date = start_date_list[0]
+    last_processed_date = end_date_list[-1]
+    
+    IVTobj_ls=ObjectContainer([])
+
+    for start_date, end_date in zip(start_date_list, end_date_list):
+        print(start_date)
+        pickle_file_path = f'{input_path}{type_}_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}_corrected'
+    
+        dict_ = load_pkl(pickle_file_path)
+    
+
+        for object_id in dict_.keys():
+            try:
+                ds = create_obj_from_dict(dict_,
+                                        object_id,
+                                        load_coordinates=load_coordinates
+                                  
+                                        )
+            except ValueError as ex:
+                continue
+        
+            IVTobj_ls.append(ds)
+    
+    
+    return IVTobj_ls

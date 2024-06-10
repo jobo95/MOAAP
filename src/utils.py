@@ -1,10 +1,10 @@
 import datetime
 import pickle
 import numpy as np
-from src.xarray_util import ObjectContainer
 from itertools import product, chain
 from dateutil import relativedelta
 from collections import Counter
+import pandas as pd
 
 
 def create_datetime_lists(first_year, last_year, months=7, correct_last_endtime=True):
@@ -112,3 +112,8 @@ def count_objs_grid_points(objs, normalization_factor=24.0):
 
     return lon, lat, z
     # return grid_point_counter
+
+    
+    
+def read_cluster_csv(file_name):
+    return pd.read_csv(file_name)

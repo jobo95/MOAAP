@@ -50,9 +50,6 @@ def load_clustering_data(path_in:str, file_name:str):
 def plot_cluster(plot_dat,lat,lon,plot_size=(15,9),plot_shape=[5,1],cbar_size=1.0,cbar_ticks=[-20, -10, -5, -3, -2, -1, 1, 2, 3, 5, 10, 20],font_size=9,unit='hPa',color_lev = [-20, -10, -5, -3, -2, -1, 1, 2, 3, 5, 10, 20],square=False,cmap='seismic',set_title=True,titles = None):
     extent=[lon[0],lon[-1],90,lat[-1]]
     
-    #plot_name=plot_name+"_"+str(int(extent[0]))+"_"+str(int(extent[1]))+"_"+str(int(extent[2]))+"_"+str(int(extent[3]))
-    #sort cluster from highest occurence frequency to lowest
-    #sort = np.flip(np.argsort(np.bincount(BMU.astype(int))/BMU.size,axis=0),axis=0)
     sort = np.arange(plot_shape[1])
     xx,yy = np.meshgrid(lon,lat)
     fig_cluster = plt.figure(figsize = plot_size)
@@ -60,11 +57,8 @@ def plot_cluster(plot_dat,lat,lon,plot_size=(15,9),plot_shape=[5,1],cbar_size=1.
         ax = fig_cluster.add_subplot(plot_shape[0],plot_shape[1],j+1,projection=ccrs.NorthPolarStereo())
         
     
-        # Compute a circle in axes coordinates, which we can use as a boundary
-        # for the map. We can pan/zoom as much as we like - the boundary will be
-        # permanently circular.
+        
         theta = np.linspace(-np.radians(lon[0])+np.pi, -np.radians(lon[-1]+1.125)+np.pi, 100)
-        #theta = np.linspace(np.pi/2, 3*np.pi/2, 100)
         center, radius = [0.5, 0.5], 0.5
     
         verts = np.vstack([np.sin(theta), np.cos(theta)]).T

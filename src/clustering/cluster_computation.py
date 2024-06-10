@@ -19,7 +19,28 @@ def compute_and_save_cluster(EXP: Experiments,
                     save_BMUs: bool = False,
                     save_centroids: bool = False,
                     cluster_names_dict : dict = {},
-                    BMU_projection_flag:str= "") -> dict:
+                    BMU_projection_flag:str= "") -> dict[str, np.ndarray]:
+    """Compute and/or save circulation regimes with kmeans.
+
+    Args:
+        EXP (Experiments): Experiment Type
+        num_cluster (int, optional): Number of clusters if kmeans is fitted. Defaults to 4.
+        back_trafo_centroids (bool, optional): Backtransform cluster centroids via inverse cosine and pca transformation. Defaults to True.
+        pca_ref (str, optional): File pointing to a saved reference PCA object that is used for  dimensionality reduction. Defaults to None.
+        kmeans_ref (str, optional): File pointing to a saved reference kmeans object that is used for cluster assignment. Defaults to None.
+        num_iter (int, optional): Number of kmeans inetilizations if fitted. Defaults to 10.
+        n_components (int, optional): Number of PCs if pca is fitted. Defaults to 20.
+        level (int, optional): Geopotential heigth level. Defaults to 70000.
+        save_pca (bool, optional): If True, save fitted    pca object. Defaults to False.
+        save_kmeans (bool, optional): If True, save fitted kmeans object. Defaults to False.
+        save_BMUs (bool, optional): If True, save BMU dataframe. Defaults to False.
+        save_centroids (bool, optional): If true, save cluster centroids. Defaults to False.
+        cluster_names_dict (dict, optional): Dictionary that describes which clustering label corresponds to which regime name.  Defaults to {}.
+        BMU_projection_flag (str, optional): Additional suffix for the BMU csv file output. Defaults to "".
+
+    Returns:
+        dict[str, np.ndarray]: dictionary containing values for cluster centers, BMUs, lat and lon
+    """
     
     exp = EXP.value
     season = Season.DJF
@@ -99,6 +120,7 @@ def compute_and_save_cluster(EXP: Experiments,
     if save_BMUs:
         BMU_file = f"{path_out}regime_output/BMU/{file_name[0:-3]}_{n_components}PCs_{num_cluster}clusters{BMU_projection_flag}.csv"
         BMU_df = pd.DataFrame(BMU, index=time_frame)
+        BMU_df.index.name = "time"
         BMU_df.columns=["cluster_id"]
         if cluster_names_dict:
             BMU_df["cluster_name"] = BMU_df.apply(lambda row: cluster_names_dict[row["cluster_id"]], axis=1)

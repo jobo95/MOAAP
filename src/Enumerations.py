@@ -39,5 +39,6 @@ class Experiments(Enum):
         return self._value_[index]
 
 class Domains(Enum):
-    NORTH_ATLANTIC = Domain(north=60, south=40, east=0, west=-60)
-    NORTH_PACIFIC = Domain(north=60, south=40, east=-160, west=160)
+    NORTH_ATLANTIC = Domain(north=70, south=50, east=0, west=-60)
+    NORTH_PACIFIC = Domain(north=70, south=40, east=-160, west=140)
+    CENTRAL_ARCTIC = Domain(north=90, south=75, east=180, west=-180)
