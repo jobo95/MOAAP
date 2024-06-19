@@ -1,6 +1,7 @@
+from typing import List
+
 import numpy as np
 import pandas as pd
-from typing import List
 from sklearn.cluster import KMeans
 from sklearn.metrics import calinski_harabasz_score
 
@@ -71,10 +72,6 @@ def compute_synthetic_variance_ratios(
     df["original_time_series"] = np.nan
     for m in range(M):
         df[f"sample_{m}"] = np.nan
-
-    #
-    synthetic_var_ratio = np.empty((len(cluster_range), M))
-    original_var_ratio = np.empty(len(cluster_range))
 
     for n, n_clusters in enumerate(cluster_range):
         print(f"{n_clusters=}")

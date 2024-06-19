@@ -1,6 +1,14 @@
 from enum import Enum, IntEnum
+
+from src.Experiments_infos import (
+    ERA5,
+    ICON_CNRM_CONTROL,
+    ICON_CNRM_SSP,
+    ICON_ERA5,
+    ICON_NorESM_CONTROL,
+    ICON_NorESM_SSP,
+)
 from src.GridPoints import Domain
-from src.Experiments_infos import *
 
 
 class Month(IntEnum):
@@ -27,16 +35,26 @@ class Season(Enum):
 
     def __getitem__(self, index):
         return self._value_[index]
-    
+
+
+class GPH700_4Cluster(Enum):
+    NAO_PLUS = "NAO+"
+    NAO_MINUS = "NAO-"
+    ATL_MINUS = "ATL-"
+    SCAN = "SCAN"
+
+
 class Experiments(Enum):
     ICON_CNRM_CONTROL = ICON_CNRM_CONTROL
     ICON_NORESM_CONTROL = ICON_NorESM_CONTROL
     ICON_CNRM_SSP = ICON_CNRM_SSP
-    ICON_NORESM_SSP = ICON_NorESM_SSP #ICON_CNRM_EXP = ICON_CNRM_CONTROL
+    ICON_NORESM_SSP = ICON_NorESM_SSP  # ICON_CNRM_EXP = ICON_CNRM_CONTROL
     ERA5 = ERA5
+    ICON_ERA5 = ICON_ERA5
 
     def __getitem__(self, index):
         return self._value_[index]
+
 
 class Domains(Enum):
     NORTH_ATLANTIC = Domain(north=70, south=50, east=0, west=-60)

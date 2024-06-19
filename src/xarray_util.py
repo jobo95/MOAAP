@@ -1,208 +1,19 @@
 from __future__ import annotations
-import numpy as np
-import xarray as xr
-import pandas as pd
-from metpy.units import units
-from dateutil import relativedelta
-from src.utils import load_pkl, create_datetime_lists, get_datetime_str
 
 from datetime import datetime
-import cftime
-from src.GridPoints import *
-from typing import Sequence
-from numpy.typing import ArrayLike
-from src.Enumerations import Domains
-import dask 
 
+import numpy as np
+import pandas as pd
+import xarray as xr
 
-class ObjectContainer(list):
-    """
-    Custom list-like class, which elements are xr.dataset objects and contain information about different Tracking Objects.
-    Implements  custom  methods to conveniently access and compute statistics of attributes of Tracking objects.
-    """
+from src.GridPoints import RotatedGridPoint, get_Gridpoint_field
+from src.Objectcontainer import ObjectContainer
+from src.utils import create_datetime_lists, get_datetime_str, load_pkl
 
-    def __init__(self, iterable) -> None:
-        """Initialize container instance.
-
-        Args:
-            iterable: Sequence containing initial Tracking objects ()
-
-        Raises:
-            TypeError: If Sequence objects are not  xr.Dataset objects
-        """
-
-        if not all(map(lambda x: isinstance(x, xr.Dataset), iterable)):
-            raise TypeError(
-                "Object container can only be initialized with a sequence that only contains xarray Datasets"
-            )
-
-        super().__init__(iterable)
-
-    def append(self, item) -> None:
-        """Append Tracking
-
-        Args:
-            item (xr.Dataset): Tracking Object to append
-
-        Raises:
-            TypeError: If appended Tracking object is not a xr.Dataset
-
-        """
-
-        #if not isinstance(item, xr.Dataset):
-        #    raise TypeError("Object container can only append xarray Dataset objects")
-        return super().append(item)
-
-    def sel_season(self, season) -> ObjectContainer:
-        """Select tracking objects that start in a specific season
-
-        Args:
-            season (Enum or list-like): Season to be selected
-
-        Returns:
-            ObjectContainer
-        """
-        return ObjectContainer(
-            [x for x in self if pd.to_datetime(x.get.start_date).month in season]
-        )
-
-    def get_attributes(self, attr: str) -> List:
-        """Get  a specific attribute from all Tracking objects in Container.
-
-        Args:
-            attr (str): Attribute name
-
-        Returns:
-            list: List with attribute values of individual Tracking Objects
-        """
-
-        return [getattr(x.get, attr) for x in self]
-
-    def obj_means(self, attr: str):
-        """
-        Calculate mean values of attribute for each individual Tracking object in Container.'
-
-        Args:
-            attr (str): Attribute name
-
-        Returns:
-            Array-like: attribute's mean value for each individual Tracking object
-        """
-        return np.squeeze([x.get.mean(attr) for x in self])
-
-    def obj_medians(self, attr: str):
-        """
-        Calculate median values of attribute for each individual Tracking object in Container.'
-
-        Args:
-            attr (str): Attribute name
-
-        Returns:
-            Array-like: attribute's mean value for each individual Tracking object
-        """
-        return np.squeeze([x.get.median(attr) for x in self])
-
-    def max(self, attr: str) -> float:
-        """
-        Get the attributes' maximum value among all Tracking objects.
-
-        Args:
-            attr (str):Attribute name
-
-        Returns:
-            float: max value
-        """
-        return float(np.max([getattr(x.get, attr) for x in self]))
-
-    def quantile(self, attr: str, quant: float) -> float:
-        """Compute quantile of attribute over all Tracking Objects.
-
-        Args:
-            attr (str): Attribute name
-            quant (float): quantile
-
-        Returns:
-            float:quantile of attribute
-        """
-        return np.quantile([x.get.mean(attr) for x in self], quant)
-
-    def count(self) -> int:
-        """
-
-        Returns:
-            int: Number of Tracking objects in Container
-        """
-        return len(self)
-
-    def sortby(self, attr, reverse=False):
-
-        return self.sort(reverse=reverse, key=lambda x: getattr(x.get, attr))
-
-    def filter_by_median(self, threshold, attr, above=True) -> ObjectContainer:
-        """Select only those Tracking Objects in Container which attributes' median value are below/above a certain threshold
-
-        Args:
-            threshold (float): Treshold value
-            attr (str): Attribute name
-            above (bool, optional): Select only objects with attriubte median value above threshold. Defaults to True.
-
-        Returns:
-            Object_container: Selected Tracking objects
-        """
-        if above:
-
-            return ObjectContainer([x for x in self if x.get.median(attr) > threshold])
-        else:
-            return ObjectContainer([x for x in self if x.get.median(attr) < threshold])
-        
-    def filter_by_attr_category(self, attr, category) -> ObjectContainer:
-        q033 = self.quantile(attr=attr, quant = 0.33)
-        q066 = self.quantile(attr=attr, quant = 0.66)
-        
-        if category == 'Small':
-            return self.filter_by_median(threshold = q033, attr = attr, above=False)
-        
-        if category == 'Medium':
-            return self.filter_by_median(threshold = q033, attr = attr, above=True).filter_by_median(threshold = q066, attr = attr, above=False)
-        
-        if category == 'Large':
-            return self.filter_by_median(threshold = q066, attr = attr, above=True)
-
-    def seltimesteps(self, time_slice:slice) -> ObjectContainer:
-        """Select timesteps from individual objects
-
-        Args:
-            time_slice (slice): time indices to be selected
-
-        """
-        
-        return ObjectContainer([x.isel(times=time_slice) for x in self])
-    
-    def sel_by_domain(self, domain: Domains, origin :bool=True) -> ObjectContainer:
-        if origin:
-            return ObjectContainer([x for x in self if x.get.regular_track[0] in domain.value])
-        else:
-            return ObjectContainer([x for x in self if x.get.regular_track[-1] in domain.value])
-
-    def sel_by_regime(self, regime_name: str) -> ObjectContainer:
-        BMU = pd.read_csv(regime_path)
-        date_strings =list( BMU[BMU.cluster_name == regime_name].time.values)
-        
-        cftime_dates = [cftime.DatetimeNoLeap(datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').year,
-                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').month,
-                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').day,
-                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').hour,
-                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').minute,
-                                      datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S').second)
-               for date_string in date_strings]
-        
-        return ObjectContainer
-
-        
 
 @xr.register_dataset_accessor("get")
 class Accessor:
-    ### TODO accessor overriding warning######
+    # TODO accessor overriding warning
     """
     Add some additional accessors to the xr.Datasets
     """
@@ -239,7 +50,14 @@ class Accessor:
     def speed(self):
         return self._obj.speed.values
 
-   
+    @property
+    def clusters(self):
+        return self._obj.clusters.values
+
+    @property
+    def exp(self):
+        return self._obj.exp.values.item()
+
     def track(self, rotated: bool = True):
 
         ls = self._obj.track.values
@@ -248,7 +66,7 @@ class Accessor:
             return ls
         else:
             return [x.to_regular() for x in ls]
-        
+
     @property
     def rotated_track(self):
         return self._obj.get.track(rotated=True)
@@ -256,6 +74,7 @@ class Accessor:
     @property
     def regular_track(self):
         return self._obj.get.track(rotated=False)
+
     @property
     def mass_center_idx(self):
         return self._obj.mass_center_idx.values
@@ -278,11 +97,7 @@ class Accessor:
         return self._obj.track.sel(times=self._obj.times[0])
 
 
-def create_obj_from_dict(
-    dict_,
-    key,
-    load_coordinates=False,
-):
+def create_obj_from_dict(dict_, key, load_coordinates=False, exp=None):
     """Create Tracking object xr.Dataset from Dictionary
 
     Args:
@@ -293,11 +108,13 @@ def create_obj_from_dict(
     Returns:
         xr.Dataset: Dataset that contains characteristics of tracking object
     """
+    cluster_allocations = pd.read_csv(exp.BMU_path + exp.BMU_file)
 
     if load_coordinates:
         ds = xr.Dataset(
             data_vars=dict(
                 id_=key,
+                # exp=exp,
                 # nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
                 # * units('km^2')),
                 size=(["times"], dict_[key]["size"] * 1e-6),
@@ -311,25 +128,31 @@ def create_obj_from_dict(
                 mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
                 # track_rlat=(['times'], dict_[key]['track'][:, 0]),
                 # track_rlon=(['times'], dict_[key]['track'][:, 1]),
-                 track=(
+                track=(
                     ["times"],
                     [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
-                 ),
+                ),
                 speed=(
                     ["times"],
                     np.insert(dict_[key]["speed"], 0, np.nan),
                 ),  # * units('m/s')),
                 gridpoints=(["times"], get_Gridpoint_field(key, dict_)),
-                cluster = (["times"], get_cluster(),
+                # clusters=(
+                #    ["times"],
+                #    load_cluster_for_container(
+                #        cluster_allocations, dict_[key]["times"]
+                #    ),
+                # ),
             ),
             coords=dict(times=dict_[key]["times"]),
         )
 
     else:
-        #### TODO get rid of boilerplate code######
+        # TODO get rid of boilerplate cod
         ds = xr.Dataset(
             data_vars=dict(
                 id_=key,
+                exp=exp,
                 # nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
                 # * units('km^2')),
                 size=(["times"], dict_[key]["size"] * 1e-6),
@@ -341,12 +164,16 @@ def create_obj_from_dict(
                 min_IVT=(["times"], dict_[key]["min"]),  # * units('kg/m/s')),
                 mass_center_idy=(["times"], dict_[key]["mass_center_loc"][:, 0]),
                 mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
-                # track_rlat=(['times'], dict_[key]['track'][:, 0]),
-                # track_rlon=(['times'], dict_[key]['track'][:, 1]),
-                 track=(
+                clusters=(
+                    ["times"],
+                    load_cluster_for_container(
+                        cluster_allocations, dict_[key]["times"]
+                    ),
+                ),
+                track=(
                     ["times"],
                     [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
-                 ),
+                ),
                 speed=(
                     ["times"],
                     np.insert(dict_[key]["speed"], 0, np.nan),
@@ -357,32 +184,47 @@ def create_obj_from_dict(
 
     return ds
 
-def load_tracking_objects(input_path, input_file_name_temp, type_, first_year, last_year,load_coordinates=False):
-    
-    start_date_list, end_date_list = create_datetime_lists(first_year,last_year, months=6, correct_last_endtime=False) 
-    first_processed_date = start_date_list[0]
-    last_processed_date = end_date_list[-1]
-    
-    IVTobj_ls=ObjectContainer([])
+
+def load_cluster_for_container(
+    df: pd.Dataframe, times: np.ndarray[datetime]
+) -> list[str]:
+
+    date_list = pd.to_datetime(times).normalize()
+
+    df["time"] = pd.to_datetime(df["time"])
+    df["date"] = df["time"].dt.normalize()
+
+    return [df[df["date"] == x].cluster_name.values.item() for x in date_list]
+
+
+def load_tracking_objects(
+    input_path,
+    input_file_name_temp,
+    type_,
+    first_year,
+    last_year,
+    load_coordinates=False,
+    exp=None,
+):
+
+    start_date_list, end_date_list = create_datetime_lists(
+        first_year, last_year, months=6, correct_last_endtime=False
+    )
+
+    IVTobj_ls = ObjectContainer([])
 
     for start_date, end_date in zip(start_date_list, end_date_list):
         print(start_date)
-        pickle_file_path = f'{input_path}{type_}_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}_corrected'
-    
-        dict_ = load_pkl(pickle_file_path)
-    
+        pickle_file_path = f"{input_path}{type_}_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}_corrected"
 
+        dict_ = load_pkl(pickle_file_path)
         for object_id in dict_.keys():
             try:
-                ds = create_obj_from_dict(dict_,
-                                        object_id,
-                                        load_coordinates=load_coordinates
-                                  
-                                        )
-            except ValueError as ex:
+                ds = create_obj_from_dict(
+                    dict_, object_id, load_coordinates=load_coordinates, exp=exp
+                )
+            except ValueError:
                 continue
-        
+
             IVTobj_ls.append(ds)
-    
-    
     return IVTobj_ls

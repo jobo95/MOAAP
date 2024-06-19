@@ -1,82 +1,80 @@
 #!/usr/bin/env python
 
-''' 
+""" 
    Tracking_Functions.py
 
    This file contains the tracking fuctions for the object
    identification and tracking of precipitation areas, cyclones,
    clouds, and moisture streams
 
-'''
+"""
 
-import numpy as np
-from scipy import stats
-import matplotlib.pyplot as plt
-from netCDF4 import Dataset
+import datetime
 import glob
 import os
-from pdb import set_trace as stop
-# from scipy.ndimage.filters import gaussian_filter
-from scipy.ndimage import gaussian_filter
-from scipy.ndimage import median_filter
-from scipy.ndimage import label
-from matplotlib import cm
-from scipy import ndimage
-import random
-import scipy
 import pickle
-import datetime
-import pandas as pd
+import random
 import subprocess
-import matplotlib.path as mplPath
 import sys
+import time
 from calendar import monthrange
 from itertools import groupby
-from tqdm import tqdm
-import time
+from pdb import set_trace as stop
+
+import matplotlib.path as mplPath
+import matplotlib.pyplot as plt
+import netCDF4
+import numpy as np
+import pandas as pd
+import scipy
 
 #### speed up interpolation
 import scipy.interpolate as spint
 import scipy.spatial.qhull as qhull
-import numpy as np
 import xarray as xr
-import netCDF4
+from matplotlib import cm
+from netCDF4 import Dataset
+from scipy import ndimage, stats
 
+# from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter, label, median_filter
+from tqdm import tqdm
 
 ###########################################################
 ###########################################################
+
 
 ### UTILITY Functions
-def calc_grid_distance_area(lon,lat):
-    """ Function to calculate grid parameters
-        It uses haversine function to approximate distances
-        It approximates the first row and column to the sencond
-        because coordinates of grid cell center are assumed
-        lat, lon: input coordinates(degrees) 2D [y,x] dimensions
-        dx: distance (m)
-        dy: distance (m)
-        area: area of grid cell (m2)
-        grid_distance: average grid distance over the domain (m)
+def calc_grid_distance_area(lon, lat):
+    """Function to calculate grid parameters
+    It uses haversine function to approximate distances
+    It approximates the first row and column to the sencond
+    because coordinates of grid cell center are assumed
+    lat, lon: input coordinates(degrees) 2D [y,x] dimensions
+    dx: distance (m)
+    dy: distance (m)
+    area: area of grid cell (m2)
+    grid_distance: average grid distance over the domain (m)
     """
     dy = np.zeros(lon.shape)
     dx = np.zeros(lat.shape)
 
-    dx[:,1:]=haversine(lon[:,1:],lat[:,1:],lon[:,:-1],lat[:,:-1])
-    dy[1:,:]=haversine(lon[1:,:],lat[1:,:],lon[:-1,:],lat[:-1,:])
+    dx[:, 1:] = haversine(lon[:, 1:], lat[:, 1:], lon[:, :-1], lat[:, :-1])
+    dy[1:, :] = haversine(lon[1:, :], lat[1:, :], lon[:-1, :], lat[:-1, :])
 
-    dx[:,0] = dx[:,1]
-    dy[0,:] = dy[1,:]
-    
+    dx[:, 0] = dx[:, 1]
+    dy[0, :] = dy[1, :]
+
     dx = dx * 10**3
     dy = dy * 10**3
 
-    area = dx*dy
+    area = dx * dy
     grid_distance = np.mean(np.append(dy[:, :, None], dx[:, :, None], axis=2))
 
-    return dx,dy,area,grid_distance
+    return dx, dy, area, grid_distance
 
 
-def radialdistance(lat1,lon1,lat2,lon2):
+def radialdistance(lat1, lon1, lat2, lon2):
     # Approximate radius of earth in km
     R = 6373.0
 
@@ -88,11 +86,12 @@ def radialdistance(lat1,lon1,lat2,lon2):
     dlon = lon2 - lon1
     dlat = lat2 - lat1
 
-    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
+    a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
     c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
 
     distance = R * c
     return distance
+
 
 def haversine(lon1, lat1, lon2, lat2):
     """
@@ -104,10 +103,11 @@ def haversine(lon1, lat1, lon2, lat2):
     # haversine formula
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2
+    a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
     c = 2 * np.arcsin(np.sqrt(a))
     km = 6367 * c
     return km
+
 
 # def haversine(lat1, lon1, lat2, lon2):
 
@@ -133,69 +133,72 @@ def haversine(lon1, lat1, lon2, lat2):
 #     dist_m = c * 6371000 #const.earth_radius
 #     return dist_m
 
-def calculate_area_objects(objects_id_pr,object_indices,grid_cell_area):
 
-    """ Calculates the area of each object during their lifetime
-        one area value for each object and each timestep it exist
+def calculate_area_objects(objects_id_pr, object_indices, grid_cell_area):
+    """Calculates the area of each object during their lifetime
+    one area value for each object and each timestep it exist
     """
     num_objects = len(object_indices)
     area_objects = np.array(
         [
             [
-            np.sum(grid_cell_area[object_indices[obj][1:]][objects_id_pr[object_indices[obj]][tstep, :, :] == obj + 1])
-            for tstep in range(objects_id_pr[object_indices[obj]].shape[0])
+                np.sum(
+                    grid_cell_area[object_indices[obj][1:]][
+                        objects_id_pr[object_indices[obj]][tstep, :, :] == obj + 1
+                    ]
+                )
+                for tstep in range(objects_id_pr[object_indices[obj]].shape[0])
             ]
-        for obj in range(num_objects)
+            for obj in range(num_objects)
         ],
-    dtype=object
+        dtype=object,
     )
 
     return area_objects
 
-def remove_small_short_objects(objects_id,
-                               area_objects,
-                               min_area,
-                               min_time,
-                               DT,
-                               objects = None):
+
+def remove_small_short_objects(
+    objects_id, area_objects, min_area, min_time, DT, objects=None
+):
     """Checks if the object is large enough during enough time steps
-        and removes objects that do not meet this condition
-        area_object: array of lists with areas of each objects during their lifetime [objects[tsteps]]
-        min_area: minimum area of the object (km2)
-        min_time: minimum time with the object large enough (hours)
-        DT: time step of input data [hours]
-        objects: object slices - speeds up processing if provided
+    and removes objects that do not meet this condition
+    area_object: array of lists with areas of each objects during their lifetime [objects[tsteps]]
+    min_area: minimum area of the object (km2)
+    min_time: minimum time with the object large enough (hours)
+    DT: time step of input data [hours]
+    objects: object slices - speeds up processing if provided
     """
 
-    #create final object array
-    sel_objects = np.zeros(objects_id.shape,dtype=int)
+    # create final object array
+    sel_objects = np.zeros(objects_id.shape, dtype=int)
 
     new_obj_id = 1
-    for obj,_ in enumerate(area_objects):
+    for obj, _ in enumerate(area_objects):
         AreaTest = np.nanmax(
             np.convolve(
                 np.array(area_objects[obj]) >= min_area * 1000**2,
-                np.ones(int(min_time/ DT)),
+                np.ones(int(min_time / DT)),
                 mode="valid",
             )
         )
-        if (AreaTest == int(min_time/ DT)) & (
-            len(area_objects[obj]) >= int(min_time/ DT)
+        if (AreaTest == int(min_time / DT)) & (
+            len(area_objects[obj]) >= int(min_time / DT)
         ):
             if objects == None:
-                sel_objects[objects_id == (obj + 1)] =     new_obj_id
+                sel_objects[objects_id == (obj + 1)] = new_obj_id
                 new_obj_id += 1
             else:
-                sel_objects[objects[obj]][objects_id[objects[obj]] == (obj + 1)] = new_obj_id
+                sel_objects[objects[obj]][
+                    objects_id[objects[obj]] == (obj + 1)
+                ] = new_obj_id
                 new_obj_id += 1
 
     return sel_objects
 
 
-
-
 ###########################################################
 ###########################################################
+
 
 ###########################################################
 ###########################################################
@@ -206,78 +209,96 @@ def calc_object_characteristics(
     times,  # timesteps of the data
     Lat,  # 2D latidudes
     Lon,  # 2D Longitudes
-    grid_spacing,       # average grid spacing
+    grid_spacing,  # average grid spacing
     grid_cell_area,
-    min_tsteps=1,   # minimum lifetime in data timesteps
-    dict_keys_offset = 0,
-    split_merge = None  # dict containing information of splitting and merging of objects
-    ):
+    min_tsteps=1,  # minimum lifetime in data timesteps
+    dict_keys_offset=0,
+    split_merge=None,  # dict containing information of splitting and merging of objects
+):
     # ========
     num_objects = int(var_objects.max())
-#     num_objects = len(np.unique(var_objects))-1
+    #     num_objects = len(np.unique(var_objects))-1
     object_indices = ndimage.find_objects(var_objects)
 
-    #print (split_merge)
+    # print (split_merge)
     if num_objects >= 1:
         objects_charac = {}
         print("            Loop over " + str(num_objects) + " objects")
-        
+
         for iobj in range(num_objects):
             if object_indices[iobj] == None:
                 continue
             object_slice = np.copy(var_objects[object_indices[iobj]])
-            data_slice   = np.copy(var_data[object_indices[iobj]])
+            data_slice = np.copy(var_data[object_indices[iobj]])
 
             time_idx_slice = object_indices[iobj][0]
-            lat_idx_slice  = object_indices[iobj][1]
-            lon_idx_slice  = object_indices[iobj][2]
+            lat_idx_slice = object_indices[iobj][1]
+            lon_idx_slice = object_indices[iobj][2]
 
             if len(object_slice) >= min_tsteps:
 
-                data_slice[object_slice!=(iobj + 1)] = np.nan
-                grid_cell_area_slice = np.tile(grid_cell_area[lat_idx_slice, lon_idx_slice], (len(data_slice), 1, 1))
+                data_slice[object_slice != (iobj + 1)] = np.nan
+                grid_cell_area_slice = np.tile(
+                    grid_cell_area[lat_idx_slice, lon_idx_slice],
+                    (len(data_slice), 1, 1),
+                )
                 grid_cell_area_slice[object_slice != (iobj + 1)] = np.nan
                 lat_slice = Lat[lat_idx_slice, lon_idx_slice]
                 lon_slice = Lon[lat_idx_slice, lon_idx_slice]
 
-
                 # calculate statistics
                 obj_times = times[time_idx_slice]
-                obj_size  = np.nansum(grid_cell_area_slice, axis=(1, 2))
+                obj_size = np.nansum(grid_cell_area_slice, axis=(1, 2))
                 obj_min = np.nanmin(data_slice, axis=(1, 2))
                 obj_max = np.nanmax(data_slice, axis=(1, 2))
                 obj_mean = np.nanmean(data_slice, axis=(1, 2))
                 obj_tot = np.nansum(data_slice, axis=(1, 2))
 
-
                 # Track lat/lon
                 # obj_mass_center = \
                 # np.array([ndimage.measurements.center_of_mass(object_slice[tt,:,:]==(iobj+1)) for tt in range(object_slice.shape[0])])
                 # ### JLa
-                obj_mass_center = \
-                np.array([ndimage.center_of_mass(object_slice[tt,:,:]==(iobj+1)) for tt in range(object_slice.shape[0])])
+                obj_mass_center = np.array(
+                    [
+                        ndimage.center_of_mass(object_slice[tt, :, :] == (iobj + 1))
+                        for tt in range(object_slice.shape[0])
+                    ]
+                )
 
                 obj_track = np.full([len(obj_mass_center), 2], np.nan)
-                iREAL = ~np.isnan(obj_mass_center[:,0])
+                iREAL = ~np.isnan(obj_mass_center[:, 0])
                 try:
-                    obj_track[iREAL,0]=np.array([lat_slice[int(round(obj_loc[0])),int(round(obj_loc[1]))]    for tstep, obj_loc in enumerate(obj_mass_center[iREAL,:]) if np.isnan(obj_loc[0]) != True])
-                    obj_track[iREAL,1]=np.array([lon_slice[int(round(obj_loc[0])),int(round(obj_loc[1]))]    for tstep, obj_loc in enumerate(obj_mass_center[iREAL,:]) if np.isnan(obj_loc[0]) != True])
+                    obj_track[iREAL, 0] = np.array(
+                        [
+                            lat_slice[int(round(obj_loc[0])), int(round(obj_loc[1]))]
+                            for tstep, obj_loc in enumerate(obj_mass_center[iREAL, :])
+                            if np.isnan(obj_loc[0]) != True
+                        ]
+                    )
+                    obj_track[iREAL, 1] = np.array(
+                        [
+                            lon_slice[int(round(obj_loc[0])), int(round(obj_loc[1]))]
+                            for tstep, obj_loc in enumerate(obj_mass_center[iREAL, :])
+                            if np.isnan(obj_loc[0]) != True
+                        ]
+                    )
                 except:
                     stop()
-                    
-                    
-#                 obj_track = np.full([len(obj_mass_center), 2], np.nan)
-#                 try:
-#                     obj_track[:,0]=np.array([lat_slice[int(round(obj_loc[0])),int(round(obj_loc[1]))]    for tstep, obj_loc in enumerate(obj_mass_center[:,:]) if np.isnan(obj_loc[0]) != True])
-#                     obj_track[:,1]=np.array([lon_slice[int(round(obj_loc[0])),int(round(obj_loc[1]))]    for tstep, obj_loc in enumerate(obj_mass_center[:,:]) if np.isnan(obj_loc[0]) != True])
-#                 except:
-#                     stop()
-                    
-#                 if np.any(np.isnan(obj_track)):
-#                     raise ValueError("track array contains NaNs")
 
-                obj_speed = (np.sum(np.diff(obj_mass_center,axis=0)**2,axis=1)**0.5) * (grid_spacing / 1000.0)
-                
+                #                 obj_track = np.full([len(obj_mass_center), 2], np.nan)
+                #                 try:
+                #                     obj_track[:,0]=np.array([lat_slice[int(round(obj_loc[0])),int(round(obj_loc[1]))]    for tstep, obj_loc in enumerate(obj_mass_center[:,:]) if np.isnan(obj_loc[0]) != True])
+                #                     obj_track[:,1]=np.array([lon_slice[int(round(obj_loc[0])),int(round(obj_loc[1]))]    for tstep, obj_loc in enumerate(obj_mass_center[:,:]) if np.isnan(obj_loc[0]) != True])
+                #                 except:
+                #                     stop()
+
+                #                 if np.any(np.isnan(obj_track)):
+                #                     raise ValueError("track array contains NaNs")
+
+                obj_speed = (
+                    np.sum(np.diff(obj_mass_center, axis=0) ** 2, axis=1) ** 0.5
+                ) * (grid_spacing / 1000.0)
+
                 this_object_charac = {
                     "mass_center_loc": obj_mass_center,
                     "speed": obj_speed,
@@ -289,143 +310,169 @@ def calc_object_characteristics(
                     #                        'rgrAccumulation':rgrAccumulation,
                     "times": obj_times,
                     "track": obj_track,
-                    "lon_idx_slice" : lon_idx_slice ,
-                    "lat_idx_slice" : lat_idx_slice ,
-                    "time_idx_slice" : time_idx_slice ,
-                    #"lat_slice": lat_slice,
-                    #"lon_slice": lon_slice,
-                    #"object_slice": object_slice,
+                    "lon_idx_slice": lon_idx_slice,
+                    "lat_idx_slice": lat_idx_slice,
+                    "time_idx_slice": time_idx_slice,
+                    # "lat_slice": lat_slice,
+                    # "lon_slice": lon_slice,
+                    # "object_slice": object_slice,
                     "data_slice": data_slice,
-                    "split_info" : split_merge #JRie added
+                    "split_info": split_merge,  # JRie added
                 }
 
                 try:
-                    objects_charac[str(iobj + 1 + dict_keys_offset)] = this_object_charac #add offset to dict keys in order to differentiate between objects of different years
+                    objects_charac[str(iobj + 1 + dict_keys_offset)] = (
+                        this_object_charac  # add offset to dict keys in order to differentiate between objects of different years
+                    )
 
                 except:
-                    raise ValueError ("Error asigning properties to final dictionary")
-
+                    raise ValueError("Error asigning properties to final dictionary")
 
         if filename_out is not None:
-            with open(filename_out+'.pkl', 'wb') as handle:
+            with open(filename_out + ".pkl", "wb") as handle:
                 pickle.dump(objects_charac, handle)
 
         return objects_charac
 
-    
-
-
-    
-    
 
 # This function is a predecessor of calc_object_characteristics
-def ObjectCharacteristics(PR_objectsFull, # feature object file
-                         PR_orig,         # original file used for feature detection
-                         SaveFile,        # output file name and locaiton
-                         TIME,            # timesteps of the data
-                         Lat,             # 2D latidudes
-                         Lon,             # 2D Longitudes
-                         Gridspacing,     # average grid spacing
-                         Area,
-                         MinTime=1,       # minimum lifetime of an object
-                         Boundary = 1
-                         ):   # 1 --> remove object when it hits the boundary of the domain
-                                              #
-
+def ObjectCharacteristics(
+    PR_objectsFull,  # feature object file
+    PR_orig,  # original file used for feature detection
+    SaveFile,  # output file name and locaiton
+    TIME,  # timesteps of the data
+    Lat,  # 2D latidudes
+    Lon,  # 2D Longitudes
+    Gridspacing,  # average grid spacing
+    Area,
+    MinTime=1,  # minimum lifetime of an object
+    Boundary=1,
+):  # 1 --> remove object when it hits the boundary of the domain
+    #
 
     # ========
 
-    import scipy
     import pickle
 
-    nr_objectsUD=PR_objectsFull.max()
+    import scipy
+
+    nr_objectsUD = PR_objectsFull.max()
     rgiObjectsUDFull = PR_objectsFull
     if nr_objectsUD >= 1:
-        grObject={}
-        print('            Loop over '+str(PR_objectsFull.max())+' objects')
+        grObject = {}
+        print("            Loop over " + str(PR_objectsFull.max()) + " objects")
         for ob in range(int(PR_objectsFull.max())):
-    #             print('        process object '+str(ob+1)+' out of '+str(PR_objectsFull.max()))
-            TT=(np.sum((PR_objectsFull == (ob+1)), axis=(1,2)) > 0)
+            #             print('        process object '+str(ob+1)+' out of '+str(PR_objectsFull.max()))
+            TT = np.sum((PR_objectsFull == (ob + 1)), axis=(1, 2)) > 0
             if sum(TT) >= MinTime:
-                PR_object=np.copy(PR_objectsFull[TT,:,:])
-                PR_object[PR_object != (ob+1)]=0
-                Objects=ndimage.find_objects(PR_object)
+                PR_object = np.copy(PR_objectsFull[TT, :, :])
+                PR_object[PR_object != (ob + 1)] = 0
+                Objects = ndimage.find_objects(PR_object)
                 if len(Objects) > 1:
                     Objects = [Objects[np.where(np.array(Objects) != None)[0][0]]]
 
                 ObjAct = PR_object[Objects[0]]
-                ValAct = PR_orig[TT,:,:][Objects[0]]
+                ValAct = PR_orig[TT, :, :][Objects[0]]
                 ValAct[ObjAct == 0] = np.nan
-                AreaAct = np.repeat(Area[Objects[0][1:]][None,:,:], ValAct.shape[0], axis=0)
+                AreaAct = np.repeat(
+                    Area[Objects[0][1:]][None, :, :], ValAct.shape[0], axis=0
+                )
                 AreaAct[ObjAct == 0] = np.nan
                 LatAct = np.copy(Lat[Objects[0][1:]])
                 LonAct = np.copy(Lon[Objects[0][1:]])
 
                 # calculate statistics
-                TimeAct=TIME[TT]
-                rgrSize = np.nansum(AreaAct, axis=(1,2))
-                rgrPR_Min = np.nanmin(ValAct, axis=(1,2))
-                rgrPR_Max = np.nanmax(ValAct, axis=(1,2))
-                rgrPR_Mean = np.nanmean(ValAct, axis=(1,2))
-                rgrPR_Vol = np.nansum(ValAct, axis=(1,2))
+                TimeAct = TIME[TT]
+                rgrSize = np.nansum(AreaAct, axis=(1, 2))
+                rgrPR_Min = np.nanmin(ValAct, axis=(1, 2))
+                rgrPR_Max = np.nanmax(ValAct, axis=(1, 2))
+                rgrPR_Mean = np.nanmean(ValAct, axis=(1, 2))
+                rgrPR_Vol = np.nansum(ValAct, axis=(1, 2))
 
                 # Track lat/lon
-                rgrMassCent=np.array([scipy.ndimage.measurements.center_of_mass(ObjAct[tt,:,:]) for tt in range(ObjAct.shape[0])])
-                TrackAll = np.zeros((len(rgrMassCent),2)); TrackAll[:] = np.nan
+                rgrMassCent = np.array(
+                    [
+                        scipy.ndimage.measurements.center_of_mass(ObjAct[tt, :, :])
+                        for tt in range(ObjAct.shape[0])
+                    ]
+                )
+                TrackAll = np.zeros((len(rgrMassCent), 2))
+                TrackAll[:] = np.nan
                 try:
-                    FIN = ~np.isnan(rgrMassCent[:,0])
+                    FIN = ~np.isnan(rgrMassCent[:, 0])
                     for ii in range(len(rgrMassCent)):
-                        if ~np.isnan(rgrMassCent[ii,0]) == True:
-                            TrackAll[ii,1] = LatAct[int(np.round(rgrMassCent[ii][0],0)), int(np.round(rgrMassCent[ii][1],0))]
-                            TrackAll[ii,0] = LonAct[int(np.round(rgrMassCent[ii][0],0)), int(np.round(rgrMassCent[ii][1],0))]
+                        if ~np.isnan(rgrMassCent[ii, 0]) == True:
+                            TrackAll[ii, 1] = LatAct[
+                                int(np.round(rgrMassCent[ii][0], 0)),
+                                int(np.round(rgrMassCent[ii][1], 0)),
+                            ]
+                            TrackAll[ii, 0] = LonAct[
+                                int(np.round(rgrMassCent[ii][0], 0)),
+                                int(np.round(rgrMassCent[ii][1], 0)),
+                            ]
                 except:
                     stop()
 
-                rgrObjSpeed=np.array([((rgrMassCent[tt,0]-rgrMassCent[tt+1,0])**2 + (rgrMassCent[tt,1]-rgrMassCent[tt+1,1])**2)**0.5 for tt in range(ValAct.shape[0]-1)])*(Gridspacing/1000.)
+                rgrObjSpeed = np.array(
+                    [
+                        (
+                            (rgrMassCent[tt, 0] - rgrMassCent[tt + 1, 0]) ** 2
+                            + (rgrMassCent[tt, 1] - rgrMassCent[tt + 1, 1]) ** 2
+                        )
+                        ** 0.5
+                        for tt in range(ValAct.shape[0] - 1)
+                    ]
+                ) * (Gridspacing / 1000.0)
 
-                grAct={'rgrMassCent':rgrMassCent, 
-                       'rgrObjSpeed':rgrObjSpeed,
-                       'rgrPR_Vol':rgrPR_Vol,
-                       'rgrPR_Min':rgrPR_Min,
-                       'rgrPR_Max':rgrPR_Max,
-                       'rgrPR_Mean':rgrPR_Mean,
-                       'rgrSize':rgrSize,
-    #                        'rgrAccumulation':rgrAccumulation,
-                       'TimeAct':TimeAct,
-                       'rgrMassCentLatLon':TrackAll}
+                grAct = {
+                    "rgrMassCent": rgrMassCent,
+                    "rgrObjSpeed": rgrObjSpeed,
+                    "rgrPR_Vol": rgrPR_Vol,
+                    "rgrPR_Min": rgrPR_Min,
+                    "rgrPR_Max": rgrPR_Max,
+                    "rgrPR_Mean": rgrPR_Mean,
+                    "rgrSize": rgrSize,
+                    #                        'rgrAccumulation':rgrAccumulation,
+                    "TimeAct": TimeAct,
+                    "rgrMassCentLatLon": TrackAll,
+                }
                 try:
-                    grObject[str(ob+1)]=grAct
+                    grObject[str(ob + 1)] = grAct
                 except:
                     stop()
                     continue
         if SaveFile != None:
-            pickle.dump(grObject, open(SaveFile, "wb" ) )
+            pickle.dump(grObject, open(SaveFile, "wb"))
         return grObject
-    
-    
+
+
 # ==============================================================
 # ==============================================================
+
+import numpy as np
 
 #### speed up interpolation
 import scipy.interpolate as spint
 import scipy.spatial.qhull as qhull
-import numpy as np
 import xarray as xr
 
-def interp_weights(xy, uv,d=2):
+
+def interp_weights(xy, uv, d=2):
     tri = qhull.Delaunay(xy)
     simplex = tri.find_simplex(uv)
     vertices = np.take(tri.simplices, simplex, axis=0)
     temp = np.take(tri.transform, simplex, axis=0)
     delta = uv - temp[:, d]
-    bary = np.einsum('njk,nk->nj', temp[:, :d, :], delta)
+    bary = np.einsum("njk,nk->nj", temp[:, :d, :], delta)
     return vertices, np.hstack((bary, 1 - bary.sum(axis=1, keepdims=True)))
 
+
 # ==============================================================
 # ==============================================================
 
+
 def interpolate(values, vtx, wts):
-    return np.einsum('nj,nj->n', np.take(values, vtx), wts)
+    return np.einsum("nj,nj->n", np.take(values, vtx), wts)
 
 
 # ==============================================================
@@ -433,6 +480,7 @@ def interpolate(values, vtx, wts):
 import numpy as np
 import scipy.ndimage.filters as filters
 import scipy.ndimage.morphology as morphology
+
 
 def detect_local_minima(arr):
     # https://stackoverflow.com/questions/3684484/peak-detection-in-a-2d-array/3689710#3689710
@@ -443,83 +491,113 @@ def detect_local_minima(arr):
     """
     # define an connected neighborhood
     # http://www.scipy.org/doc/api_docs/SciPy.ndimage.morphology.html#generate_binary_structure
-    neighborhood = morphology.generate_binary_structure(len(arr.shape),2)
-    # apply the local minimum filter; all locations of minimum value 
+    neighborhood = morphology.generate_binary_structure(len(arr.shape), 2)
+    # apply the local minimum filter; all locations of minimum value
     # in their neighborhood are set to 1
     # http://www.scipy.org/doc/api_docs/SciPy.ndimage.filters.html#minimum_filter
-    local_min = (filters.minimum_filter(arr, footprint=neighborhood)==arr)
-    # local_min is a mask that contains the peaks we are 
+    local_min = filters.minimum_filter(arr, footprint=neighborhood) == arr
+    # local_min is a mask that contains the peaks we are
     # looking for, but also the background.
     # In order to isolate the peaks we must remove the background from the mask.
-    # 
+    #
     # we create the mask of the background
-    background = (arr==0)
-    # 
-    # a little technicality: we must erode the background in order to 
-    # successfully subtract it from local_min, otherwise a line will 
+    background = arr == 0
+    #
+    # a little technicality: we must erode the background in order to
+    # successfully subtract it from local_min, otherwise a line will
     # appear along the background border (artifact of the local minimum filter)
     # http://www.scipy.org/doc/api_docs/SciPy.ndimage.morphology.html#binary_erosion
     eroded_background = morphology.binary_erosion(
-        background, structure=neighborhood, border_value=1)
-    # 
-    # we obtain the final mask, containing only peaks, 
+        background, structure=neighborhood, border_value=1
+    )
+    #
+    # we obtain the final mask, containing only peaks,
     # by removing the background from the local_min mask
     detected_minima = local_min ^ eroded_background
-    return np.where(detected_minima)   
+    return np.where(detected_minima)
 
 
 # ==============================================================
 # ==============================================================
-def Feature_Calculation(DATA_all,    # np array that contains [time,lat,lon,Variables] with vars
-                        Variables,   # Variables beeing ['V', 'U', 'T', 'Q', 'SLP']
-                        dLon,        # distance between longitude cells
-                        dLat,        # distance between latitude cells
-                        Lat,         # Latitude coordinates
-                        dT,          # time step in hours
-                        Gridspacing):# grid spacing in m
+def Feature_Calculation(
+    DATA_all,  # np array that contains [time,lat,lon,Variables] with vars
+    Variables,  # Variables beeing ['V', 'U', 'T', 'Q', 'SLP']
+    dLon,  # distance between longitude cells
+    dLat,  # distance between latitude cells
+    Lat,  # Latitude coordinates
+    dT,  # time step in hours
+    Gridspacing,
+):  # grid spacing in m
     from scipy import ndimage
-    
-    
+
     # 11111111111111111111111111111111111111111111111111
     # calculate vapor transport on pressure level
-    VapTrans = ((DATA_all[:,:,:,Variables.index('U')]*DATA_all[:,:,:,Variables.index('Q')])**2 + (DATA_all[:,:,:,Variables.index('V')]*DATA_all[:,:,:,Variables.index('Q')])**2)**(1/2)
+    VapTrans = (
+        (
+            DATA_all[:, :, :, Variables.index("U")]
+            * DATA_all[:, :, :, Variables.index("Q")]
+        )
+        ** 2
+        + (
+            DATA_all[:, :, :, Variables.index("V")]
+            * DATA_all[:, :, :, Variables.index("Q")]
+        )
+        ** 2
+    ) ** (1 / 2)
 
     # 22222222222222222222222222222222222222222222222222
     # Frontal Detection according to https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2017GL073662
-    UU = DATA_all[:,:,:,Variables.index('U')]
-    VV = DATA_all[:,:,:,Variables.index('V')]
+    UU = DATA_all[:, :, :, Variables.index("U")]
+    VV = DATA_all[:, :, :, Variables.index("V")]
     dx = dLon
     dy = dLat
-    du = np.gradient( UU )
-    dv = np.gradient( VV )
-    PV = np.abs( dv[-1]/dx[None,:] - du[-2]/dy[None,:] )
-    TK = DATA_all[:,:,:,Variables.index('T')]
-    vgrad = np.gradient(TK, axis=(1,2))
-    Tgrad = np.sqrt(vgrad[0]**2 + vgrad[1]**2)
+    du = np.gradient(UU)
+    dv = np.gradient(VV)
+    PV = np.abs(dv[-1] / dx[None, :] - du[-2] / dy[None, :])
+    TK = DATA_all[:, :, :, Variables.index("T")]
+    vgrad = np.gradient(TK, axis=(1, 2))
+    Tgrad = np.sqrt(vgrad[0] ** 2 + vgrad[1] ** 2)
 
     Fstar = PV * Tgrad
 
-    Tgrad_zero = 0.45#*100/(np.mean([dLon,dLat], axis=0)/1000.)  # 0.45 K/(100 km)
+    Tgrad_zero = 0.45  # *100/(np.mean([dLon,dLat], axis=0)/1000.)  # 0.45 K/(100 km)
     import metpy.calc as calc
     from metpy.units import units
+
     CoriolisPar = calc.coriolis_parameter(np.deg2rad(Lat))
-    Frontal_Diagnostic = np.array(Fstar/(CoriolisPar * Tgrad_zero))
+    Frontal_Diagnostic = np.array(Fstar / (CoriolisPar * Tgrad_zero))
 
     # # 3333333333333333333333333333333333333333333333333333
     # # Cyclone identification based on pressure annomaly threshold
 
-    SLP = DATA_all[:,:,:,Variables.index('SLP')]/100.
+    SLP = DATA_all[:, :, :, Variables.index("SLP")] / 100.0
     # remove high-frequency variabilities --> smooth over 100 x 100 km (no temporal smoothing)
-    SLP_smooth = ndimage.uniform_filter(SLP, size=[1,int(100/(Gridspacing/1000.)),int(100/(Gridspacing/1000.))])
+    SLP_smooth = ndimage.uniform_filter(
+        SLP,
+        size=[1, int(100 / (Gridspacing / 1000.0)), int(100 / (Gridspacing / 1000.0))],
+    )
     # smoothign over 3000 x 3000 km and 78 hours
-    SLPsmoothAn = ndimage.uniform_filter(SLP, size=[int(78/dT),int(int(3000/(Gridspacing/1000.))),int(int(3000/(Gridspacing/1000.)))])
-    SLP_Anomaly = np.array(SLP_smooth-SLPsmoothAn)
+    SLPsmoothAn = ndimage.uniform_filter(
+        SLP,
+        size=[
+            int(78 / dT),
+            int(int(3000 / (Gridspacing / 1000.0))),
+            int(int(3000 / (Gridspacing / 1000.0))),
+        ],
+    )
+    SLP_Anomaly = np.array(SLP_smooth - SLPsmoothAn)
     # plt.contour(SLP_Anomaly[tt,:,:], levels=[-9990,-10,1100], colors='b')
-    Pressure_anomaly = SLP_Anomaly < -12 # 12 hPa depression
+    Pressure_anomaly = SLP_Anomaly < -12  # 12 hPa depression
     HighPressure_annomaly = SLP_Anomaly > 12
 
-    return Pressure_anomaly, Frontal_Diagnostic, VapTrans, SLP_Anomaly, vgrad, HighPressure_annomaly
-
+    return (
+        Pressure_anomaly,
+        Frontal_Diagnostic,
+        VapTrans,
+        SLP_Anomaly,
+        vgrad,
+        HighPressure_annomaly,
+    )
 
 
 # ==============================================================
@@ -527,251 +605,335 @@ def Feature_Calculation(DATA_all,    # np array that contains [time,lat,lon,Vari
 # from math import radians, cos, sin, asin, sqrt
 # def haversine(lon1, lat1, lon2, lat2):
 #     """
-#     Calculate the great circle distance between two points 
+#     Calculate the great circle distance between two points
 #     on the earth (specified in decimal degrees)
 #     """
-#     # convert decimal degrees to radians 
+#     # convert decimal degrees to radians
 #     lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-#     # haversine formula 
-#     dlon = lon2 - lon1 
-#     dlat = lat2 - lat1 
+#     # haversine formula
+#     dlon = lon2 - lon1
+#     dlat = lat2 - lat1
 #     a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-#     c = 2 * asin(sqrt(a)) 
+#     c = 2 * asin(sqrt(a))
 #     # Radius of earth in kilometers is 6371
 #     km = 6371* c
 #     return km
 
 
-
-def ReadERA5(TIME,      # Time period to read (this program will read hourly data)
-            var,        # Variable name. See list below for defined variables
-            PL,         # Pressure level of variable
-            REGION):    # Region to read. Format must be <[N,E,S,W]> in degrees from -180 to +180 longitude
+def ReadERA5(
+    TIME,  # Time period to read (this program will read hourly data)
+    var,  # Variable name. See list below for defined variables
+    PL,  # Pressure level of variable
+    REGION,
+):  # Region to read. Format must be <[N,E,S,W]> in degrees from -180 to +180 longitude
     # ----------
     # This function reads hourly ERA5 data for one variable from NCAR's RDA archive in a region of interest.
     # ----------
 
-    DayStart = datetime.datetime(TIME[0].year, TIME[0].month, TIME[0].day,TIME[0].hour)
-    DayStop = datetime.datetime(TIME[-1].year, TIME[-1].month, TIME[-1].day,TIME[-1].hour)
-    TimeDD=pd.date_range(DayStart, end=DayStop, freq='d')
-    Plevels = np.array([1, 2, 3, 5, 7, 10, 20, 30, 50, 70, 100, 125, 150, 175, 200, 225, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 775, 800, 825, 850, 875, 900, 925, 950, 975, 1000])
+    DayStart = datetime.datetime(TIME[0].year, TIME[0].month, TIME[0].day, TIME[0].hour)
+    DayStop = datetime.datetime(
+        TIME[-1].year, TIME[-1].month, TIME[-1].day, TIME[-1].hour
+    )
+    TimeDD = pd.date_range(DayStart, end=DayStop, freq="d")
+    Plevels = np.array(
+        [
+            1,
+            2,
+            3,
+            5,
+            7,
+            10,
+            20,
+            30,
+            50,
+            70,
+            100,
+            125,
+            150,
+            175,
+            200,
+            225,
+            250,
+            300,
+            350,
+            400,
+            450,
+            500,
+            550,
+            600,
+            650,
+            700,
+            750,
+            775,
+            800,
+            825,
+            850,
+            875,
+            900,
+            925,
+            950,
+            975,
+            1000,
+        ]
+    )
 
-    dT = int(divmod((TimeDD[1] - TimeDD[0]).total_seconds(), 60)[0]/60)
-    
+    dT = int(divmod((TimeDD[1] - TimeDD[0]).total_seconds(), 60)[0] / 60)
+
     # check if variable is defined
-    if var == 'V':
-        ERAvarfile = 'v.ll025uv'
-        Dir = '/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/'
-        NCvarname = 'V'
+    if var == "V":
+        ERAvarfile = "v.ll025uv"
+        Dir = "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/"
+        NCvarname = "V"
         PL = np.argmin(np.abs(Plevels - PL))
-    if var == 'U':
-        ERAvarfile = 'u.ll025uv'
-        Dir = '/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/'
-        NCvarname = 'U'
+    if var == "U":
+        ERAvarfile = "u.ll025uv"
+        Dir = "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/"
+        NCvarname = "U"
         PL = np.argmin(np.abs(Plevels - PL))
-    if var == 'T':
-        ERAvarfile = 't.ll025sc'
-        Dir = '/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/'
-        NCvarname = 'T'
+    if var == "T":
+        ERAvarfile = "t.ll025sc"
+        Dir = "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/"
+        NCvarname = "T"
         PL = np.argmin(np.abs(Plevels - PL))
-    if var == 'ZG':
-        ERAvarfile = 'z.ll025sc'
-        Dir = '/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/'
-        NCvarname = 'Z'
+    if var == "ZG":
+        ERAvarfile = "z.ll025sc"
+        Dir = "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/"
+        NCvarname = "Z"
         PL = np.argmin(np.abs(Plevels - PL))
-    if var == 'Q':
-        ERAvarfile = 'q.ll025sc'
-        Dir = '/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/'
-        NCvarname = 'Q'
+    if var == "Q":
+        ERAvarfile = "q.ll025sc"
+        Dir = "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.pl/"
+        NCvarname = "Q"
         PL = np.argmin(np.abs(Plevels - PL))
-    if var == 'SLP':
-        ERAvarfile = 'msl.ll025sc'
-        Dir = '/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.sfc/'
-        NCvarname = 'MSL'
+    if var == "SLP":
+        ERAvarfile = "msl.ll025sc"
+        Dir = "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.sfc/"
+        NCvarname = "MSL"
         PL = -1
-    if var == 'IVTE':
-        ERAvarfile = 'viwve.ll025sc'
-        Dir = '/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.vinteg/'
-        NCvarname = 'VIWVE'
+    if var == "IVTE":
+        ERAvarfile = "viwve.ll025sc"
+        Dir = "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.vinteg/"
+        NCvarname = "VIWVE"
         PL = -1
-    if var == 'IVTN':
-        ERAvarfile = 'viwvn.ll025sc'
-        Dir = '/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.vinteg/'
-        NCvarname = 'VIWVN'
+    if var == "IVTN":
+        ERAvarfile = "viwvn.ll025sc"
+        Dir = "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.an.vinteg/"
+        NCvarname = "VIWVN"
         PL = -1
 
     print(ERAvarfile)
     # read in the coordinates
-    ncid=Dataset("/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.invariant/197901/e5.oper.invariant.128_129_z.ll025sc.1979010100_1979010100.nc", mode='r')
-    Lat=np.squeeze(ncid.variables['latitude'][:])
-    Lon=np.squeeze(ncid.variables['longitude'][:])
+    ncid = Dataset(
+        "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.invariant/197901/e5.oper.invariant.128_129_z.ll025sc.1979010100_1979010100.nc",
+        mode="r",
+    )
+    Lat = np.squeeze(ncid.variables["latitude"][:])
+    Lon = np.squeeze(ncid.variables["longitude"][:])
     # Zfull=np.squeeze(ncid.variables['Z'][:])
     ncid.close()
     if np.max(Lon) > 180:
         Lon[Lon >= 180] = Lon[Lon >= 180] - 360
-    Lon,Lat = np.meshgrid(Lon,Lat)
+    Lon, Lat = np.meshgrid(Lon, Lat)
 
     # get the region of interest
     if (REGION[1] > 0) & (REGION[3] < 0):
         # region crosses zero meridian
-        iRoll = np.sum(Lon[0,:] < 0)
+        iRoll = np.sum(Lon[0, :] < 0)
     else:
-        iRoll=0
-    Lon = np.roll(Lon,iRoll, axis=1)
-    iNorth = np.argmin(np.abs(Lat[:,0] - REGION[0]))
-    iSouth = np.argmin(np.abs(Lat[:,0] - REGION[2]))+1
-    iEeast = np.argmin(np.abs(Lon[0,:] - REGION[1]))+1
-    iWest = np.argmin(np.abs(Lon[0,:] - REGION[3]))
-    print(iNorth,iSouth,iWest,iEeast)
+        iRoll = 0
+    Lon = np.roll(Lon, iRoll, axis=1)
+    iNorth = np.argmin(np.abs(Lat[:, 0] - REGION[0]))
+    iSouth = np.argmin(np.abs(Lat[:, 0] - REGION[2])) + 1
+    iEeast = np.argmin(np.abs(Lon[0, :] - REGION[1])) + 1
+    iWest = np.argmin(np.abs(Lon[0, :] - REGION[3]))
+    print(iNorth, iSouth, iWest, iEeast)
 
-    Lon = Lon[iNorth:iSouth,iWest:iEeast]
-    Lat = Lat[iNorth:iSouth,iWest:iEeast]
+    Lon = Lon[iNorth:iSouth, iWest:iEeast]
+    Lat = Lat[iNorth:iSouth, iWest:iEeast]
     # Z=np.roll(Zfull,iRoll, axis=1)
     # Z = Z[iNorth:iSouth,iWest:iEeast]
 
-    DataAll = np.zeros((len(TIME),Lon.shape[0],Lon.shape[1])); DataAll[:]=np.nan
-    tt=0
-    
+    DataAll = np.zeros((len(TIME), Lon.shape[0], Lon.shape[1]))
+    DataAll[:] = np.nan
+    tt = 0
+
     for mm in range(len(TimeDD)):
-        YYYYMM = str(TimeDD[mm].year)+str(TimeDD[mm].month).zfill(2)
-        YYYYMMDD = str(TimeDD[mm].year)+str(TimeDD[mm].month).zfill(2)+str(TimeDD[mm].day).zfill(2)
-        DirAct = Dir + YYYYMM + '/'
-        if (var == 'SLP') | (var == 'IVTE') | (var == 'IVTN'):
-            FILES = glob.glob(DirAct + '*'+ERAvarfile+'*'+YYYYMM+'*.nc')
+        YYYYMM = str(TimeDD[mm].year) + str(TimeDD[mm].month).zfill(2)
+        YYYYMMDD = (
+            str(TimeDD[mm].year)
+            + str(TimeDD[mm].month).zfill(2)
+            + str(TimeDD[mm].day).zfill(2)
+        )
+        DirAct = Dir + YYYYMM + "/"
+        if (var == "SLP") | (var == "IVTE") | (var == "IVTN"):
+            FILES = glob.glob(DirAct + "*" + ERAvarfile + "*" + YYYYMM + "*.nc")
         else:
-            FILES = glob.glob(DirAct + '*'+ERAvarfile+'*'+YYYYMMDD+'*.nc')
+            FILES = glob.glob(DirAct + "*" + ERAvarfile + "*" + YYYYMMDD + "*.nc")
         FILES = np.sort(FILES)
-        
-        TIMEACT = TIME[(TimeDD[mm].year == TIME.year) &  (TimeDD[mm].month == TIME.month) & (TimeDD[mm].day == TIME.day)]
-        
-        for fi in range(len(FILES)): #[7:9]:
+
+        TIMEACT = TIME[
+            (TimeDD[mm].year == TIME.year)
+            & (TimeDD[mm].month == TIME.month)
+            & (TimeDD[mm].day == TIME.day)
+        ]
+
+        for fi in range(len(FILES)):  # [7:9]:
             print(FILES[fi])
-            ncid = Dataset(FILES[fi], mode='r')
-            time_var = ncid.variables['time']
-            dtime = netCDF4.num2date(time_var[:],time_var.units)
-            TimeNC = pd.to_datetime([pd.datetime(d.year, d.month, d.day, d.hour, d.minute, d.second) for d in dtime])
+            ncid = Dataset(FILES[fi], mode="r")
+            time_var = ncid.variables["time"]
+            dtime = netCDF4.num2date(time_var[:], time_var.units)
+            TimeNC = pd.to_datetime(
+                [
+                    pd.datetime(d.year, d.month, d.day, d.hour, d.minute, d.second)
+                    for d in dtime
+                ]
+            )
             TT = np.isin(TimeNC, TIMEACT)
             if iRoll != 0:
-                if PL !=-1:
+                if PL != -1:
                     try:
-                        DATAact = np.squeeze(ncid.variables[NCvarname][TT,PL,iNorth:iSouth,:])
+                        DATAact = np.squeeze(
+                            ncid.variables[NCvarname][TT, PL, iNorth:iSouth, :]
+                        )
                     except:
                         stop()
                 else:
-                    DATAact = np.squeeze(ncid.variables[NCvarname][TT,iNorth:iSouth,:])
+                    DATAact = np.squeeze(
+                        ncid.variables[NCvarname][TT, iNorth:iSouth, :]
+                    )
                 ncid.close()
             else:
-                if PL !=-1:
-                    DATAact = np.squeeze(ncid.variables[NCvarname][TT,PL,iNorth:iSouth,iWest:iEeast])
+                if PL != -1:
+                    DATAact = np.squeeze(
+                        ncid.variables[NCvarname][TT, PL, iNorth:iSouth, iWest:iEeast]
+                    )
                 else:
-                    DATAact = np.squeeze(ncid.variables[NCvarname][TT,iNorth:iSouth,iWest:iEeast])
+                    DATAact = np.squeeze(
+                        ncid.variables[NCvarname][TT, iNorth:iSouth, iWest:iEeast]
+                    )
                 ncid.close()
             # cut out region
             if len(DATAact.shape) == 2:
-                DATAact=DATAact[None,:,:]
-            DATAact=np.roll(DATAact,iRoll, axis=2)
+                DATAact = DATAact[None, :, :]
+            DATAact = np.roll(DATAact, iRoll, axis=2)
             if iRoll != 0:
-                DATAact = DATAact[:,:,iWest:iEeast]
+                DATAact = DATAact[:, :, iWest:iEeast]
             else:
-                DATAact = DATAact[:,:,:]
+                DATAact = DATAact[:, :, :]
             try:
-                DataAll[tt:tt+DATAact.shape[0],:,:]=DATAact
+                DataAll[tt : tt + DATAact.shape[0], :, :] = DATAact
             except:
                 continue
-            tt = tt+DATAact.shape[0]
+            tt = tt + DATAact.shape[0]
     return DataAll, Lat, Lon
 
 
-
 # =======================================================================================
-def ReadERA5_2D(TIME,      # Time period to read (this program will read hourly data)
-            var,        # Variable name. See list below for defined variables
-            PL,         # Pressure level of variable
-            REGION):    # Region to read. Format must be <[N,E,S,W]> in degrees from -180 to +180 longitude
+def ReadERA5_2D(
+    TIME,  # Time period to read (this program will read hourly data)
+    var,  # Variable name. See list below for defined variables
+    PL,  # Pressure level of variable
+    REGION,
+):  # Region to read. Format must be <[N,E,S,W]> in degrees from -180 to +180 longitude
     # ----------
     # This function reads hourly 2D ERA5 data.
     # ----------
     from calendar import monthrange
 
-    DayStart = datetime.datetime(TIME[0].year, TIME[0].month, TIME[0].day,TIME[0].hour)
-    DayStop = datetime.datetime(TIME[-1].year, TIME[-1].month, TIME[-1].day,TIME[-1].hour)
-    TimeDD=pd.date_range(DayStart, end=DayStop, freq='d')
-    TimeMM=pd.date_range(DayStart, end=DayStop, freq='m')
+    DayStart = datetime.datetime(TIME[0].year, TIME[0].month, TIME[0].day, TIME[0].hour)
+    DayStop = datetime.datetime(
+        TIME[-1].year, TIME[-1].month, TIME[-1].day, TIME[-1].hour
+    )
+    TimeDD = pd.date_range(DayStart, end=DayStop, freq="d")
+    TimeMM = pd.date_range(DayStart, end=DayStop, freq="m")
     if len(TimeMM) == 0:
         TimeMM = [TimeDD[0]]
 
-    dT = int(divmod((TimeDD[1] - TimeDD[0]).total_seconds(), 60)[0]/60)
-    ERA5dir = '/glade/campaign/mmm/c3we/prein/ERA5/hourly/'
+    dT = int(divmod((TimeDD[1] - TimeDD[0]).total_seconds(), 60)[0] / 60)
+    ERA5dir = "/glade/campaign/mmm/c3we/prein/ERA5/hourly/"
     if PL != -1:
-        DirName = str(var)+str(PL)
+        DirName = str(var) + str(PL)
     else:
         DirName = str(var)
 
     print(var)
     # read in the coordinates
-    ncid=Dataset("/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.invariant/197901/e5.oper.invariant.128_129_z.ll025sc.1979010100_1979010100.nc", mode='r')
-    Lat=np.squeeze(ncid.variables['latitude'][:])
-    Lon=np.squeeze(ncid.variables['longitude'][:])
+    ncid = Dataset(
+        "/gpfs/fs1/collections/rda/data/ds633.0/e5.oper.invariant/197901/e5.oper.invariant.128_129_z.ll025sc.1979010100_1979010100.nc",
+        mode="r",
+    )
+    Lat = np.squeeze(ncid.variables["latitude"][:])
+    Lon = np.squeeze(ncid.variables["longitude"][:])
     # Zfull=np.squeeze(ncid.variables['Z'][:])
     ncid.close()
     if np.max(Lon) > 180:
         Lon[Lon >= 180] = Lon[Lon >= 180] - 360
-    Lon,Lat = np.meshgrid(Lon,Lat)
+    Lon, Lat = np.meshgrid(Lon, Lat)
 
     # get the region of interest
     if (REGION[1] > 0) & (REGION[3] < 0):
         # region crosses zero meridian
-        iRoll = np.sum(Lon[0,:] < 0)
+        iRoll = np.sum(Lon[0, :] < 0)
     else:
-        iRoll=0
-    Lon = np.roll(Lon,iRoll, axis=1)
-    iNorth = np.argmin(np.abs(Lat[:,0] - REGION[0]))
-    iSouth = np.argmin(np.abs(Lat[:,0] - REGION[2]))+1
-    iEeast = np.argmin(np.abs(Lon[0,:] - REGION[1]))+1
-    iWest = np.argmin(np.abs(Lon[0,:] - REGION[3]))
-    print(iNorth,iSouth,iWest,iEeast)
+        iRoll = 0
+    Lon = np.roll(Lon, iRoll, axis=1)
+    iNorth = np.argmin(np.abs(Lat[:, 0] - REGION[0]))
+    iSouth = np.argmin(np.abs(Lat[:, 0] - REGION[2])) + 1
+    iEeast = np.argmin(np.abs(Lon[0, :] - REGION[1])) + 1
+    iWest = np.argmin(np.abs(Lon[0, :] - REGION[3]))
+    print(iNorth, iSouth, iWest, iEeast)
 
-    Lon = Lon[iNorth:iSouth,iWest:iEeast]
-    Lat = Lat[iNorth:iSouth,iWest:iEeast]
+    Lon = Lon[iNorth:iSouth, iWest:iEeast]
+    Lat = Lat[iNorth:iSouth, iWest:iEeast]
     # Z=np.roll(Zfull,iRoll, axis=1)
     # Z = Z[iNorth:iSouth,iWest:iEeast]
 
-    DataAll = np.zeros((len(TIME),Lon.shape[0],Lon.shape[1])); DataAll[:]=np.nan
-    tt=0
-    
+    DataAll = np.zeros((len(TIME), Lon.shape[0], Lon.shape[1]))
+    DataAll[:] = np.nan
+    tt = 0
+
     for mm in tqdm(range(len(TimeMM))):
-        YYYYMM = str(TimeMM[mm].year)+str(TimeMM[mm].month).zfill(2)
+        YYYYMM = str(TimeMM[mm].year) + str(TimeMM[mm].month).zfill(2)
         YYYY = TimeMM[mm].year
         MM = TimeMM[mm].month
         DD = monthrange(YYYY, MM)[1]
-        
-        TimeFile = TimeDD=pd.date_range(datetime.datetime(YYYY, MM, 1,0), end=datetime.datetime(YYYY, MM, DD,23), freq='h')
-        TT = np.isin(TimeFile,TIME)
-        
-        ncid = Dataset(ERA5dir+DirName+'/'+YYYYMM+'_'+DirName+'_ERA5.nc', mode='r')
+
+        TimeFile = TimeDD = pd.date_range(
+            datetime.datetime(YYYY, MM, 1, 0),
+            end=datetime.datetime(YYYY, MM, DD, 23),
+            freq="h",
+        )
+        TT = np.isin(TimeFile, TIME)
+
+        ncid = Dataset(
+            ERA5dir + DirName + "/" + YYYYMM + "_" + DirName + "_ERA5.nc", mode="r"
+        )
         if iRoll != 0:
-            DATAact = np.squeeze(ncid.variables[var][TT,iNorth:iSouth,:])
+            DATAact = np.squeeze(ncid.variables[var][TT, iNorth:iSouth, :])
             ncid.close()
         else:
-            DATAact = np.squeeze(ncid.variables[var][TT,iNorth:iSouth,iWest:iEeast])
+            DATAact = np.squeeze(ncid.variables[var][TT, iNorth:iSouth, iWest:iEeast])
             ncid.close()
         # cut out region
         if len(DATAact.shape) == 2:
-            DATAact=DATAact[None,:,:]
-        DATAact=np.roll(DATAact,iRoll, axis=2)
+            DATAact = DATAact[None, :, :]
+        DATAact = np.roll(DATAact, iRoll, axis=2)
         if iRoll != 0:
-            DATAact = DATAact[:,:,iWest:iEeast]
+            DATAact = DATAact[:, :, iWest:iEeast]
         try:
-            DataAll[tt:tt+DATAact.shape[0],:,:]=DATAact
+            DataAll[tt : tt + DATAact.shape[0], :, :] = DATAact
         except:
             continue
-        tt = tt+DATAact.shape[0]
+        tt = tt + DATAact.shape[0]
     return DataAll, Lat, Lon
+
 
 def ConnectLon(object_indices):
     for tt in range(object_indices.shape[0]):
         EDGE = np.append(
-            object_indices[tt, :, -1][:, None], object_indices[tt, :, 0][:, None], axis=1
+            object_indices[tt, :, -1][:, None],
+            object_indices[tt, :, 0][:, None],
+            axis=1,
         )
         iEDGE = np.sum(EDGE > 0, axis=1) == 2
         OBJ_Left = EDGE[iEDGE, 0]
@@ -779,14 +941,14 @@ def ConnectLon(object_indices):
         OBJ_joint = np.array(
             [
                 OBJ_Left[ii].astype(str) + "_" + OBJ_Right[ii].astype(str)
-                for ii,_ in enumerate(OBJ_Left)
+                for ii, _ in enumerate(OBJ_Left)
             ]
         )
         NotSame = OBJ_Left != OBJ_Right
         OBJ_joint = OBJ_joint[NotSame]
         OBJ_unique = np.unique(OBJ_joint)
         # set the eastern object to the number of the western object in all timesteps
-        for obj,_ in enumerate(OBJ_unique):
+        for obj, _ in enumerate(OBJ_unique):
             ObE = int(OBJ_unique[obj].split("_")[1])
             ObW = int(OBJ_unique[obj].split("_")[0])
             object_indices[object_indices == ObE] = ObW
@@ -794,16 +956,17 @@ def ConnectLon(object_indices):
 
 
 def ConnectLon_on_timestep(object_indices):
-    
-    """ This function connects objects over the date line on a time-step by
-        time-step basis, which makes it different from the ConnectLon function.
-        This function is needed when long-living objects are first split into
-        smaller objects using the BreakupObjects function.
+    """This function connects objects over the date line on a time-step by
+    time-step basis, which makes it different from the ConnectLon function.
+    This function is needed when long-living objects are first split into
+    smaller objects using the BreakupObjects function.
     """
-    
+
     for tt in range(object_indices.shape[0]):
         EDGE = np.append(
-            object_indices[tt, :, -1][:, None], object_indices[tt, :, 0][:, None], axis=1
+            object_indices[tt, :, -1][:, None],
+            object_indices[tt, :, 0][:, None],
+            axis=1,
         )
         iEDGE = np.sum(EDGE > 0, axis=1) == 2
         OBJ_Left = EDGE[iEDGE, 0]
@@ -811,17 +974,17 @@ def ConnectLon_on_timestep(object_indices):
         OBJ_joint = np.array(
             [
                 OBJ_Left[ii].astype(str) + "_" + OBJ_Right[ii].astype(str)
-                for ii,_ in enumerate(OBJ_Left)
+                for ii, _ in enumerate(OBJ_Left)
             ]
         )
         NotSame = OBJ_Left != OBJ_Right
         OBJ_joint = OBJ_joint[NotSame]
         OBJ_unique = np.unique(OBJ_joint)
         # set the eastern object to the number of the western object in all timesteps
-        for obj,_ in enumerate(OBJ_unique):
+        for obj, _ in enumerate(OBJ_unique):
             ObE = int(OBJ_unique[obj].split("_")[1])
             ObW = int(OBJ_unique[obj].split("_")[0])
-            object_indices[tt,object_indices[tt,:] == ObE] = ObW
+            object_indices[tt, object_indices[tt, :] == ObE] = ObW
     return object_indices
 
 
@@ -829,9 +992,9 @@ def ConnectLon_on_timestep(object_indices):
 def BreakupObjects(
     DATA,  # 3D matrix [time,lat,lon] containing the objects
     min_tsteps,  # minimum lifetime in data timesteps
-    dT,# time step in hours
-    obj_history = False,  # calculates how object start and end
-    ):  
+    dT,  # time step in hours
+    obj_history=False,  # calculates how object start and end
+):
 
     start = time.perf_counter()
 
@@ -846,19 +1009,21 @@ def BreakupObjects(
 
     rgiObjNrs = np.unique(DATA)[1:]
     TT = np.zeros((MaxOb))
-    for obj in range(MaxOb):  
+    for obj in range(MaxOb):
         if object_indices[obj] != None:
             TT[obj] = object_indices[obj][0].stop - object_indices[obj][0].start
-    TT = TT[rgiObjNrs-1]
-    TT = TT.astype('int')
+    TT = TT[rgiObjNrs - 1]
+    TT = TT.astype("int")
     # Sel_Obj = rgiObjNrs[TT > MinLif]
 
     # Average 2D objects in 3D objects?
     Av_2Dob = np.zeros((len(rgiObjNrs)))
     Av_2Dob[:] = np.nan
     ii = 1
-    
-    object_split = {} # this directory holds information about splitting and merging of objects
+
+    object_split = (
+        {}
+    )  # this directory holds information about splitting and merging of objects
     for obj in tqdm(range(len(rgiObjNrs))):
         iOb = rgiObjNrs[obj]
         if TT[obj] <= MinLif:
@@ -886,7 +1051,7 @@ def BreakupObjects(
                 if object_indices[SelOb][0].start == 0:
                     # object starts when tracking starts
                     object_split[str(iOb)][0] = -1
-                if object_indices[SelOb][0].stop == DATA.shape[0]-1:
+                if object_indices[SelOb][0].stop == DATA.shape[0] - 1:
                     # object stops when tracking stops
                     object_split[str(iOb)][-1] = -1
         else:
@@ -904,13 +1069,13 @@ def BreakupObjects(
                         rgiObActCP.remove(ob1)
                         continue
                     elif len(tt1_obj) == 1:
-                        rgiObjects2D_ACT[
-                            tt, rgiObjects2D_ACT[tt, :] == tt1_obj[0]
-                        ] = ob1
+                        rgiObjects2D_ACT[tt, rgiObjects2D_ACT[tt, :] == tt1_obj[0]] = (
+                            ob1
+                        )
                     else:
                         VOL = [
                             np.sum(rgiObjects2D_ACT[tt, :] == tt1_obj[jj])
-                            for jj,_ in enumerate(tt1_obj)
+                            for jj, _ in enumerate(tt1_obj)
                         ]
                         rgiObjects2D_ACT[
                             tt, rgiObjects2D_ACT[tt, :] == tt1_obj[np.argmax(VOL)]
@@ -928,7 +1093,7 @@ def BreakupObjects(
                     if len(ttm1_obj) > 1:
                         VOL = [
                             np.sum(rgiObjects2D_ACT[tt - 1, :] == ttm1_obj[jj])
-                            for jj,_ in enumerate(ttm1_obj)
+                            for jj, _ in enumerate(ttm1_obj)
                         ]
                         rgiObjects2D_ACT[tt, rgiObjects2D_ACT[tt, :] == ob2] = ttm1_obj[
                             np.argmax(VOL)
@@ -958,18 +1123,20 @@ def BreakupObjects(
                 temp_obj = np.unique(TMP[DATA_ACT[:, :, :] == iOb])
                 for ob_ms in range(len(temp_obj)):
                     t1_obj = temp_obj[ob_ms]
-                    sel_time = np.where(np.sum((TMP == t1_obj) > 0, axis=(1,2)) > 0)[0]
+                    sel_time = np.where(np.sum((TMP == t1_obj) > 0, axis=(1, 2)) > 0)[0]
                     obj_charac = [0] * len(sel_time)
                     for kk in range(len(sel_time)):
                         if sel_time[kk] == 0:
                             # object starts when tracking starts
                             obj_charac[kk] = -1
-                        elif sel_time[kk]+1 == TMP.shape[0]:
+                        elif sel_time[kk] + 1 == TMP.shape[0]:
                             # object ends when tracking ends
                             obj_charac[kk] = -1
 
                         # check if system starts from splitting
-                        t0_ob = TMP[sel_time[kk]-1,:,:][TMP[sel_time[kk],:,:] == t1_obj]
+                        t0_ob = TMP[sel_time[kk] - 1, :, :][
+                            TMP[sel_time[kk], :, :] == t1_obj
+                        ]
                         unique_t0 = list(np.unique(t0_ob))
                         try:
                             unique_t0.remove(0)
@@ -988,10 +1155,12 @@ def BreakupObjects(
 
                     # check if object ends by merging
                     if obj_charac[-1] != -1:
-                        if sel_time[-1]+1 == TMP.shape[0]:
+                        if sel_time[-1] + 1 == TMP.shape[0]:
                             obj_charac[-1] = -1
                         else:
-                            t2_ob = TMP[sel_time[-1]+1,:,:][TMP[sel_time[-1],:,:] == t1_obj]
+                            t2_ob = TMP[sel_time[-1] + 1, :, :][
+                                TMP[sel_time[-1], :, :] == t1_obj
+                            ]
                             unique_t2 = list(np.unique(t2_ob))
                             try:
                                 unique_t2.remove(0)
@@ -1008,14 +1177,11 @@ def BreakupObjects(
 
     # clean up object matrix
     if obj_history == True:
-        DATA_fin, object_split =    clean_up_objects(DATA,
-                                    dT,
-                                    min_tsteps, 
-                                    obj_splitmerge = object_split)
+        DATA_fin, object_split = clean_up_objects(
+            DATA, dT, min_tsteps, obj_splitmerge=object_split
+        )
     else:
-        DATA_fin, object_split =    clean_up_objects(DATA,
-                                    dT,
-                                    min_tsteps)
+        DATA_fin, object_split = clean_up_objects(DATA, dT, min_tsteps)
 
     end = time.perf_counter()
     timer(start, end)
@@ -1023,17 +1189,19 @@ def BreakupObjects(
     return DATA_fin, object_split
 
 
-
-
 # from https://stackoverflow.com/questions/27779677/how-to-format-elapsed-time-from-seconds-to-hours-minutes-seconds-and-milliseco
-def timer(start,end):
-    hours, rem = divmod(end-start, 3600)
+def timer(start, end):
+    hours, rem = divmod(end - start, 3600)
     minutes, seconds = divmod(rem, 60)
-    print("        "+"{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds))
+    print(
+        "        " + "{:0>2}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds)
+    )
 
 
 # this function removes nan values by interpolating temporally
 from numba import jit
+
+
 @jit(nopython=True)
 def interpolate_numba(arr, no_data=-32768):
     """return array interpolated along time-axis to fill missing values"""
@@ -1044,42 +1212,50 @@ def interpolate_numba(arr, no_data=-32768):
         for y in range(arr.shape[1]):
             # slice along y axis
             for z in range(arr.shape[0]):
-                value = arr[z,y,x]
+                value = arr[z, y, x]
                 if z == 0:  # don't interpolate first value
                     new_value = value
-                elif z == len(arr[:,0,0])-1:  # don't interpolate last value
+                elif z == len(arr[:, 0, 0]) - 1:  # don't interpolate last value
                     new_value = value
 
                 elif value == no_data:  # interpolate
 
-                    left = arr[z-1,y,x]
-                    right = arr[z+1,y,x]
+                    left = arr[z - 1, y, x]
+                    right = arr[z + 1, y, x]
                     # look for valid neighbours
                     if left != no_data and right != no_data:  # left and right are valid
                         new_value = (left + right) / 2
 
                     elif left == no_data and z == 1:  # boundary condition left
                         new_value = value
-                    elif right == no_data and z == len(arr[:,0,0])-2:  # boundary condition right
+                    elif (
+                        right == no_data and z == len(arr[:, 0, 0]) - 2
+                    ):  # boundary condition right
                         new_value = value
 
-                    elif left == no_data and right != no_data:  # take second neighbour to the left
-                        more_left = arr[z-2,y,x]
+                    elif (
+                        left == no_data and right != no_data
+                    ):  # take second neighbour to the left
+                        more_left = arr[z - 2, y, x]
                         if more_left == no_data:
                             new_value = value
                         else:
                             new_value = (more_left + right) / 2
 
-                    elif left != no_data and right == no_data:  # take second neighbour to the right
-                        more_right = arr[z+2,y,x]
+                    elif (
+                        left != no_data and right == no_data
+                    ):  # take second neighbour to the right
+                        more_right = arr[z + 2, y, x]
                         if more_right == no_data:
                             new_value = value
                         else:
                             new_value = (more_right + left) / 2
 
-                    elif left == no_data and right == no_data:  # take second neighbour on both sides
-                        more_left = arr[z-2,y,x]
-                        more_right = arr[z+2,y,x]
+                    elif (
+                        left == no_data and right == no_data
+                    ):  # take second neighbour on both sides
+                        more_left = arr[z - 2, y, x]
+                        more_right = arr[z + 2, y, x]
                         if more_left != no_data and more_right != no_data:
                             new_value = (more_left + more_right) / 2
                         else:
@@ -1088,7 +1264,7 @@ def interpolate_numba(arr, no_data=-32768):
                         new_value = value
                 else:
                     new_value = value
-                result[z,y,x] = int(new_value)
+                result[z, y, x] = int(new_value)
     return result
 
 
@@ -1096,83 +1272,85 @@ def interpolate_numba(arr, no_data=-32768):
 #              tropical wave classification
 # https://github.com/tmiyachi/mcclimate/blob/master/kf_filter.py
 
+import sys
+
 import numpy
 import scipy.fftpack as fftpack
 import scipy.signal as signal
-import sys
 
-gravitational_constant = 6.673e-11 #Nm^2/kg^2
-gasconst = 8.314e+3 #JK^-1kmol^-1
+gravitational_constant = 6.673e-11  # Nm^2/kg^2
+gasconst = 8.314e3  # JK^-1kmol^-1
 
-#earth
-gravity_earth = 9.81 #m/s^2
-radius_earth = 6.37e+6
+# earth
+gravity_earth = 9.81  # m/s^2
+radius_earth = 6.37e6
 omega_earth = 7.292e-5
 
-#air
+# air
 gasconst_dry = 287
 specific_heat_pressure = 1004
 specific_heat_volume = 717
-ratio_gamma = specific_heat_pressure/specific_heat_volume
+ratio_gamma = specific_heat_pressure / specific_heat_volume
 
 NA = numpy.newaxis
 pi = numpy.pi
 g = gravity_earth
 a = radius_earth
-beta = 2.0*omega_earth/radius_earth
+beta = 2.0 * omega_earth / radius_earth
 
 
 class KFfilter:
     """class for wavenumber-frequency filtering for WK99 and WKH00"""
+
     def __init__(self, datain, spd, tim_taper=0.1):
         """Arguments:
-        
-       'datain'    -- the data to be filtered. dimension must be (time, lat, lon)
 
-       'spd'       -- samples per day
+        'datain'    -- the data to be filtered. dimension must be (time, lat, lon)
 
-       'tim_taper' -- tapering ratio by cos. applay tapering first and last tim_taper%
-                      samples. default is cos20 tapering
+        'spd'       -- samples per day
 
-                      """
+        'tim_taper' -- tapering ratio by cos. applay tapering first and last tim_taper%
+                       samples. default is cos20 tapering
+
+        """
         ntim, nlat, nlon = datain.shape
 
-        #remove the lowest three harmonics of the seasonal cycle (WK99, WKW03)
-##         if ntim > 365*spd/3:
-##             rf = fftpack.rfft(datain,axis=0)
-##             freq = fftpack.rfftfreq(ntim*spd, d=1./float(spd))
-##             rf[(freq <= 3./365) & (freq >=1./365),:,:] = 0.0     #freq<=3./365 only??
-##             datain = fftpack.irfft(rf,axis=0)
+        # remove the lowest three harmonics of the seasonal cycle (WK99, WKW03)
+        ##         if ntim > 365*spd/3:
+        ##             rf = fftpack.rfft(datain,axis=0)
+        ##             freq = fftpack.rfftfreq(ntim*spd, d=1./float(spd))
+        ##             rf[(freq <= 3./365) & (freq >=1./365),:,:] = 0.0     #freq<=3./365 only??
+        ##             datain = fftpack.irfft(rf,axis=0)
 
-        #remove dominal trend
+        # remove dominal trend
         data = signal.detrend(datain, axis=0)
 
-        #tapering
-        if tim_taper == 'hann':
+        # tapering
+        if tim_taper == "hann":
             window = signal.hann(ntim)
-            data = data * window[:,NA,NA]
+            data = data * window[:, NA, NA]
         elif tim_taper > 0:
-        #taper by cos tapering same dtype as input array
-            tp = int(ntim*tim_taper)
+            # taper by cos tapering same dtype as input array
+            tp = int(ntim * tim_taper)
             window = numpy.ones(ntim, dtype=datain.dtype)
             x = numpy.arange(tp)
-            window[:tp] = 0.5*(1.0-numpy.cos(x*pi/tp))
-            window[-tp:] = 0.5*(1.0-numpy.cos(x[::-1]*pi/tp))
-            data = data * window[:,NA,NA]
+            window[:tp] = 0.5 * (1.0 - numpy.cos(x * pi / tp))
+            window[-tp:] = 0.5 * (1.0 - numpy.cos(x[::-1] * pi / tp))
+            data = data * window[:, NA, NA]
 
-        #FFT
-        self.fftdata = fftpack.fft2(data, axes=(0,2))
+        # FFT
+        self.fftdata = fftpack.fft2(data, axes=(0, 2))
 
-        #Note
-        # fft is defined by exp(-ikx), so to adjust exp(ikx) multipried minus         
-        wavenumber = -fftpack.fftfreq(nlon)*nlon
-        frequency = fftpack.fftfreq(ntim, d=1./float(spd))
+        # Note
+        # fft is defined by exp(-ikx), so to adjust exp(ikx) multipried minus
+        wavenumber = -fftpack.fftfreq(nlon) * nlon
+        frequency = fftpack.fftfreq(ntim, d=1.0 / float(spd))
         knum, freq = numpy.meshgrid(wavenumber, frequency)
 
-        #make f<0 domain same as f>0 domain
-        #CAUTION: wave definition is exp(i(k*x-omega*t)) but FFT definition exp(-ikx)
-        #so cahnge sign
-        knum[freq<0] = -knum[freq<0]
+        # make f<0 domain same as f>0 domain
+        # CAUTION: wave definition is exp(i(k*x-omega*t)) but FFT definition exp(-ikx)
+        # so cahnge sign
+        knum[freq < 0] = -knum[freq < 0]
         freq = numpy.abs(freq)
         self.knum = knum
         self.freq = freq
@@ -1181,14 +1359,15 @@ class KFfilter:
         self.frequency = frequency
 
     def decompose_antisymm(self):
-        """decompose attribute data to sym and antisym component
-        """
+        """decompose attribute data to sym and antisym component"""
         fftdata = self.fftdata
         nf, nlat, nk = fftdata.shape
-        symm = 0.5*(fftdata[:,:nlat/2+1,:] + fftdata[:,nlat:nlat/2-1:-1,:])  
-        anti = 0.5*(fftdata[:,:nlat/2,:] - fftdata[:,nlat:nlat/2:-1,:]) 
-        
-        self.fftdata = numpy.concatenate([anti, symm],axis=1)
+        symm = 0.5 * (
+            fftdata[:, : nlat / 2 + 1, :] + fftdata[:, nlat : nlat / 2 - 1 : -1, :]
+        )
+        anti = 0.5 * (fftdata[:, : nlat / 2, :] - fftdata[:, nlat : nlat / 2 : -1, :])
+
+        self.fftdata = numpy.concatenate([anti, symm], axis=1)
 
     def kfmask(self, fmin=None, fmax=None, kmin=None, kmax=None):
         """return wavenumber-frequency mask for wavefilter method
@@ -1203,14 +1382,14 @@ class KFfilter:
         knum = self.knum
         freq = self.freq
 
-        #wavenumber cut-off
-        mask = numpy.zeros((nf,nk), dtype=numpy.bool)
+        # wavenumber cut-off
+        mask = numpy.zeros((nf, nk), dtype=numpy.bool)
         if kmin != None:
-            mask = mask | (knum < kmin) 
+            mask = mask | (knum < kmin)
         if kmax != None:
             mask = mask | (kmax < knum)
 
-        #frequency cutoff
+        # frequency cutoff
         if fmin != None:
             mask = mask | (freq < fmin)
         if fmax != None:
@@ -1220,9 +1399,9 @@ class KFfilter:
 
     def wavefilter(self, mask):
         """apply wavenumber-frequency filtering by original mask.
-        
+
         Arguments:
-        
+
            'mask' -- 2D boolean array (wavenumber, frequency).domain to be filterd
                      is False (True member to be zero)
         """
@@ -1232,17 +1411,17 @@ class KFfilter:
         nf, nlat, nk = fftdata.shape
 
         if (nf, nk) != mask.shape:
-            print( "mask array size is incorrect.")
+            print("mask array size is incorrect.")
             sys.exit()
 
-        mask = numpy.repeat(mask[:,NA,:], nlat, axis=1)    
+        mask = numpy.repeat(mask[:, NA, :], nlat, axis=1)
         fftdata[mask] = 0.0
 
-        #inverse FFT
-        filterd = fftpack.ifft2(fftdata, axes=(0,2))
+        # inverse FFT
+        filterd = fftpack.ifft2(fftdata, axes=(0, 2))
         return filterd.real
 
-    #filter
+    # filter
     def kelvinfilter(self, fmin=0.05, fmax=0.4, kmin=None, kmax=14, hmin=8, hmax=90):
         """kelvin wave filter
 
@@ -1254,42 +1433,46 @@ class KFfilter:
 
            'hmin/hmax' --equivalent depth
         """
-        
+
         fftdata = self.fftdata.copy()
         knum = self.knum
         freq = self.freq
         nf, nlat, nk = fftdata.shape
 
         # filtering ############################################################
-        mask = numpy.zeros((nf,nk), dtype=numpy.bool)
-        #wavenumber cut-off
+        mask = numpy.zeros((nf, nk), dtype=numpy.bool)
+        # wavenumber cut-off
         if kmin != None:
-            mask = mask | (knum < kmin) 
+            mask = mask | (knum < kmin)
         if kmax != None:
             mask = mask | (kmax < knum)
 
-        #frequency cutoff
+        # frequency cutoff
         if fmin != None:
             mask = mask | (freq < fmin)
         if fmax != None:
             mask = mask | (fmax < freq)
 
-        #dispersion filter
+        # dispersion filter
         if hmin != None:
-            c = numpy.sqrt(g*hmin)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c) #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)         #adusting ^2pia to ^m
-            mask = mask | (omega - k <0)
+            c = numpy.sqrt(g * hmin)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega - k < 0)
         if hmax != None:
-            c = numpy.sqrt(g*hmax)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c) #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)         #adusting ^2pia to ^m
-            mask = mask | (omega - k >0)
+            c = numpy.sqrt(g * hmax)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega - k > 0)
 
-        mask = numpy.repeat(mask[:,NA,:], nlat, axis=1)
+        mask = numpy.repeat(mask[:, NA, :], nlat, axis=1)
         fftdata[mask] = 0.0
 
-        filterd = fftpack.ifft2(fftdata, axes=(0,2))
+        filterd = fftpack.ifft2(fftdata, axes=(0, 2))
         return filterd.real
 
     def erfilter(self, fmin=None, fmax=None, kmin=-10, kmax=-1, hmin=8, hmax=90, n=1):
@@ -1306,7 +1489,7 @@ class KFfilter:
            'n'         -- meridional mode number
         """
 
-        if n <=0 or n%1 !=0:
+        if n <= 0 or n % 1 != 0:
             print("n must be n>=1 integer")
             sys.exit()
 
@@ -1316,35 +1499,39 @@ class KFfilter:
         nf, nlat, nk = fftdata.shape
 
         # filtering ############################################################
-        mask = numpy.zeros((nf,nk), dtype=numpy.bool)
-        #wavenumber cut-off
+        mask = numpy.zeros((nf, nk), dtype=numpy.bool)
+        # wavenumber cut-off
         if kmin != None:
-            mask = mask | (knum < kmin) 
+            mask = mask | (knum < kmin)
         if kmax != None:
             mask = mask | (kmax < knum)
 
-        #frequency cutoff
+        # frequency cutoff
         if fmin != None:
             mask = mask | (freq < fmin)
         if fmax != None:
             mask = mask | (fmax < freq)
 
-        #dispersion filter
+        # dispersion filter
         if hmin != None:
-            c = numpy.sqrt(g*hmin)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c)           #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)                         #adusting ^2pia to ^m               
-            mask = mask | (omega*(k**2 + (2*n+1)) + k  < 0)
+            c = numpy.sqrt(g * hmin)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega * (k**2 + (2 * n + 1)) + k < 0)
         if hmax != None:
-            c = numpy.sqrt(g*hmax)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c)           #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)                         #adusting ^2pia to ^m               
-            mask = mask | (omega*(k**2 + (2*n+1)) + k  > 0)
-        mask = numpy.repeat(mask[:,NA,:], nlat, axis=1)
-        
+            c = numpy.sqrt(g * hmax)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega * (k**2 + (2 * n + 1)) + k > 0)
+        mask = numpy.repeat(mask[:, NA, :], nlat, axis=1)
+
         fftdata[mask] = 0.0
 
-        filterd = fftpack.ifft2(fftdata, axes=(0,2))
+        filterd = fftpack.ifft2(fftdata, axes=(0, 2))
         return filterd.real
 
     def igfilter(self, fmin=None, fmax=None, kmin=-15, kmax=-1, hmin=12, hmax=90, n=1):
@@ -1361,7 +1548,7 @@ class KFfilter:
 
            'n'         -- meridional mode number
         """
-        if n <=0 or n%1 !=0:
+        if n <= 0 or n % 1 != 0:
             print("n must be n>=1 integer. for n=0 EIG you must use eig0filter method.")
             sys.exit()
 
@@ -1371,34 +1558,38 @@ class KFfilter:
         nf, nlat, nk = fftdata.shape
 
         # filtering ############################################################
-        mask = numpy.zeros((nf,nk), dtype=numpy.bool)
-        #wavenumber cut-off
+        mask = numpy.zeros((nf, nk), dtype=numpy.bool)
+        # wavenumber cut-off
         if kmin != None:
-            mask = mask | (knum < kmin) 
+            mask = mask | (knum < kmin)
         if kmax != None:
             mask = mask | (kmax < knum)
 
-        #frequency cutoff
+        # frequency cutoff
         if fmin != None:
             mask = mask | (freq < fmin)
         if fmax != None:
             mask = mask | (fmax < freq)
 
-        #dispersion filter
+        # dispersion filter
         if hmin != None:
-            c = numpy.sqrt(g*hmin)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c)           #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)                         #adusting ^2pia to ^m               
-            mask = mask | (omega**2 - k**2 - (2*n+1)  < 0)
+            c = numpy.sqrt(g * hmin)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega**2 - k**2 - (2 * n + 1) < 0)
         if hmax != None:
-            c = numpy.sqrt(g*hmax)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c)           #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)                         #adusting ^2pia to ^m               
-            mask = mask | (omega**2 - k**2 - (2*n+1)  > 0)
-        mask = numpy.repeat(mask[:,NA,:], nlat, axis=1)
+            c = numpy.sqrt(g * hmax)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega**2 - k**2 - (2 * n + 1) > 0)
+        mask = numpy.repeat(mask[:, NA, :], nlat, axis=1)
         fftdata[mask] = 0.0
-        
-        filterd = fftpack.ifft2(fftdata, axes=(0,2))
+
+        filterd = fftpack.ifft2(fftdata, axes=(0, 2))
         return filterd.real
 
     def eig0filter(self, fmin=None, fmax=0.55, kmin=0, kmax=15, hmin=12, hmax=50):
@@ -1423,34 +1614,38 @@ class KFfilter:
         nf, nlat, nk = fftdata.shape
 
         # filtering ############################################################
-        mask = numpy.zeros((nf,nk), dtype=numpy.bool)
-        #wavenumber cut-off
+        mask = numpy.zeros((nf, nk), dtype=numpy.bool)
+        # wavenumber cut-off
         if kmin != None:
-            mask = mask | (knum < kmin) 
+            mask = mask | (knum < kmin)
         if kmax != None:
             mask = mask | (kmax < knum)
 
-        #frequency cutoff
+        # frequency cutoff
         if fmin != None:
             mask = mask | (freq < fmin)
         if fmax != None:
             mask = mask | (fmax < freq)
 
-        #dispersion filter
+        # dispersion filter
         if hmin != None:
-            c = numpy.sqrt(g*hmin)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c)           #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)                         #adusting ^2pia to ^m               
-            mask = mask | (omega**2 - k*omega - 1 < 0)
+            c = numpy.sqrt(g * hmin)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega**2 - k * omega - 1 < 0)
         if hmax != None:
-            c = numpy.sqrt(g*hmax)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c)           #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)                         #adusting ^2pia to ^m               
-            mask = mask | (omega**2 - k*omega - 1 > 0)
-        mask = numpy.repeat(mask[:,NA,:], nlat, axis=1)
+            c = numpy.sqrt(g * hmax)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega**2 - k * omega - 1 > 0)
+        mask = numpy.repeat(mask[:, NA, :], nlat, axis=1)
         fftdata[mask] = 0.0
 
-        filterd = fftpack.ifft2(fftdata, axes=(0,2))
+        filterd = fftpack.ifft2(fftdata, axes=(0, 2))
         return filterd.real
 
     def mrgfilter(self, fmin=None, fmax=None, kmin=-10, kmax=-1, hmin=8, hmax=90):
@@ -1468,41 +1663,45 @@ class KFfilter:
         if kmax > 0:
             print("kmax must be negative. if k > 0, this mode is the same as n=0 EIG")
             sys.exit()
-            
+
         fftdata = self.fftdata.copy()
         knum = self.knum
         freq = self.freq
         nf, nlat, nk = fftdata.shape
 
         # filtering ############################################################
-        mask = numpy.zeros((nf,nk), dtype=numpy.bool)
-        #wavenumber cut-off
+        mask = numpy.zeros((nf, nk), dtype=numpy.bool)
+        # wavenumber cut-off
         if kmin != None:
-            mask = mask | (knum < kmin) 
+            mask = mask | (knum < kmin)
         if kmax != None:
             mask = mask | (kmax < knum)
 
-        #frequency cutoff
+        # frequency cutoff
         if fmin != None:
             mask = mask | (freq < fmin)
         if fmax != None:
             mask = mask | (fmax < freq)
 
-        #dispersion filter
+        # dispersion filter
         if hmin != None:
-            c = numpy.sqrt(g*hmin)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c)           #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)                         #adusting ^2pia to ^m               
-            mask = mask | (omega**2 - k*omega - 1 < 0)
+            c = numpy.sqrt(g * hmin)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega**2 - k * omega - 1 < 0)
         if hmax != None:
-            c = numpy.sqrt(g*hmax)
-            omega = 2.*pi*freq/24./3600. / numpy.sqrt(beta*c)           #adusting day^-1 to s^-1
-            k     = knum/a * numpy.sqrt(c/beta)                         #adusting ^2pia to ^m               
-            mask = mask | (omega**2 - k*omega - 1 > 0)
-        mask = numpy.repeat(mask[:,NA,:], nlat, axis=1)
+            c = numpy.sqrt(g * hmax)
+            omega = (
+                2.0 * pi * freq / 24.0 / 3600.0 / numpy.sqrt(beta * c)
+            )  # adusting day^-1 to s^-1
+            k = knum / a * numpy.sqrt(c / beta)  # adusting ^2pia to ^m
+            mask = mask | (omega**2 - k * omega - 1 > 0)
+        mask = numpy.repeat(mask[:, NA, :], nlat, axis=1)
         fftdata[mask] = 0.0
 
-        filterd = fftpack.ifft2(fftdata, axes=(0,2))
+        filterd = fftpack.ifft2(fftdata, axes=(0, 2))
         return filterd.real
 
     def tdfilter(self, fmin=None, fmax=None, kmin=-20, kmax=-6):
@@ -1519,36 +1718,34 @@ class KFfilter:
         knum = self.knum
         freq = self.freq
         nf, nlat, nk = fftdata.shape
-        mask = numpy.zeros((nf,nk), dtype=numpy.bool)
+        mask = numpy.zeros((nf, nk), dtype=numpy.bool)
 
-        #wavenumber cut-off
+        # wavenumber cut-off
         if kmin != None:
-            mask = mask | (knum < kmin) 
+            mask = mask | (knum < kmin)
         if kmax != None:
             mask = mask | (kmax < knum)
 
-        #frequency cutoff
+        # frequency cutoff
         if fmin != None:
             mask = mask | (freq < fmin)
         if fmax != None:
             mask = mask | (fmax < freq)
 
-        #dispersion filter
-        mask = mask | (84*freq+knum-22 > 0) | (210*freq+2.5*knum-13 < 0)                                                                                         
-        mask = numpy.repeat(mask[:,NA,:], nlat, axis=1)
+        # dispersion filter
+        mask = mask | (84 * freq + knum - 22 > 0) | (210 * freq + 2.5 * knum - 13 < 0)
+        mask = numpy.repeat(mask[:, NA, :], nlat, axis=1)
 
         fftdata[mask] = 0.0
 
-        filterd = fftpack.ifft2(fftdata, axes=(0,2))
+        filterd = fftpack.ifft2(fftdata, axes=(0, 2))
         return filterd.real
 
 
-
-
 # from - https://stackoverflow.com/questions/19412462/getting-distance-between-two-points-based-on-latitude-longitude
-def DistanceCoord(Lo1,La1,Lo2,La2):
+def DistanceCoord(Lo1, La1, Lo2, La2):
 
-    from math import sin, cos, sqrt, atan2, radians
+    from math import atan2, cos, radians, sin, sqrt
 
     # approximate radius of earth in km
     R = 6373.0
@@ -1561,7 +1758,7 @@ def DistanceCoord(Lo1,La1,Lo2,La2):
     dlon = lon2 - lon1
     dlat = lat2 - lat1
 
-    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     distance = R * c
@@ -1573,11 +1770,13 @@ import shapely.geometry as sgeom
 from shapely.ops import unary_union
 from shapely.prepared import prep
 
-land_shp_fname = shpreader.natural_earth(resolution='50m',
-                                       category='physical', name='land')
+land_shp_fname = shpreader.natural_earth(
+    resolution="50m", category="physical", name="land"
+)
 
 land_geom = unary_union(list(shpreader.Reader(land_shp_fname).geometries()))
 land = prep(land_geom)
+
 
 def is_land(x, y):
     return land.contains(sgeom.Point(x, y))
@@ -1586,6 +1785,7 @@ def is_land(x, y):
 # https://stackoverflow.com/questions/13542855/algorithm-to-find-the-minimum-area-rectangle-for-given-points-in-order-to-comput/33619018#33619018
 import numpy as np
 from scipy.spatial import ConvexHull
+
 
 def minimum_bounding_rectangle(points):
     """
@@ -1596,13 +1796,14 @@ def minimum_bounding_rectangle(points):
     :rval: an nx2 matrix of coordinates
     """
     from scipy.ndimage.interpolation import rotate
-    pi2 = np.pi/2.
+
+    pi2 = np.pi / 2.0
 
     # get the convex hull for the points
     hull_points = points[ConvexHull(points).vertices]
 
     # calculate edge angles
-    edges = np.zeros((len(hull_points)-1, 2))
+    edges = np.zeros((len(hull_points) - 1, 2))
     edges = hull_points[1:] - hull_points[:-1]
 
     angles = np.zeros((len(edges)))
@@ -1613,11 +1814,9 @@ def minimum_bounding_rectangle(points):
 
     # find rotation matrices
     # XXX both work
-    rotations = np.vstack([
-        np.cos(angles),
-        np.cos(angles-pi2),
-        np.cos(angles+pi2),
-        np.cos(angles)]).T
+    rotations = np.vstack(
+        [np.cos(angles), np.cos(angles - pi2), np.cos(angles + pi2), np.cos(angles)]
+    ).T
 
     rotations = rotations.reshape((-1, 2, 2))
 
@@ -1650,182 +1849,258 @@ def minimum_bounding_rectangle(points):
     return rval
 
 
+# ================================================================================================
+# ================================================================================================
 
-# ================================================================================================
-# ================================================================================================
 
 def MultiObjectIdentification(
-    DATA_all,                      # matrix with data on common grid in the format [time,lat,lon,variable]
-                                   # the variables are 'V850' [m/s], 'U850' [m/s], 'T850' K, 'Q850' g/kg, 
-                                   # 'SLP' [Pa], 'IVTE' [kg m-1 s-1], 'IVTN' [kg m-1 s-1], 'PR' [mm/time], 'BT' [K]]
-                                   # this order must be followed
-    Lon,                           # 2D longitude grid centers
-    Lat,                           # 2D latitude grid spacing
-    Time,                          # datetime vector of data
-    dT,                            # integer - temporal frequency of data [hour]
-    Mask,                          # mask with dimensions [lat,lon] defining analysis region
-    DataName = '',                 # name of the common grid
-    OutputFolder='',               # string containing the output directory path. Default is local directory
+    DATA_all,  # matrix with data on common grid in the format [time,lat,lon,variable]
+    # the variables are 'V850' [m/s], 'U850' [m/s], 'T850' K, 'Q850' g/kg,
+    # 'SLP' [Pa], 'IVTE' [kg m-1 s-1], 'IVTN' [kg m-1 s-1], 'PR' [mm/time], 'BT' [K]]
+    # this order must be followed
+    Lon,  # 2D longitude grid centers
+    Lat,  # 2D latitude grid spacing
+    Time,  # datetime vector of data
+    dT,  # integer - temporal frequency of data [hour]
+    Mask,  # mask with dimensions [lat,lon] defining analysis region
+    DataName="",  # name of the common grid
+    OutputFolder="",  # string containing the output directory path. Default is local directory
     # minimum precip. obj.
-    SmoothSigmaP = 0,              # Gaussion std for precipitation smoothing
-    Pthreshold = 2,                # precipitation threshold [mm/h]
-    MinTimePR = 4,                 # minimum lifetime of precip. features in hours
-    MinAreaPR = 5000,              # minimum area of precipitation features [km2]
-    # minimum Moisture Stream 
-    MinTimeMS = 9,                 # minimum lifetime for moisture stream [hours]
-    MinAreaMS = 100000,            # mimimum area of moisture stream [km2]
-    MinMSthreshold = 0.13,         # treshold for moisture stream [g*m/g*s]
+    SmoothSigmaP=0,  # Gaussion std for precipitation smoothing
+    Pthreshold=2,  # precipitation threshold [mm/h]
+    MinTimePR=4,  # minimum lifetime of precip. features in hours
+    MinAreaPR=5000,  # minimum area of precipitation features [km2]
+    # minimum Moisture Stream
+    MinTimeMS=9,  # minimum lifetime for moisture stream [hours]
+    MinAreaMS=100000,  # mimimum area of moisture stream [km2]
+    MinMSthreshold=0.13,  # treshold for moisture stream [g*m/g*s]
     # cyclone tracking
-    MinTimeCY = 12,                # minimum livetime of cyclones [hours]
-    MaxPresAnCY = -8,              # preshure thershold for cyclone anomaly [hPa]
+    MinTimeCY=12,  # minimum livetime of cyclones [hours]
+    MaxPresAnCY=-8,  # preshure thershold for cyclone anomaly [hPa]
     # anty cyclone tracking
-    MinTimeACY = 12,               # minimum livetime of anticyclone [hours]
-    MinPresAnACY = 6,              # preshure thershold for anti cyclone anomaly [hPa]
+    MinTimeACY=12,  # minimum livetime of anticyclone [hours]
+    MinPresAnACY=6,  # preshure thershold for anti cyclone anomaly [hPa]
     # Frontal zones
-    MinAreaFR = 50000,             # mimimum size of frontal zones [km2]
-    front_treshold = 1,            # threshold for masking frontal zones
+    MinAreaFR=50000,  # mimimum size of frontal zones [km2]
+    front_treshold=1,  # threshold for masking frontal zones
     # Cloud tracking setup
-    SmoothSigmaC = 0,              # standard deviation of Gaussian filter for cloud tracking
-    Cthreshold = 241,              # brightness temperature threshold for cloud tracking [K]
-    MinTimeC = 4,                  # mimimum livetime of ice cloud shields [hours]
-    MinAreaC = 40000,              # mimimum area of ice cloud shields [km2]
+    SmoothSigmaC=0,  # standard deviation of Gaussian filter for cloud tracking
+    Cthreshold=241,  # brightness temperature threshold for cloud tracking [K]
+    MinTimeC=4,  # mimimum livetime of ice cloud shields [hours]
+    MinAreaC=40000,  # mimimum area of ice cloud shields [km2]
     # AR tracking
-    IVTtrheshold = 500,            # Integrated water vapor transport threshold for AR detection [kg m-1 s-1]
-    MinTimeIVT = 9,                # minimum livetime of ARs [hours]
-    AR_MinLen = 2000,              # mimimum length of an AR [km]
-    AR_Lat = 20,                   # AR centroids have to be poeward of this latitude
-    AR_width_lenght_ratio = 2,     # mimimum length to width ratio of AR
+    IVTtrheshold=500,  # Integrated water vapor transport threshold for AR detection [kg m-1 s-1]
+    MinTimeIVT=9,  # minimum livetime of ARs [hours]
+    AR_MinLen=2000,  # mimimum length of an AR [km]
+    AR_Lat=20,  # AR centroids have to be poeward of this latitude
+    AR_width_lenght_ratio=2,  # mimimum length to width ratio of AR
     # TC detection
-    TC_Pmin = 995,                 # mimimum pressure for TC detection [hPa]
-    TC_lat_genesis = 35,           # maximum latitude for TC genesis [absolute degree latitude]
-    TC_lat_max = 60,               # maximum latitude for TC existance [absolute degree latitude]
-    TC_deltaT_core = 0,            # minimum degrees difference between TC core and surrounding [K]
-    TC_T850min = 285,              # minimum temperature of TC core at 850hPa [K]
-    TC_minBT = 241,                # minimum average cloud top brightness temperature [K]
+    TC_Pmin=995,  # mimimum pressure for TC detection [hPa]
+    TC_lat_genesis=35,  # maximum latitude for TC genesis [absolute degree latitude]
+    TC_lat_max=60,  # maximum latitude for TC existance [absolute degree latitude]
+    TC_deltaT_core=0,  # minimum degrees difference between TC core and surrounding [K]
+    TC_T850min=285,  # minimum temperature of TC core at 850hPa [K]
+    TC_minBT=241,  # minimum average cloud top brightness temperature [K]
     # MCs detection
-    MCS_Minsize = 5000,            # minimum size of precipitation area [km2] 
-    MCS_minPR = 15,                 # minimum precipitation threshold [mm/h]
-    CL_MaxT = 215,                 # minimum brightness temperature in ice shield [K]
-    CL_Area = 40000,               # minimum cloud area size [km2]
-    MCS_minTime = 4                # minimum lifetime of MCS [hours]
-    ):
-    
-    Variables = ['V850', 'U850', 'T850', 'Q850', 'SLP-1', 'IVTE-1', 'IVTN-1','Z500','V200','U200', 'PR-1', 'BT-1']
+    MCS_Minsize=5000,  # minimum size of precipitation area [km2]
+    MCS_minPR=15,  # minimum precipitation threshold [mm/h]
+    CL_MaxT=215,  # minimum brightness temperature in ice shield [K]
+    CL_Area=40000,  # minimum cloud area size [km2]
+    MCS_minTime=4,  # minimum lifetime of MCS [hours]
+):
+
+    Variables = [
+        "V850",
+        "U850",
+        "T850",
+        "Q850",
+        "SLP-1",
+        "IVTE-1",
+        "IVTN-1",
+        "Z500",
+        "V200",
+        "U200",
+        "PR-1",
+        "BT-1",
+    ]
     # calculate grid spacing assuming regular lat/lon grid
-    _,_,Area,Gridspacing = calc_grid_distance_area(Lon,Lat)
+    _, _, Area, Gridspacing = calc_grid_distance_area(Lon, Lat)
     Area[Area < 0] = 0
-    
-    
-    EarthCircum = 40075000 #[m]
-    dLat = np.copy(Lon); dLat[:] = EarthCircum/(360/(Lat[1,0]-Lat[0,0]))
+
+    EarthCircum = 40075000  # [m]
+    dLat = np.copy(Lon)
+    dLat[:] = EarthCircum / (360 / (Lat[1, 0] - Lat[0, 0]))
     dLon = np.copy(Lon)
     for la in range(Lat.shape[0]):
-        dLon[la,:] = EarthCircum/(360/(Lat[1,0]-Lat[0,0]))*np.cos(np.deg2rad(Lat[la,0]))
-#     Gridspacing = np.abs(np.mean(np.append(dLat[:,:,None],dLon[:,:,None], axis=2)))
-#     Area = dLat*dLon
-#     Area[Area < 0] = 0
-    
-    rgiObj_Struct=np.zeros((3,3,3)); rgiObj_Struct[:,:,:]=1
+        dLon[la, :] = (
+            EarthCircum
+            / (360 / (Lat[1, 0] - Lat[0, 0]))
+            * np.cos(np.deg2rad(Lat[la, 0]))
+        )
+    #     Gridspacing = np.abs(np.mean(np.append(dLat[:,:,None],dLon[:,:,None], axis=2)))
+    #     Area = dLat*dLon
+    #     Area[Area < 0] = 0
+
+    rgiObj_Struct = np.zeros((3, 3, 3))
+    rgiObj_Struct[:, :, :] = 1
     StartDay = Time[0]
-    SetupString = '_dt-'+str(dT)+'h_MOAAP-masks.nc'
+    SetupString = "_dt-" + str(dT) + "h_MOAAP-masks.nc"
     FrontMask = np.copy(Mask)
     FrontMask[np.abs(Lat) < 10] = 0
 
     # connect over date line?
-    if (Lon[0,0] < -176) & (Lon[0,-1] > 176):
-        connectLon= 1
+    if (Lon[0, 0] < -176) & (Lon[0, -1] > 176):
+        connectLon = 1
     else:
-        connectLon= 0
+        connectLon = 0
 
-
-    print('    Derive nescessary varialbes for feature indentification')
+    print("    Derive nescessary varialbes for feature indentification")
     import time
+
     start = time.perf_counter()
     # 11111111111111111111111111111111111111111111111111
     # calculate vapor transport on pressure level
-    VapTrans = ((DATA_all[:,:,:,Variables.index('U850')]*DATA_all[:,:,:,Variables.index('Q850')])**2 + (DATA_all[:,:,:,Variables.index('V850')]*DATA_all[:,:,:,Variables.index('Q850')])**2)**(1/2)
+    VapTrans = (
+        (
+            DATA_all[:, :, :, Variables.index("U850")]
+            * DATA_all[:, :, :, Variables.index("Q850")]
+        )
+        ** 2
+        + (
+            DATA_all[:, :, :, Variables.index("V850")]
+            * DATA_all[:, :, :, Variables.index("Q850")]
+        )
+        ** 2
+    ) ** (1 / 2)
 
     # 22222222222222222222222222222222222222222222222222
     # Frontal Detection according to https://agupubs.onlinelibrary.wiley.com/doi/full/10.1002/2017GL073662
-    UU = DATA_all[:,:,:,Variables.index('U850')]
-    VV = DATA_all[:,:,:,Variables.index('V850')]
+    UU = DATA_all[:, :, :, Variables.index("U850")]
+    VV = DATA_all[:, :, :, Variables.index("V850")]
     dx = dLon
     dy = dLat
-    du = np.gradient( UU )
-    dv = np.gradient( VV )
-    PV = np.abs( dv[-1]/dx[None,:] - du[-2]/dy[None,:] )
-    TK = DATA_all[:,:,:,Variables.index('T850')]
-    vgrad = np.gradient(TK, axis=(1,2))
-    Tgrad = np.sqrt(vgrad[0]**2 + vgrad[1]**2)
+    du = np.gradient(UU)
+    dv = np.gradient(VV)
+    PV = np.abs(dv[-1] / dx[None, :] - du[-2] / dy[None, :])
+    TK = DATA_all[:, :, :, Variables.index("T850")]
+    vgrad = np.gradient(TK, axis=(1, 2))
+    Tgrad = np.sqrt(vgrad[0] ** 2 + vgrad[1] ** 2)
 
     Fstar = PV * Tgrad
 
-    Tgrad_zero = 0.45 #*100/(np.mean([dLon,dLat], axis=0)/1000.)  # 0.45 K/(100 km)
+    Tgrad_zero = 0.45  # *100/(np.mean([dLon,dLat], axis=0)/1000.)  # 0.45 K/(100 km)
     import metpy.calc as calc
     from metpy.units import units
+
     CoriolisPar = calc.coriolis_parameter(np.deg2rad(Lat))
-    Frontal_Diagnostic = np.array(Fstar/(CoriolisPar * Tgrad_zero))
+    Frontal_Diagnostic = np.array(Fstar / (CoriolisPar * Tgrad_zero))
 
     # # 3333333333333333333333333333333333333333333333333333
-    # # Cyclone identification based on pressure annomaly threshold    
-    
-    SLP = DATA_all[:,:,:,Variables.index('SLP-1')]/100.
+    # # Cyclone identification based on pressure annomaly threshold
+
+    SLP = DATA_all[:, :, :, Variables.index("SLP-1")] / 100.0
     if np.sum(np.isnan(SLP)) == 0:
         # remove high-frequency variabilities --> smooth over 100 x 100 km (no temporal smoothing)
-        SLP_smooth = ndimage.uniform_filter(SLP, size=[1,int(100/(Gridspacing/1000.)),int(100/(Gridspacing/1000.))])
+        SLP_smooth = ndimage.uniform_filter(
+            SLP,
+            size=[
+                1,
+                int(100 / (Gridspacing / 1000.0)),
+                int(100 / (Gridspacing / 1000.0)),
+            ],
+        )
         # smoothign over 3000 x 3000 km and 78 hours
-        SLPsmoothAn = ndimage.uniform_filter(SLP, size=[int(78/dT),int(int(3000/(Gridspacing/1000.))),int(int(3000/(Gridspacing/1000.)))])
+        SLPsmoothAn = ndimage.uniform_filter(
+            SLP,
+            size=[
+                int(78 / dT),
+                int(int(3000 / (Gridspacing / 1000.0))),
+                int(int(3000 / (Gridspacing / 1000.0))),
+            ],
+        )
     else:
         # this code takes care of the smoothing of fields that contain NaN values
         # from - https://stackoverflow.com/questions/18697532/gaussian-filtering-a-image-with-nan-in-python
-        U=SLP.copy()               # random array...
-        V=SLP.copy()
-        V[np.isnan(U)]=0
-        VV = ndimage.uniform_filter(V, size=[int(78/dT),int(int(3000/(Gridspacing/1000.))),int(int(3000/(Gridspacing/1000.)))])
-        W=0*U.copy()+1
-        W[np.isnan(U)]=0
-        WW=ndimage.uniform_filter(W, size=[int(78/dT),int(int(3000/(Gridspacing/1000.))),int(int(3000/(Gridspacing/1000.)))])
-        SLPsmoothAn=VV/WW
+        U = SLP.copy()  # random array...
+        V = SLP.copy()
+        V[np.isnan(U)] = 0
+        VV = ndimage.uniform_filter(
+            V,
+            size=[
+                int(78 / dT),
+                int(int(3000 / (Gridspacing / 1000.0))),
+                int(int(3000 / (Gridspacing / 1000.0))),
+            ],
+        )
+        W = 0 * U.copy() + 1
+        W[np.isnan(U)] = 0
+        WW = ndimage.uniform_filter(
+            W,
+            size=[
+                int(78 / dT),
+                int(int(3000 / (Gridspacing / 1000.0))),
+                int(int(3000 / (Gridspacing / 1000.0))),
+            ],
+        )
+        SLPsmoothAn = VV / WW
 
-        VV = ndimage.uniform_filter(V, size=[1,int(100/(Gridspacing/1000.)),int(100/(Gridspacing/1000.))])
-        WW=ndimage.uniform_filter(W, size=[1,int(100/(Gridspacing/1000.)),int(100/(Gridspacing/1000.))])
-        SLP_smooth = VV/WW
+        VV = ndimage.uniform_filter(
+            V,
+            size=[
+                1,
+                int(100 / (Gridspacing / 1000.0)),
+                int(100 / (Gridspacing / 1000.0)),
+            ],
+        )
+        WW = ndimage.uniform_filter(
+            W,
+            size=[
+                1,
+                int(100 / (Gridspacing / 1000.0)),
+                int(100 / (Gridspacing / 1000.0)),
+            ],
+        )
+        SLP_smooth = VV / WW
 
-    SLP_Anomaly = SLP_smooth-SLPsmoothAn
-    SLP_Anomaly[:,Mask == 0] = np.nan
+    SLP_Anomaly = SLP_smooth - SLPsmoothAn
+    SLP_Anomaly[:, Mask == 0] = np.nan
     # plt.contour(SLP_Anomaly[tt,:,:], levels=[-9990,-10,1100], colors='b')
-    Pressure_anomaly = SLP_Anomaly < MaxPresAnCY # 10 hPa depression | original setting was 12
-    HighPressure_annomaly = SLP_Anomaly > MinPresAnACY #12
+    Pressure_anomaly = (
+        SLP_Anomaly < MaxPresAnCY
+    )  # 10 hPa depression | original setting was 12
+    HighPressure_annomaly = SLP_Anomaly > MinPresAnACY  # 12
 
     # from - https://stackoverflow.com/questions/18697532/gaussian-filtering-a-image-with-nan-in-python
-    sigma=10.0                  # standard deviation for Gaussian kernel
-    truncate=10.                # truncate filter at this many sigmas
+    sigma = 10.0  # standard deviation for Gaussian kernel
+    truncate = 10.0  # truncate filter at this many sigmas
 
-    U=SLP.copy()               # random array...
+    U = SLP.copy()  # random array...
 
-    V=SLP.copy()
-    V[np.isnan(U)]=0
-    VV=gaussian_filter(V,sigma=[sigma,sigma,sigma],truncate=truncate)
+    V = SLP.copy()
+    V[np.isnan(U)] = 0
+    VV = gaussian_filter(V, sigma=[sigma, sigma, sigma], truncate=truncate)
 
-    W=0*U.copy()+1
-    W[np.isnan(U)]=0
-    WW=gaussian_filter(W,sigma=[sigma,sigma,sigma],truncate=truncate)
+    W = 0 * U.copy() + 1
+    W[np.isnan(U)] = 0
+    WW = gaussian_filter(W, sigma=[sigma, sigma, sigma], truncate=truncate)
 
-    Z=VV/WW
-
+    Z = VV / WW
 
     # 4444444444444444444444444444444444444444444444444444444
     # calculate IVT
-    IVT = ((DATA_all[:,:,:,Variables.index('IVTE-1')])**2+np.abs(DATA_all[:,:,:,Variables.index('IVTN-1')])**2)**0.5
+    IVT = (
+        (DATA_all[:, :, :, Variables.index("IVTE-1")]) ** 2
+        + np.abs(DATA_all[:, :, :, Variables.index("IVTN-1")]) ** 2
+    ) ** 0.5
 
     # Mask data outside of Focus domain
-    DATA_all[:,Mask == 0,:] = np.nan
-    Pressure_anomaly[:,Mask == 0] = np.nan
-    HighPressure_annomaly[:,Mask == 0] = np.nan
-    Frontal_Diagnostic[:,Mask == 0] = np.nan
-    VapTrans[:,Mask == 0] = np.nan
-    SLP[:,Mask == 0] = np.nan
-    
+    DATA_all[:, Mask == 0, :] = np.nan
+    Pressure_anomaly[:, Mask == 0] = np.nan
+    HighPressure_annomaly[:, Mask == 0] = np.nan
+    Frontal_Diagnostic[:, Mask == 0] = np.nan
+    VapTrans[:, Mask == 0] = np.nan
+    SLP[:, Mask == 0] = np.nan
+
     # 5555555555555555555555555555555555555555555555555555555
     # Detect jet stream features
     uv200 = (
@@ -5191,11 +5466,13 @@ def track_tropwaves(pr, Lat, connectLon, dT):
     and n>=1 Inertio Gravirt Wave
     """
 
-    from Tracking_Functions import interpolate_numba
-    from Tracking_Functions import KFfilter
-    from Tracking_Functions import clean_up_objects
-    from Tracking_Functions import BreakupObjects
-    from Tracking_Functions import ConnectLon_on_timestep
+    from Tracking_Functions import (
+        BreakupObjects,
+        ConnectLon_on_timestep,
+        KFfilter,
+        clean_up_objects,
+        interpolate_numba,
+    )
 
     pr_eq = pr.copy()
     pr_eq[:, np.abs(Lat[:, 0]) > 20] = 0

@@ -1,17 +1,14 @@
+import os
+from datetime import datetime
+
+import numpy as np
+import pandas as pd
 import xarray as xr
 from cdo import Cdo
-import datetime
-from itertools import product
-from dateutil import relativedelta
-import pickle
-import os
-import pandas as pd
-import numpy as np
-from datetime import datetime
 
 
 class TrackingDataLoader:
-    #####TODO Tracking DataLoader flexibler machen####
+    # TODO Tracking DataLoader flexibler machen
     """
     Class that loads and prepares input data for the MOAAP Tracking algorithm. Currently loads data in chunks of 7 months. (from January to August and from July to February respectively)
     Assumes that the input data are fiven in files that contain yearly data of the form:
@@ -171,7 +168,10 @@ class TrackingDataLoader:
         ds = xr.open_dataset(path + filename)
 
         if rm_nc:
-            os.remove(self.scratch_path + self.filename_merged)
+            try:
+                os.remove(self.scratch_path + self.filename_merged)
+            except OSError:
+                pass
 
         ds_sel = ds.sel(time=self._create_seltime_array(ds))
         del ds
@@ -203,10 +203,10 @@ class TrackingDataLoader:
             cdo = Cdo()
 
             print(
-                f"Mergetime {self.path_var+self.filename_year1} {self.path_var+self.filename_year2}  {self.scratch_path}{self.filename_merged}"
+                f"Mergetime {self.path_var + self.filename_year1} {self.path_var + self.filename_year2}  {self.scratch_path}{self.filename_merged}"
             )
 
             cdo.mergetime(
-                input=f"{self.path_var+self.filename_year1} {self.path_var+self.filename_year2}",
+                input=f"{self.path_var + self.filename_year1} {self.path_var + self.filename_year2}",
                 output=f"{self.scratch_path}{self.filename_merged}",
             )

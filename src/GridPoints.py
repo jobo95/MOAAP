@@ -1,7 +1,7 @@
 from __future__ import annotations
-import xarray as xr
+
 import numpy as np
-import cartopy.crs as ccrs
+import xarray as xr
 
 
 class GridPoint:
@@ -40,6 +40,9 @@ class GridPoint:
             instance = super().__new__(cls)
             cls._instances[coord] = instance
             return instance
+
+    def __getnewargs__(self):
+        return self.lat, self.lon
 
     def __init__(self, lat, lon):
         self.lat = lat
@@ -84,10 +87,10 @@ class RegularGridPoint(GridPoint):
 
         lat = GridPoint.rotated_lat_grid[lat_idx, lon_idx]
         lon = GridPoint.rotated_lon_grid[lat_idx, lon_idx]
-        
-        #crs_target=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
-        #crs_source=ccrs.PlateCarree()
-        #lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
+
+        # crs_target=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
+        # crs_source=ccrs.PlateCarree()
+        # lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
         return RotatedGridPoint(lat, lon)
 
 
@@ -111,14 +114,13 @@ class RotatedGridPoint(GridPoint):
         lat = GridPoint.regular_lat_grid[lat_idx, lon_idx]
         lon = GridPoint.regular_lon_grid[lat_idx, lon_idx]
 
-        #crs_source=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
-        #crs_target=ccrs.PlateCarree()
-        #lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
+        # crs_source=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
+        # crs_target=ccrs.PlateCarree()
+        # lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
         return RegularGridPoint(lat, lon)
 
 
 class Domain:
-    ######TODO######
     def __init__(
         self,
         north: float,
@@ -163,12 +165,9 @@ def get_Gridpoint_field(key, dict_):
     lat_slice = GridPoint.rotated_lat_grid[lat_idx_slice, lon_idx_slice]
     lon_slice = GridPoint.rotated_lon_grid[lat_idx_slice, lon_idx_slice]
 
-    indices = np.argwhere(~np.isnan(dict_[key]["data_slice"]))  # [:,1]
+    indices = np.argwhere(~np.isnan(dict_[key]["data_slice"]))
     time_steps = np.unique(indices[:, 0])
 
-    # coordinates_ls = []
-    ls_lat = []
-    ls_lon = []
     gridpoint_ls = []
     for tstep in time_steps:
         idx = indices[indices[:, 0] == tstep][:, 1:]
@@ -181,5 +180,4 @@ def get_Gridpoint_field(key, dict_):
         ]
 
         gridpoint_ls.append(sub_gridpoint_ls)
-        # np.append(arr,ls)
     return np.array(gridpoint_ls, dtype="object")

@@ -1,9 +1,8 @@
-import matplotlib.pyplot as plt
-import cartopy.crs as ccrs
 import cartopy
-from numpy.typing import ArrayLike
-from typing import List
+import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
 import numpy as np
+
 from src.Enumerations import Domains
 
 
@@ -19,7 +18,7 @@ def plot_unstructured_rotated_grid(
     title="",
     cbar_label=None,
     cmap="Blues",
-    plot_domains: dict[Domains, str]= None,
+    plot_domains: dict[Domains, str] = None,
 ):
     """
     Plot data field over the regional ICON domain using rotated coordinates.
@@ -39,12 +38,14 @@ def plot_unstructured_rotated_grid(
         cmap (str,optional). Colorscheme. Default is "Blues".
     """
 
-    ###TODO origin hier nicht festsetzen#####
+    # TODO origin hier nicht festsetzen
     pole_lon = 0
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0,90))
+    ax = fig.add_subplot(
+        subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0, 90)
+    )
 
     # ax = plt.axes(projection=crs_arctic)
 
@@ -76,20 +77,43 @@ def plot_unstructured_rotated_grid(
     )
     if plot_domains:
         for domain, color in plot_domains.items():
-            d=domain.value 
-            plt.plot(np.linspace(d.west,d.west),np.linspace(d.south,d.north), transform=ccrs.PlateCarree(), color=color, linewidth=2, )
-            plt.plot(np.linspace(d.west,d.east),np.linspace(d.north,d.north), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
-            plt.plot(np.linspace(d.east,d.east),np.linspace(d.north,d.south), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
-            plt.plot(np.linspace(d.east,d.west),np.linspace(d.south,d.south), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
-        
-    
-    
+            d = domain.value
+            plt.plot(
+                np.linspace(d.west, d.west),
+                np.linspace(d.south, d.north),
+                transform=ccrs.PlateCarree(),
+                color=color,
+                linewidth=2,
+            )
+            plt.plot(
+                np.linspace(d.west, d.east),
+                np.linspace(d.north, d.north),
+                transform=ccrs.PlateCarree(),
+                color=color,
+                linewidth=2,
+            )
+            plt.plot(
+                np.linspace(d.east, d.east),
+                np.linspace(d.north, d.south),
+                transform=ccrs.PlateCarree(),
+                color=color,
+                linewidth=2,
+            )
+            plt.plot(
+                np.linspace(d.east, d.west),
+                np.linspace(d.south, d.south),
+                transform=ccrs.PlateCarree(),
+                color=color,
+                linewidth=2,
+            )
+
     cbar = plt.colorbar(plot, ax=ax, pad=pad)
     cbar.set_label(cbar_label)
     plt.title(title)
 
     # plt.show()
-    
+
+
 def plot_contourf_rotated_grid(
     lon,
     lat,
@@ -102,18 +126,25 @@ def plot_contourf_rotated_grid(
     title="",
     cbar_label=None,
     cmap="Blues",
+    reglat=None,
+    reglon=None,
+    quiver_dat=None,
+    quiver_thinning=5,
+    quiver_scale=100,
+    quiver_unit_scale=10,
 ):
-    
 
-    ###TODO origin hier nicht festsetzen#####
+    # TODO origin hier nicht festsetzen
     pole_lon = 0
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.NorthPolarStereo())
+    ax = fig.add_subplot(
+        subplts[0], subplts[1], index + 1, projection=ccrs.NorthPolarStereo()
+    )
 
     # ax = plt.axes(projection=crs_arctic)
-    xx,yy = np.meshgrid(lon, lat)
+    xx, yy = np.meshgrid(lon, lat)
     ax.set_extent([-180, 180, 58, 90], crs=ccrs.PlateCarree())
     ax.add_feature(cartopy.feature.OCEAN, color="white", zorder=0)
     ax.add_feature(
@@ -132,7 +163,7 @@ def plot_contourf_rotated_grid(
     )  # draw_labels=True,
     ax.coastlines(linewidth=0.3, color="black")
 
-    plot = plt.contourf(
+    plot = ax.contourf(
         xx,
         yy,
         z,
@@ -140,19 +171,64 @@ def plot_contourf_rotated_grid(
         cmap=cmap,
         transform=crs_arctic,
     )
+    if quiver_dat is not None:
+        plot_dat_u = quiver_dat[0].flatten()
+        plot_dat_v = quiver_dat[1].flatten()
+
+        step = quiver_thinning
+
+        # Ausdünnen der Daten
+        xx_thin = reglon.flatten()[::step]
+        yy_thin = reglat.flatten()[::step]
+        plot_dat_u_thin = plot_dat_u[::step]
+        plot_dat_v_thin = plot_dat_v[::step]
+
+        quiv = ax.quiver(
+            xx_thin,
+            yy_thin,
+            plot_dat_u_thin,
+            plot_dat_v_thin,
+            units="width",
+            scale=quiver_scale,
+            headwidth=6,
+            transform=ccrs.PlateCarree(),
+            color="black",
+        )
+        ax.quiverkey(
+            quiv,
+            0.95,
+            1.06,
+            quiver_unit_scale,
+            str(quiver_unit_scale) + r"$ \frac{kg}{m \cdot s}$",
+            labelpos="E",
+            fontproperties={"size": 10},
+        )
+
     cbar = plt.colorbar(plot, ax=ax, pad=pad)
     cbar.set_label(cbar_label)
     plt.title(title)
 
     # plt.show()
-    
-def plot_tracks_rotated_grid(tracks, fig, index,levels = [1,2,3,4,5], title=None, cbar_label=None, subplts=(4, 1),plot_domains : dict[str,Domains]={}):
-    
+
+
+def plot_tracks_rotated_grid(
+    tracks,
+    fig,
+    index,
+    levels=[1, 2, 3, 4, 5],
+    title=None,
+    cbar_label=None,
+    subplts=(4, 1),
+    plot_domains: dict[str, Domains] = {},
+):
+
     pole_lon = 0
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0,90))
+    ax = fig.add_subplot(
+        subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0, 90)
+    )
 
     # ax = plt.axes(projection=crs_arctic)
     ax.set_extent([-180, 180, 58, 90], crs=ccrs.PlateCarree())
@@ -172,23 +248,42 @@ def plot_tracks_rotated_grid(tracks, fig, index,levels = [1,2,3,4,5], title=None
         linestyle=":",
     )  # draw_labels=True,
     ax.coastlines(linewidth=0.3, color="black")
-    
+
     for track in tracks:
-        lons=[x.lon for x in track]
-        lats=[x.lat for x in track]
-        
+        lons = [x.lon for x in track]
+        lats = [x.lat for x in track]
+
         ax.plot(lons, lats, lw=1, transform=crs_arctic)
-        ax.plot(lons, lats, marker='o',markersize=1, transform=crs_arctic)
-        
-    
+        ax.plot(lons, lats, marker="o", markersize=1, transform=crs_arctic)
+
     if plot_domains:
         for domain, color in plot_domains.items():
-            d=domain.value 
-            plt.plot(np.linspace(d.west,d.west),np.linspace(d.south,d.north), transform=ccrs.PlateCarree(), color=color, linewidth=2, )
-            plt.plot(np.linspace(d.west,d.east),np.linspace(d.north,d.north), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
-            plt.plot(np.linspace(d.east,d.east),np.linspace(d.north,d.south), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
-            plt.plot(np.linspace(d.east,d.west),np.linspace(d.south,d.south), transform=ccrs.PlateCarree(), color=color, linewidth=2,)
-    
-
-
-
+            d = domain.value
+            plt.plot(
+                np.linspace(d.west, d.west),
+                np.linspace(d.south, d.north),
+                transform=ccrs.PlateCarree(),
+                color=color,
+                linewidth=2,
+            )
+            plt.plot(
+                np.linspace(d.west, d.east),
+                np.linspace(d.north, d.north),
+                transform=ccrs.PlateCarree(),
+                color=color,
+                linewidth=2,
+            )
+            plt.plot(
+                np.linspace(d.east, d.east),
+                np.linspace(d.north, d.south),
+                transform=ccrs.PlateCarree(),
+                color=color,
+                linewidth=2,
+            )
+            plt.plot(
+                np.linspace(d.east, d.west),
+                np.linspace(d.south, d.south),
+                transform=ccrs.PlateCarree(),
+                color=color,
+                linewidth=2,
+            )

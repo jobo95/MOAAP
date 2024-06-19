@@ -1,14 +1,14 @@
 import datetime
 import pickle
-import numpy as np
-from itertools import product, chain
-from dateutil import relativedelta
 from collections import Counter
+from itertools import chain, product
+
+import numpy as np
 import pandas as pd
+from dateutil import relativedelta
 
 
 def create_datetime_lists(first_year, last_year, months=7, correct_last_endtime=True):
-    ###TODO####
     """
        Creates two lists with 1-month overlap
 
@@ -113,7 +113,6 @@ def count_objs_grid_points(objs, normalization_factor=24.0):
     return lon, lat, z
     # return grid_point_counter
 
-    
-    
+
 def read_cluster_csv(file_name):
     return pd.read_csv(file_name)
