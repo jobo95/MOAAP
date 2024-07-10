@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
+
 import numpy as np
 import xarray as xr
 
 
-class GridPoint:
+class GridPoint(ABC):
     """
-    Parrent class for grid points.
+    Base class for grid points.
     """
 
     input_field_grid = (
@@ -60,6 +62,10 @@ class GridPoint:
     def __repr__(self):
         return f"{self.__class__.__name__}(lat={self.lat}, lon={self.lon})"
 
+    @abstractmethod
+    def get_all_gridpoints(cls) -> list[GridPoint]:
+        pass
+
 
 class RegularGridPoint(GridPoint):
     """
@@ -75,6 +81,12 @@ class RegularGridPoint(GridPoint):
                 "Longitude of RegularGridPoint object has to stay between -180 and 180."
             )
         super().__init__(lat, lon)
+
+    @classmethod
+    def get_all_gridpoints(cls) -> list[RegularGridPoint]:
+        lats, lons = cls.regular_lat_grid.flatten(), cls.regular_lon_grid.flatten()
+        gridpoint_ls = [RegularGridPoint(lat, lon) for lat, lon in zip(lats, lons)]
+        return gridpoint_ls
 
     def to_rotated(self) -> RotatedGridPoint:
         """Convert to rotated Gridpoint
@@ -100,6 +112,12 @@ class RotatedGridPoint(GridPoint):
     """
 
     _instances = {}
+
+    @classmethod
+    def get_all_gridpoints(cls) -> list[RotatedGridPoint]:
+        lats, lons = cls.rotated_lat_grid.flatten(), cls.rotated_lon_grid.flatten()
+        gridpoint_ls = [RotatedGridPoint(lat, lon) for lat, lon in zip(lats, lons)]
+        return gridpoint_ls
 
     def to_regular(self) -> RegularGridPoint:
         """Convert to regular Gridpoint

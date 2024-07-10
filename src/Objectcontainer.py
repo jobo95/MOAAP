@@ -5,9 +5,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 import xarray as xr
-
 from src.Enumerations import Domains
-
 
 class ObjectContainer(list):
     """
@@ -47,7 +45,7 @@ class ObjectContainer(list):
         #    raise TypeError("Object container can only append xarray Dataset objects")
         return super().append(item)
 
-    def sel_season(self, season) -> ObjectContainer:
+    def sel_season(self, season  ) -> ObjectContainer:
         """Select tracking objects that start in a specific season
 
         Args:
@@ -174,6 +172,9 @@ class ObjectContainer(list):
 
         return ObjectContainer([x.isel(times=time_slice) for x in self])
 
+    def sel_by_time(self,time : np.datetime64) -> ObjectContainer:
+        return ObjectContainer([x for x in self if time in x.times])
+
     def sel_by_domain(self, domain: Domains, origin: bool = True) -> ObjectContainer:
         if origin:
             return ObjectContainer(
@@ -194,3 +195,12 @@ class ObjectContainer(list):
             [obj_.isel(times=get_idx(obj_, regime_name)) for obj_ in self]
         )
         return ObjectContainer([x for x in container if x.times.size > 0])
+
+    def get_index_by_id(self, obj_id :int) -> xr.Dataset:
+        for ind,obj in enumerate(self):
+            if int(obj_id) == int(obj.id_):
+                return ind
+            else:
+                continue
+            
+

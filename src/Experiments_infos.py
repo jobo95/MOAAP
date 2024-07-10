@@ -20,6 +20,7 @@ class ICONExperiment:
     lon_nc: str = "lon"
     time_nc: str = "time"
     BMU_path: str = "/work/aa0238/a271093/data/clustering/regime_output/BMU/"
+    container_pkl_file: str = "Object_container"
 
 
 @dataclass
@@ -236,7 +237,7 @@ class ICON_ERA5(ICONExperiment):
         "/work/aa0049/a271041/spice-v2.1/chain/work/run_era5_polarres_wp3_hindcast2/post/yearly/PMSL/"
     )
     path_IVT: str = "/work/aa0238/a271093/data/ICON_ERA5/1998-2022/remapped_3x/"
-    IVTobj_out_path: str = (
+    path_IVT_tracking: str = (
         "/work/aa0238/a271093/results/MOAAP/IVT_Tracking/ICON_DRIVENBY_ERA5_remapped_3x/"
     )
     BMU_file: str = (

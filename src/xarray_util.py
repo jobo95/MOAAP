@@ -3,12 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 
 import numpy as np
+import os
 import pandas as pd
 import xarray as xr
 
 from src.GridPoints import RotatedGridPoint, get_Gridpoint_field
 from src.Objectcontainer import ObjectContainer
-from src.utils import create_datetime_lists, get_datetime_str, load_pkl
+from src.utils import create_datetime_lists, get_datetime_str, load_pkl, save_as_pkl
 
 
 @xr.register_dataset_accessor("get")
@@ -50,6 +51,9 @@ class Accessor:
     def speed(self):
         return self._obj.speed.values
 
+    @property
+    def gridpoints(self):
+        return self._obj.gridpoints.values
     @property
     def clusters(self):
         return self._obj.clusters.values
@@ -97,7 +101,7 @@ class Accessor:
         return self._obj.track.sel(times=self._obj.times[0])
 
 
-def create_obj_from_dict(dict_, key, load_coordinates=False, exp=None):
+def create_obj_from_dict(dict_: dict, key :str, load_coordinates :bool =False, exp=None,load_clusters=False):
     """Create Tracking object xr.Dataset from Dictionary
 
     Args:
@@ -109,78 +113,80 @@ def create_obj_from_dict(dict_, key, load_coordinates=False, exp=None):
         xr.Dataset: Dataset that contains characteristics of tracking object
     """
     cluster_allocations = pd.read_csv(exp.BMU_path + exp.BMU_file)
+    #if load_coordinates:
+    #    ds = xr.Dataset(
+    #        data_vars=dict(
+    #            id_=key,
+    #            # exp=exp,
+    #            # nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
+    #            # * units('km^2')),
+    #            size=(["times"], dict_[key]["size"] * 1e-6),
+    #            # * units('kg/m/s')),
+    #            total_IVT=(["times"], dict_[key]["tot"]),
+    #            # * units('kg/m/s')),
+    #            mean_IVT=(["times"], dict_[key]["mean"]),
+    #            max_IVT=(["times"], dict_[key]["max"]),  # * units('kg/m/s')),
+    #            min_IVT=(["times"], dict_[key]["min"]),  # * units('kg/m/s')),
+    #            mass_center_idy=(["times"], dict_[key]["mass_center_loc"][:, 0]),
+    #            mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
+    #            
+    #            track=(
+    #                ["times"],
+    #                [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
+    #            ),
+    #            speed=(
+    #                ["times"],
+    #                np.insert(dict_[key]["speed"], 0, np.nan),
+    #            ),  # * units('m/s')),
+    #            gridpoints=(["times"], get_Gridpoint_field(key, dict_)),
+    #             #clusters=(
+    #             #   ["times"],
+    #             #   load_cluster_for_container(
+    #             #       cluster_allocations, dict_[key]["times"]
+    #             #   ),
+    #             #),
+    #        ),
+    #        coords=dict(times=dict_[key]["times"]),
+    #    )
+
+    ds = xr.Dataset(
+        data_vars=dict(
+            id_=key,
+            exp=exp,
+            # nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
+            # * units('km^2')),
+            size=(["times"], dict_[key]["size"] * 1e-6),
+            # * units('kg/m/s')),
+            total_IVT=(["times"], dict_[key]["tot"]),
+            # * units('kg/m/s')),
+            mean_IVT=(["times"], dict_[key]["mean"]),
+            max_IVT=(["times"], dict_[key]["max"]),  # * units('kg/m/s')),
+            min_IVT=(["times"], dict_[key]["min"]),  # * units('kg/m/s')),
+            mass_center_idy=(["times"], dict_[key]["mass_center_loc"][:, 0]),
+            mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
+            #clusters=(
+            #    ["times"],
+            #    load_cluster_for_container(
+            #        cluster_allocations, dict_[key]["times"]
+            #    ),
+            #),
+            track=(
+                ["times"],
+                [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
+            ),
+            speed=(
+                ["times"],
+                np.insert(dict_[key]["speed"], 0, np.nan),
+            ),  # * units('m/s')),
+        ),
+        coords=dict(times=dict_[key]["times"]),
+    )
 
     if load_coordinates:
-        ds = xr.Dataset(
-            data_vars=dict(
-                id_=key,
-                # exp=exp,
-                # nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
-                # * units('km^2')),
-                size=(["times"], dict_[key]["size"] * 1e-6),
-                # * units('kg/m/s')),
-                total_IVT=(["times"], dict_[key]["tot"]),
-                # * units('kg/m/s')),
-                mean_IVT=(["times"], dict_[key]["mean"]),
-                max_IVT=(["times"], dict_[key]["max"]),  # * units('kg/m/s')),
-                min_IVT=(["times"], dict_[key]["min"]),  # * units('kg/m/s')),
-                mass_center_idy=(["times"], dict_[key]["mass_center_loc"][:, 0]),
-                mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
-                # track_rlat=(['times'], dict_[key]['track'][:, 0]),
-                # track_rlon=(['times'], dict_[key]['track'][:, 1]),
-                track=(
-                    ["times"],
-                    [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
-                ),
-                speed=(
-                    ["times"],
-                    np.insert(dict_[key]["speed"], 0, np.nan),
-                ),  # * units('m/s')),
-                gridpoints=(["times"], get_Gridpoint_field(key, dict_)),
-                # clusters=(
-                #    ["times"],
-                #    load_cluster_for_container(
-                #        cluster_allocations, dict_[key]["times"]
-                #    ),
-                # ),
-            ),
-            coords=dict(times=dict_[key]["times"]),
-        )
+        ds = ds.assign(gridpoints=(["times"], get_Gridpoint_field(key, dict_)))
 
-    else:
-        # TODO get rid of boilerplate cod
-        ds = xr.Dataset(
-            data_vars=dict(
-                id_=key,
-                exp=exp,
-                # nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
-                # * units('km^2')),
-                size=(["times"], dict_[key]["size"] * 1e-6),
-                # * units('kg/m/s')),
-                total_IVT=(["times"], dict_[key]["tot"]),
-                # * units('kg/m/s')),
-                mean_IVT=(["times"], dict_[key]["mean"]),
-                max_IVT=(["times"], dict_[key]["max"]),  # * units('kg/m/s')),
-                min_IVT=(["times"], dict_[key]["min"]),  # * units('kg/m/s')),
-                mass_center_idy=(["times"], dict_[key]["mass_center_loc"][:, 0]),
-                mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
-                clusters=(
-                    ["times"],
-                    load_cluster_for_container(
-                        cluster_allocations, dict_[key]["times"]
-                    ),
-                ),
-                track=(
-                    ["times"],
-                    [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
-                ),
-                speed=(
-                    ["times"],
-                    np.insert(dict_[key]["speed"], 0, np.nan),
-                ),  # * units('m/s')),
-            ),
-            coords=dict(times=dict_[key]["times"]),
-        )
+    if load_clusters:
+        ds = ds.assign(clusters=(["times"], load_cluster_for_container(cluster_allocations, dict_[key]["times"])))
 
     return ds
 
@@ -188,28 +194,45 @@ def create_obj_from_dict(dict_, key, load_coordinates=False, exp=None):
 def load_cluster_for_container(
     df: pd.Dataframe, times: np.ndarray[datetime]
 ) -> list[str]:
-
     date_list = pd.to_datetime(times).normalize()
-
+    #print (date_list)
     df["time"] = pd.to_datetime(df["time"])
     df["date"] = df["time"].dt.normalize()
+    print (df["time"])
+    #print( [df[df["date"] == x].cluster_name.values.item() for x in date_list])
 
     return [df[df["date"] == x].cluster_name.values.item() for x in date_list]
 
 
 def load_tracking_objects(
-    input_path,
-    input_file_name_temp,
-    type_,
-    first_year,
-    last_year,
-    load_coordinates=False,
-    exp=None,
+    input_path :str,
+    input_file_name_temp :str,
+    type_ :str,
+    first_year :int,
+    last_year :int,
+    load_coordinates :bool=False,
+    load_clusters :bool=False,
+    exp =None,
+    save_pkl : bool =False,
+    correct_last_endtime :bool =False,
+    suffix :str = "",
 ):
 
     start_date_list, end_date_list = create_datetime_lists(
-        first_year, last_year, months=6, correct_last_endtime=False
+        first_year, last_year, months=6, correct_last_endtime=correct_last_endtime
     )
+    pkl_container_path = (
+        f"{exp.path_IVT_tracking}{exp.container_pkl_file}_{first_year}-{last_year}{suffix}"
+    )
+    
+    if not load_clusters:
+        pkl_container_path = pkl_container_path + "_noclusters"
+
+
+    if os.path.isfile(pkl_container_path + ".pkl") and not save_pkl:
+        print(f"{pkl_container_path} exists. Loading...")
+        IVTobj_ls = load_pkl(pkl_container_path)
+        return IVTobj_ls
 
     IVTobj_ls = ObjectContainer([])
 
@@ -221,10 +244,15 @@ def load_tracking_objects(
         for object_id in dict_.keys():
             try:
                 ds = create_obj_from_dict(
-                    dict_, object_id, load_coordinates=load_coordinates, exp=exp
+                    dict_, object_id, load_coordinates=load_coordinates, load_clusters=load_clusters, exp=exp
                 )
-            except ValueError:
+            except ValueError as ex:
                 continue
 
             IVTobj_ls.append(ds)
+
+    if save_pkl:
+        print(f"Saving {pkl_container_path}")
+        save_as_pkl(IVTobj_ls, pkl_container_path)
+
     return IVTobj_ls

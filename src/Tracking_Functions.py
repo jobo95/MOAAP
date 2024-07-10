@@ -27,7 +27,6 @@ import netCDF4
 import numpy as np
 import pandas as pd
 import scipy
-
 #### speed up interpolation
 import scipy.interpolate as spint
 import scipy.spatial.qhull as qhull
@@ -35,7 +34,6 @@ import xarray as xr
 from matplotlib import cm
 from netCDF4 import Dataset
 from scipy import ndimage, stats
-
 # from scipy.ndimage.filters import gaussian_filter
 from scipy.ndimage import gaussian_filter, label, median_filter
 from tqdm import tqdm
@@ -450,7 +448,6 @@ def ObjectCharacteristics(
 # ==============================================================
 
 import numpy as np
-
 #### speed up interpolation
 import scipy.interpolate as spint
 import scipy.spatial.qhull as qhull
@@ -5466,13 +5463,9 @@ def track_tropwaves(pr, Lat, connectLon, dT):
     and n>=1 Inertio Gravirt Wave
     """
 
-    from Tracking_Functions import (
-        BreakupObjects,
-        ConnectLon_on_timestep,
-        KFfilter,
-        clean_up_objects,
-        interpolate_numba,
-    )
+    from Tracking_Functions import (BreakupObjects, ConnectLon_on_timestep,
+                                    KFfilter, clean_up_objects,
+                                    interpolate_numba)
 
     pr_eq = pr.copy()
     pr_eq[:, np.abs(Lat[:, 0]) > 20] = 0

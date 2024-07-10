@@ -4,11 +4,8 @@ import numpy as np
 import pandas as pd
 from sklearn import cluster, decomposition
 
-from src.clustering.clustering_utils import (
-    cosine_cor,
-    inv_cosine_cor,
-    load_clustering_data,
-)
+from src.clustering.clustering_utils import (cosine_cor, inv_cosine_cor,
+                                             load_clustering_data)
 from src.Enumerations import Experiments, Season
 from src.utils import load_pkl, save_as_pkl
 

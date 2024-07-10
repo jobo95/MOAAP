@@ -6,9 +6,12 @@ from itertools import chain, product
 import numpy as np
 import pandas as pd
 from dateutil import relativedelta
+from src.GridPoints import RotatedGridPoint
 
 
-def create_datetime_lists(first_year, last_year, months=7, correct_last_endtime=True):
+def create_datetime_lists(
+    first_year: int, last_year: int, months: int = 7, correct_last_endtime: bool = True
+):
     """
        Creates two lists with 1-month overlap
 
@@ -93,8 +96,8 @@ def count_objs_grid_points(objs, normalization_factor=24.0):
         -z: 1-D array of count values
 
     """
-
-    grid_point_counter = Counter()
+    counter_init_dict = dict.fromkeys(RotatedGridPoint.get_all_gridpoints(), 0)
+    grid_point_counter = Counter(counter_init_dict)
 
     for idx in range(len(objs)):
         points = objs[idx].gridpoints.values
