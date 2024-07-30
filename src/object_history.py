@@ -1,15 +1,14 @@
 
+from itertools import chain
+
 import numpy as np
 import pandas as pd
-from numpy import ndarray
 import xarray as xr
+from numpy import ndarray
 from sklearn.neighbors import KDTree
-from itertools import chain
+
 from src.GridPoints import RotatedGridPoint
 from src.Objectcontainer import ObjectContainer
-
-
-
 
 
 def compute_history(object_container: ObjectContainer, threshold: float = 3) -> ObjectContainer:
@@ -25,7 +24,7 @@ def compute_history(object_container: ObjectContainer, threshold: float = 3) -> 
         ObjectContainer: modified object container with history added
     """
 
-    
+    print ("    compute history")
     object_container = create_empty_history(object_container)
     
     for type_ in ("start","end"):
@@ -35,11 +34,15 @@ def compute_history(object_container: ObjectContainer, threshold: float = 3) -> 
         if type_=="end":
             all_objs =  object_container.seltimesteps(slice(-1,None))
 
-        for obj in all_objs:
+        for i,obj in enumerate(all_objs):
+            print (str(100*i/len(all_objs))+"%")
             objs_closest = {} 
         
             time = obj.times
-            objs_at_time =object_container.sel_by_time(time.values[0])
+            objs_at_time = object_container[i-500:i+500]
+            objs_at_time = objs_at_time.sel_by_time(time.values[0])
+            #objs_at_time =object_container.sel_by_time(time.values[0])
+            #print (len(objs_at_time))
         
             for obj2 in objs_at_time:
                 

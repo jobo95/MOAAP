@@ -1,8 +1,13 @@
 from enum import Enum, IntEnum
 
-from src.Experiments_infos import (ERA5, ICON_CNRM_CONTROL, ICON_CNRM_SSP,
-                                   ICON_ERA5, ICON_NorESM_CONTROL,
-                                   ICON_NorESM_SSP)
+from src.Experiments_infos import (
+    ERA5,
+    ICON_CNRM_CONTROL,
+    ICON_CNRM_SSP,
+    ICON_ERA5,
+    ICON_NorESM_CONTROL,
+    ICON_NorESM_SSP,
+)
 from src.GridPoints import Domain
 
 
@@ -37,6 +42,22 @@ class GPH700_4Cluster(Enum):
     NAO_MINUS = "NAO-"
     ATL_MINUS = "ATL-"
     SCAN = "SCAN"
+
+
+class GPH700_5Cluster_DJF(Enum):
+    NAO_PLUS = "NAO+"
+    NAO_MINUS = "NAO-"
+    ATL_MINUS = "ATL-"
+    SCAN = "SCAN"
+    DIP = "DIP"
+
+
+class GPH700_5Cluster_MAM(Enum):
+    NAO_PLUS = "SP-NAO+"
+    NAO_MINUS = "SP-NAO-"
+    ATL_MINUS = "SP-ATL+"
+    SCAN = "SP-SCAN"
+    DIP = "SP-DIP"
 
 
 class Experiments(Enum):

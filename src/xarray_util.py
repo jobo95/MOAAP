@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime
 
 import numpy as np
-import os
 import pandas as pd
 import xarray as xr
 
 from src.GridPoints import RotatedGridPoint, get_Gridpoint_field
+from src.object_history import compute_history
 from src.Objectcontainer import ObjectContainer
-from src.utils import create_datetime_lists, get_datetime_str, load_pkl, save_as_pkl
+from src.utils import (create_datetime_lists, get_datetime_str, load_pkl,
+                       save_as_pkl)
 
 
 @xr.register_dataset_accessor("get")
@@ -112,7 +114,9 @@ def create_obj_from_dict(dict_: dict, key :str, load_coordinates :bool =False, e
     Returns:
         xr.Dataset: Dataset that contains characteristics of tracking object
     """
-    cluster_allocations = pd.read_csv(exp.BMU_path + exp.BMU_file)
+    cluster_allocations_DJF = pd.read_csv(exp.BMU_path + exp.BMU_file_DJF)
+    cluster_allocations_MAM = pd.read_csv(exp.BMU_path + exp.BMU_file_MAM)
+    cluster_allocations = pd.concat([cluster_allocations_DJF, cluster_allocations_MAM])
     #if load_coordinates:
     #    ds = xr.Dataset(
     #        data_vars=dict(
@@ -195,13 +199,26 @@ def load_cluster_for_container(
     df: pd.Dataframe, times: np.ndarray[datetime]
 ) -> list[str]:
     date_list = pd.to_datetime(times).normalize()
-    #print (date_list)
     df["time"] = pd.to_datetime(df["time"])
     df["date"] = df["time"].dt.normalize()
-    print (df["time"])
-    #print( [df[df["date"] == x].cluster_name.values.item() for x in date_list])
+    #print (df['date'])
+    #print( [df[df["date"] == x] for x in date_list])
 
-    return [df[df["date"] == x].cluster_name.values.item() for x in date_list]
+    selected_cluster = []
+    for x in date_list:
+        app = df[df["date"] == x].cluster_name.values
+        if len(app) == 1:
+            selected_cluster.append(df[df["date"] == x].cluster_name.values.item())
+        else:
+            selected_cluster.append(np.nan) 
+            
+    #[df[df["date"] == x].cluster_name.values.item() for x in date_list] or 0
+    #print (type(selected_cluster))
+    #print (date_list[0])
+    #print (len(selected_cluster))
+
+    return selected_cluster
+    
 
 
 def load_tracking_objects(
@@ -213,7 +230,8 @@ def load_tracking_objects(
     load_coordinates :bool=False,
     load_clusters :bool=False,
     exp =None,
-    save_pkl : bool =False,
+    save_pkl : bool =True,
+    compute_hist :bool =False,
     correct_last_endtime :bool =False,
     suffix :str = "",
 ):
@@ -224,35 +242,51 @@ def load_tracking_objects(
     pkl_container_path = (
         f"{exp.path_IVT_tracking}{exp.container_pkl_file}_{first_year}-{last_year}{suffix}"
     )
-    
-    if not load_clusters:
-        pkl_container_path = pkl_container_path + "_noclusters"
+    if  load_clusters:
+        pkl_container_path = pkl_container_path + "_withClusters"
 
 
-    if os.path.isfile(pkl_container_path + ".pkl") and not save_pkl:
+    if os.path.isfile(pkl_container_path + ".pkl"):
         print(f"{pkl_container_path} exists. Loading...")
         IVTobj_ls = load_pkl(pkl_container_path)
-        return IVTobj_ls
 
-    IVTobj_ls = ObjectContainer([])
+    else:
+        IVTobj_ls = ObjectContainer([])
 
-    for start_date, end_date in zip(start_date_list, end_date_list):
-        print(start_date)
-        pickle_file_path = f"{input_path}{type_}_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}_corrected"
+        for start_date, end_date in zip(start_date_list, end_date_list):
+            print(start_date)
+            pickle_file_path = f"{input_path}{type_}_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}_corrected"
 
-        dict_ = load_pkl(pickle_file_path)
-        for object_id in dict_.keys():
-            try:
-                ds = create_obj_from_dict(
-                    dict_, object_id, load_coordinates=load_coordinates, load_clusters=load_clusters, exp=exp
-                )
-            except ValueError as ex:
-                continue
+            dict_ = load_pkl(pickle_file_path)
+            for object_id in dict_.keys():
+                #print (object_id)
+                try:
+                    ds = create_obj_from_dict(
+                        dict_, object_id, load_coordinates=load_coordinates, load_clusters=load_clusters, exp=exp
+                    )
+                except ValueError as ex:
+                    continue
 
-            IVTobj_ls.append(ds)
+                IVTobj_ls.append(ds)
 
-    if save_pkl:
-        print(f"Saving {pkl_container_path}")
-        save_as_pkl(IVTobj_ls, pkl_container_path)
+        if save_pkl:
+            print(f"Saving {pkl_container_path}")
+            save_as_pkl(IVTobj_ls, pkl_container_path)
+
+    if compute_hist:
+        pkl_container_path = pkl_container_path + "_withHist"
+
+        if os.path.isfile(pkl_container_path + ".pkl"):
+            print(f"{pkl_container_path} exists. Loading...")
+            IVTobj_ls = load_pkl(pkl_container_path)
+            print ("Computing history")
+        else:
+            IVTobj_ls = compute_history(IVTobj_ls)
+
+        if save_pkl:
+            print(f"Saving {pkl_container_path}")
+            save_as_pkl(IVTobj_ls, pkl_container_path)
+        
+    
 
     return IVTobj_ls

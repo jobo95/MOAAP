@@ -1,7 +1,9 @@
-import xarray as xr
+import datetime
+
 import numpy as np
 import pandas as pd
-import datetime
+import xarray as xr
+
 import Tracking_Functions
 
 ds_ivtu=xr.open_dataset('/work/aa0049/a271109/spice-v2.1/chain/work/polarres_WP4_MOSAiC_2020-04_11km/post/2020_04/IVTu_ts.ncz')

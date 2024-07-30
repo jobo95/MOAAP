@@ -5,7 +5,9 @@ from typing import List
 import numpy as np
 import pandas as pd
 import xarray as xr
+
 from src.Enumerations import Domains
+
 
 class ObjectContainer(list):
     """
@@ -29,7 +31,14 @@ class ObjectContainer(list):
             )
 
         super().__init__(iterable)
-
+    def __getitem__(self, index):
+        result = super().__getitem__(index)
+        if isinstance(index, slice):
+            return ObjectContainer(result)
+        else:
+            return result
+        
+        
     def append(self, item) -> None:
         """Append Tracking
 

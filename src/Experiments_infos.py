@@ -198,8 +198,10 @@ class ERA5(ICONExperiment):
     path_IVT_tracking: str = (
         "/work/aa0238/a271093/results/MOAAP/IVT_Tracking/ERA5_ICON_remapped_3x/"
     )
-    year_start: int = 1979
-    year_end: int = 2022
+    year_start: int = 1984
+    year_end: int = 2014
+    # year_start: int = 1979
+    # year_end: int = 2022
     path_IVT: str = "/work/aa0238/a271093/data/ERA5/1979-2023/ICON_remapped_3x/"
     slp_path: str = (
         "/work/aa0238/a271093/data/ERA5/1984-2014/remapped_ICON_reg_30km/slp/"
@@ -222,8 +224,11 @@ class ERA5(ICONExperiment):
         "/work/aa0238/a271093/data/clustering/ERA5/ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_"
     )
 
-    BMU_file: str = (
-        "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_DJF_fldmean_detrend_del29feb_aac_20PCs_4clusters_Ref_ERA5KmeansPCA.csv"
+    BMU_file_DJF: str = (
+        "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_DJF_fldmean_detrend_del29feb_aac_20PCs_5clusters_Ref_ERA5KmeansPCA.csv"
+    )
+    BMU_file_MAM: str = (
+        "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_MAM_fldmean_detrend_del29feb_aac_20PCs_5clusters_Ref_ERA5KmeansPCA.csv"
     )
 
 
@@ -240,8 +245,11 @@ class ICON_ERA5(ICONExperiment):
     path_IVT_tracking: str = (
         "/work/aa0238/a271093/results/MOAAP/IVT_Tracking/ICON_DRIVENBY_ERA5_remapped_3x/"
     )
-    BMU_file: str = (
-        "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_DJF_fldmean_detrend_del29feb_aac_20PCs_4clusters_Ref_ERA5KmeansPCA.csv"
+    BMU_file_DJF: str = (
+        "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_DJF_fldmean_detrend_del29feb_aac_20PCs_5clusters_Ref_ERA5KmeansPCA.csv"
+    )
+    BMU_file_MAM: str = (
+        "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_MAM_fldmean_detrend_del29feb_aac_20PCs_5clusters_Ref_ERA5KmeansPCA.csv"
     )
     IVT_thresh_file_85: str = (
         "ivt_percentile_mlauer_removed-ens-lev_remapbilWP3domain_3dx3dy.nc"

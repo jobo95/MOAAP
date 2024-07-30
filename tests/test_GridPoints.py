@@ -1,6 +1,6 @@
 import pytest
-from src.GridPoints import *
 
+from src.GridPoints import *
 
 
 def test_point_in_domain():

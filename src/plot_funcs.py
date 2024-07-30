@@ -2,6 +2,7 @@ import cartopy
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.interpolate import griddata
 
 from src.Enumerations import Domains
 
@@ -15,10 +16,12 @@ def plot_unstructured_rotated_grid(
     levels=[1, 2, 3, 5, 7, 9, 12, 15, 20, 25, 30],
     subplts=(4, 1),
     pad=0.01,
+    use_contourf: bool = True,
     title="",
     cbar_label=None,
     cmap="Blues",
     plot_domains: dict[Domains, str] = None,
+    cbar: bool = True,
 ):
     """
     Plot data field over the regional ICON domain using rotated coordinates.
@@ -67,14 +70,52 @@ def plot_unstructured_rotated_grid(
     )  # draw_labels=True,
     ax.coastlines(linewidth=0.3, color="black")
 
-    plot = plt.tricontourf(
-        lon,
-        lat,
-        z,
-        levels=levels,
-        cmap=cmap,
-        transform=crs_arctic,
-    )
+    xx = lat.reshape((194, 193))
+    yy = lon.reshape((194, 193))
+    zz = z.reshape((194, 193))
+    # plot = plt.contourf(
+    #    xx,
+    #    yy,
+    #    zz,
+    #    # levels=levels,
+    #    cmap=cmap,
+    #    transform=crs_arctic,
+    # )
+
+    if use_contourf:
+        x = lon
+        y = lat
+        grid_x, grid_y = np.mgrid[
+            np.min(lon) : np.max(lon) : 100j, np.min(lat) : np.max(lat) : 100j
+        ]
+
+        # Interpolate using 'linear' scheme
+        # grid_z_linear = griddata((x, y), z, (grid_x, grid_y), method='linear')
+
+        # Interpolate using 'cubic' scheme
+        grid_z_cubic = griddata((x, y), z, (grid_x, grid_y), method="cubic")
+
+        # Define a grid for interpolation
+        grid_x, grid_y = np.mgrid[
+            np.min(lon) : np.max(lon) : 100j, np.min(lat) : np.max(lat) : 100j
+        ]
+        plot = plt.contourf(
+            grid_x,
+            grid_y,
+            grid_z_cubic,
+            levels=levels,
+            cmap=cmap,
+            transform=crs_arctic,
+        )
+    else:
+        plot = plt.tricontourf(
+            lon,
+            lat,
+            z,
+            levels=levels,
+            cmap=cmap,
+            transform=crs_arctic,
+        )
     if plot_domains:
         for domain, color in plot_domains.items():
             d = domain.value
@@ -107,9 +148,27 @@ def plot_unstructured_rotated_grid(
                 linewidth=2,
             )
 
-    cbar = plt.colorbar(plot, ax=ax, pad=pad)
-    cbar.set_label(cbar_label)
     plt.title(title)
+
+    # if one_cbar:
+    #    if (index + 1) % subplts[1] == 0:
+    #        rows = subplts[0]
+
+    #        cbar_width = 0.01
+    #        cbar_padding = 0.05  # Abstand zwischen den Colorbars
+    #        cbar_height = (1 - (rows + 1) * cbar_padding) / rows
+
+    #        r = (index) // rows
+    #        cbar_bottom = 1 - (r * (cbar_height + cbar_padding / 2))
+    #        fig.subplots_adjust(right=0.8)
+    #        print(f"{r=}", f"{cbar_bottom=}", f"{cbar_width=}", f"{cbar_height=}")
+    #        print(f"{rows}", f"{index}")
+    #        cbar_ax = fig.add_axes([0.81, cbar_bottom, cbar_width, cbar_height])
+    #        cbar = plt.colorbar(plot, cax=cbar_ax)
+    #        cbar.set_label(cbar_label)
+    if cbar:
+        cbar = plt.colorbar(plot, ax=ax, pad=pad)
+        cbar.set_label(cbar_label)
 
     # plt.show()
 
@@ -145,6 +204,9 @@ def plot_contourf_rotated_grid(
 
     # ax = plt.axes(projection=crs_arctic)
     xx, yy = np.meshgrid(lon, lat)
+    # xx = lon
+    # yy = lat
+
     ax.set_extent([-180, 180, 58, 90], crs=ccrs.PlateCarree())
     ax.add_feature(cartopy.feature.OCEAN, color="white", zorder=0)
     ax.add_feature(

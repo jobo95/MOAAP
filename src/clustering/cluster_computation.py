@@ -12,7 +12,8 @@ from src.utils import load_pkl, save_as_pkl
 
 def compute_and_save_cluster(
     EXP: Experiments,
-    num_cluster: int = 4,
+    season: Season,
+    num_cluster: int,
     back_trafo_centroids: bool = True,
     pca_ref: str = None,
     kmeans_ref: str = None,
@@ -49,7 +50,7 @@ def compute_and_save_cluster(
     """
 
     exp = EXP.value
-    season = Season.DJF
+    season = season
     year_start = exp.year_start
     year_end = exp.year_end
     path_in = exp.clustering_data_path
