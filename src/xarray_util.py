@@ -117,41 +117,6 @@ def create_obj_from_dict(dict_: dict, key :str, load_coordinates :bool =False, e
     cluster_allocations_DJF = pd.read_csv(exp.BMU_path + exp.BMU_file_DJF)
     cluster_allocations_MAM = pd.read_csv(exp.BMU_path + exp.BMU_file_MAM)
     cluster_allocations = pd.concat([cluster_allocations_DJF, cluster_allocations_MAM])
-    #if load_coordinates:
-    #    ds = xr.Dataset(
-    #        data_vars=dict(
-    #            id_=key,
-    #            # exp=exp,
-    #            # nc_file=f'{input_path}ObjectMasks_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}.nc',
-    #            # * units('km^2')),
-    #            size=(["times"], dict_[key]["size"] * 1e-6),
-    #            # * units('kg/m/s')),
-    #            total_IVT=(["times"], dict_[key]["tot"]),
-    #            # * units('kg/m/s')),
-    #            mean_IVT=(["times"], dict_[key]["mean"]),
-    #            max_IVT=(["times"], dict_[key]["max"]),  # * units('kg/m/s')),
-    #            min_IVT=(["times"], dict_[key]["min"]),  # * units('kg/m/s')),
-    #            mass_center_idy=(["times"], dict_[key]["mass_center_loc"][:, 0]),
-    #            mass_center_idx=(["times"], dict_[key]["mass_center_loc"][:, 1]),
-    #            
-    #            track=(
-    #                ["times"],
-    #                [RotatedGridPoint(x, y) for x, y in dict_[key]["track"]],
-    #            ),
-    #            speed=(
-    #                ["times"],
-    #                np.insert(dict_[key]["speed"], 0, np.nan),
-    #            ),  # * units('m/s')),
-    #            gridpoints=(["times"], get_Gridpoint_field(key, dict_)),
-    #             #clusters=(
-    #             #   ["times"],
-    #             #   load_cluster_for_container(
-    #             #       cluster_allocations, dict_[key]["times"]
-    #             #   ),
-    #             #),
-    #        ),
-    #        coords=dict(times=dict_[key]["times"]),
-    #    )
 
     ds = xr.Dataset(
         data_vars=dict(
@@ -201,8 +166,6 @@ def load_cluster_for_container(
     date_list = pd.to_datetime(times).normalize()
     df["time"] = pd.to_datetime(df["time"])
     df["date"] = df["time"].dt.normalize()
-    #print (df['date'])
-    #print( [df[df["date"] == x] for x in date_list])
 
     selected_cluster = []
     for x in date_list:
@@ -213,9 +176,6 @@ def load_cluster_for_container(
             selected_cluster.append(np.nan) 
             
     #[df[df["date"] == x].cluster_name.values.item() for x in date_list] or 0
-    #print (type(selected_cluster))
-    #print (date_list[0])
-    #print (len(selected_cluster))
 
     return selected_cluster
     
@@ -290,3 +250,7 @@ def load_tracking_objects(
     
 
     return IVTobj_ls
+
+
+def add_variable_to_container():
+    pass

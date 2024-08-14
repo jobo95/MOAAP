@@ -7,6 +7,7 @@ import pandas as pd
 import xarray as xr
 
 from src.Enumerations import Domains
+from src.utils import select_by_gridpoint_fraction
 
 
 class ObjectContainer(list):
@@ -184,15 +185,39 @@ class ObjectContainer(list):
     def sel_by_time(self,time : np.datetime64) -> ObjectContainer:
         return ObjectContainer([x for x in self if time in x.times])
 
-    def sel_by_domain(self, domain: Domains, origin: bool = True) -> ObjectContainer:
-        if origin:
+    def sel_by_domain(self, domain: Domains, type_: str, domain_frac:float = 0.0, select_last_timesteps :bool = False) -> ObjectContainer:
+        """Select objects which trajectories are in a certain domain (at their origin, end or at any time)
+
+        Args:
+            domain (Domains): Domain object
+            type_ (str): Can be either 'origin', 'end' or 'anytime'
+            domain_frac (float, optional): Fraction of domain covered by object. Defaults to 0.0.
+
+        Returns:
+            ObjectContainer: Selected Object Container
+        """
+        
+        if type_=="origin":
             return ObjectContainer(
                 [x for x in self if x.get.regular_track[0] in domain.value]
             )
-        else:
+        elif type_=="end":
             return ObjectContainer(
                 [x for x in self if x.get.regular_track[-1] in domain.value]
             )
+        elif type_=="anytime":
+            if domain_frac:
+                domain_grid_point_field = domain.value.get_gridpoint_field(regular=False)
+                
+                return ObjectContainer([select_by_gridpoint_fraction(x, domain_grid_point_field, domain_frac, select_last_timesteps=select_last_timesteps) for x in self if select_by_gridpoint_fraction(x, domain_grid_point_field, domain_frac, select_last_timesteps=select_last_timesteps is not None)])
+                
+            return ObjectContainer([x for x in self if any(y in domain.value for y in x.get.regular_track)])
+        
+        
+        
+        else:
+            raise ValueError("type_ has to be either 'origin', 'end' or 'anytime'")
+        
 
     def sel_by_regime(self, regime_name: str) -> ObjectContainer:
         def get_idx(obj_, regime_name):

@@ -174,6 +174,14 @@ class Domain:
                 and abs(p.lon) > self.east
             )
 
+    def get_gridpoint_field(self, regular:bool =True):
+        gridpoints = RegularGridPoint.get_all_gridpoints()
+        
+        if regular:
+            return [gridpoint for gridpoint in gridpoints if self.__contains__(gridpoint)]
+        
+        return [gridpoint.to_rotated() for gridpoint in gridpoints if self.__contains__(gridpoint)]
+
 
 def get_Gridpoint_field(key, dict_):
 
