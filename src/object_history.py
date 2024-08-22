@@ -35,7 +35,7 @@ def compute_history(object_container: ObjectContainer, threshold: float = 3) -> 
             all_objs =  object_container.seltimesteps(slice(-1,None))
 
         for i,obj in enumerate(all_objs):
-            print (str(100*i/len(all_objs))+"%")
+            #print (str(100*i/len(all_objs))+"%")
             objs_closest = {} 
         
             time = obj.times

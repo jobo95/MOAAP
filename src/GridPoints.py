@@ -153,6 +153,9 @@ class Domain:
         self.west = west
 
     def __contains__(self, p: RegularGridPoint):
+        """ 
+        Check if RegularGridPoint is in Domain ("Gridpoint in Domain" syntax)
+        """
 
         if not isinstance(p, RegularGridPoint):
             raise TypeError(
@@ -174,13 +177,23 @@ class Domain:
                 and abs(p.lon) > self.east
             )
 
-    def get_gridpoint_field(self, regular:bool =True):
+    def get_gridpoint_field(self, regular:bool =True)-> list[GridPoints]:
+        """
+        Get all gridpoints that lie in the specific domain
+
+        Args:
+            regular (bool, optional): If true return regular coordinates, else Rotated Coordinates. Defaults to True.
+
+        Returns:
+            list[GridPoint]: List of gridpoints inside the domain
+        """
         gridpoints = RegularGridPoint.get_all_gridpoints()
         
         if regular:
             return [gridpoint for gridpoint in gridpoints if self.__contains__(gridpoint)]
         
         return [gridpoint.to_rotated() for gridpoint in gridpoints if self.__contains__(gridpoint)]
+
 
 
 def get_Gridpoint_field(key, dict_):
@@ -207,3 +220,4 @@ def get_Gridpoint_field(key, dict_):
 
         gridpoint_ls.append(sub_gridpoint_ls)
     return np.array(gridpoint_ls, dtype="object")
+    

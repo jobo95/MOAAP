@@ -1,18 +1,23 @@
 import datetime
 import pickle
+import sys
 from collections import Counter
 from itertools import chain, product
+from typing import TYPE_CHECKING
 
+from GridPoints import RegularGridPoint
+from Objectcontainer import ObjectContainer
 import numpy as np
 import pandas as pd
+import xarray as xr
 from dateutil import relativedelta
 
-from src.GridPoints import RotatedGridPoint
-from src.Enumerations import Domains
-import xarray as xr
 from src.decorators import measure_time_func, measure_time_func_lines
+from src.Enumerations import Domains
+from src.GridPoints import RotatedGridPoint
+from src.Variable_classes import *
 
-from typing import TYPE_CHECKING
+
 def create_datetime_lists(
     first_year: int, last_year: int, months: int = 7, correct_last_endtime: bool = True
 ):
@@ -87,7 +92,7 @@ def save_as_pkl(dict_, output_name) -> None:
         pickle.dump(dict_, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def count_objs_grid_points(objs, normalization_factor:float=24.0):
+def count_objs_grid_points(objs :ObjectContainer, normalization_factor:float=24.0)-> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
 
     Args:
@@ -118,18 +123,33 @@ def count_objs_grid_points(objs, normalization_factor:float=24.0):
     lon = np.array([x.lon for x in grid_point_ls])
 
     return lon, lat, z
-def calculate_average_ellapsed_time(objs, normalization_factor:float=1):
+def calculate_average_ellapsed_time(objs:ObjectContainer, normalization_factor:float=1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Calculate the average ellapsed time an object needs to reach a certain grid point
+
+    Args:
+        objs (ObjectContainer): Objects
+        normalization_factor (float, optional): Factor that scales the average ellapsed time returned (e.g. to days). Defaults to 1.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray, np.ndarray]: lat, lon, averaged ellapsed time
+    """
     
+    # initialize counter with all grid point counts set to zero
     counter_init_dict = dict.fromkeys(RotatedGridPoint.get_all_gridpoints(), 0)
     grid_point_counter_time = Counter(counter_init_dict)
     grid_point_counter_normal = Counter(counter_init_dict)
 
+    #iterate over all objects
     for idx in range(len(objs)):
         points = objs[idx].gridpoints.values
         
+        #iterate over all time steps of object
         for j in range(len(points)):
 
+            # save the ellapsed time the object needed to reach the grid points 
             grid_point_counter_time.update(points[j]*(j+1))
+
+            #count the absolute number of grid point occurrences
             grid_point_counter_normal.update(points[j])
 
     grid_point_ls = list(grid_point_counter_normal.keys())
@@ -137,6 +157,7 @@ def calculate_average_ellapsed_time(objs, normalization_factor:float=1):
     z_time = np.array(list(grid_point_counter_time.values())) 
     z_normal = np.array(list(grid_point_counter_normal.values())) 
 
+    # compute the average time from the sumed up times and the average number of grid points occurrences
     z =np.array([i/j/normalization_factor if j !=0 else -20 for i,j in zip(z_time,z_normal)])
     
     lat = np.array([x.lat for x in grid_point_ls])
@@ -147,7 +168,7 @@ def calculate_average_ellapsed_time(objs, normalization_factor:float=1):
     
 #@measure_time_func_lines
 def select_by_gridpoint_fraction(obj: xr.Dataset,
-                                 domain_grid_point_field : list,
+                                 domain_grid_point_field : list[RegularGridPoint],
                                  domain_fraction:float=0.5, 
                                  object_fraction:float=0.8,
                                  select_last_timesteps:bool = False,
@@ -157,7 +178,7 @@ def select_by_gridpoint_fraction(obj: xr.Dataset,
 
     Args:
         obj (xr.Dataset): object
-        domain_grid_point_field (list): list of regular grid points that lie within the domain
+        domain_grid_point_field (list[RegularGridPoint]): list of regular grid points that lie within the domain
         domain_fraction (float, optional): Fraction of domain that has to be covered by object. Defaults to 0.5. If 0 all objects are selected.
         object_fraction (float, optional): Fraction of object that has to lie inside the domain. Defaults to 0.8. 
         select_last_timesteps (bool, optional): If an object covers the domains at timestep i, then select only the i-th to the last timesteps of the object (if set to True). Defaults to False.
@@ -189,3 +210,8 @@ def select_by_gridpoint_fraction(obj: xr.Dataset,
 def read_cluster_csv(file_name:str) -> pd.DataFrame:
     
     return pd.read_csv(file_name)
+
+
+def str_to_variable_class(class_name :str):
+    
+    return globals()[class_name]

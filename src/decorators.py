@@ -1,6 +1,7 @@
-from functools import wraps
-from line_profiler import LineProfiler
 import time
+from functools import wraps
+
+from line_profiler import LineProfiler
 
 
 def measure_time_func(func):

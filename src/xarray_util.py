@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+import glob
 import os
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
 import xarray as xr
+from dateutil.relativedelta import relativedelta
 
-from src.GridPoints import RotatedGridPoint, get_Gridpoint_field
+from src.GridPoints import GridPoint, RotatedGridPoint, get_Gridpoint_field
 from src.object_history import compute_history
 from src.Objectcontainer import ObjectContainer
 from src.utils import (create_datetime_lists, get_datetime_str, load_pkl,
-                       save_as_pkl)
+                       save_as_pkl, str_to_variable_class)
 
 
 @xr.register_dataset_accessor("get")
@@ -103,7 +105,14 @@ class Accessor:
         return self._obj.track.sel(times=self._obj.times[0])
 
 
-def create_obj_from_dict(dict_: dict, key :str, load_coordinates :bool =False, exp=None,load_clusters=False):
+def create_obj_from_dict(dict_: dict,
+                         key :str, 
+                         load_coordinates :bool =False,
+                         exp=None,
+                         load_clusters=False,
+                         var_names_ls:list[str]=None,
+                         var_dataset_ls:list[xr.Dataset] =None):
+    
     """Create Tracking object xr.Dataset from Dictionary
 
     Args:
@@ -153,6 +162,10 @@ def create_obj_from_dict(dict_: dict, key :str, load_coordinates :bool =False, e
 
     if load_coordinates:
         ds = ds.assign(gridpoints=(["times"], get_Gridpoint_field(key, dict_)))
+        
+    if var_names_ls is not None:
+        #ds = ds.assign(**{var_name: (["times"], get_var_field(key, dict_, var_dataset, var_name)) for var_name in var_names})
+        ds = ds.assign(**{var_name: (["times"], get_var_field(key, dict_, var_dataset, var_name)) for var_name,var_dataset in zip(var_names_ls, var_dataset_ls)})
 
     if load_clusters:
         ds = ds.assign(clusters=(["times"], load_cluster_for_container(cluster_allocations, dict_[key]["times"])))
@@ -189,6 +202,8 @@ def load_tracking_objects(
     last_year :int,
     load_coordinates :bool=False,
     load_clusters :bool=False,
+    var_paths_ls:list[str] = None,
+    var_names_ls:list[str] = None,
     exp =None,
     save_pkl : bool =True,
     compute_hist :bool =False,
@@ -206,10 +221,15 @@ def load_tracking_objects(
         pkl_container_path = pkl_container_path + "_withClusters"
 
 
+    if var_names_ls is not None:
+         pkl_container_path = pkl_container_path + "_" + "_".join(var_names_ls)
+
     if os.path.isfile(pkl_container_path + ".pkl"):
         print(f"{pkl_container_path} exists. Loading...")
         IVTobj_ls = load_pkl(pkl_container_path)
 
+
+         
     else:
         IVTobj_ls = ObjectContainer([])
 
@@ -218,11 +238,24 @@ def load_tracking_objects(
             pickle_file_path = f"{input_path}{type_}_{input_file_name_temp}_{get_datetime_str(start_date)}-{get_datetime_str(end_date)}_corrected"
 
             dict_ = load_pkl(pickle_file_path)
+            
+            
+            if var_paths_ls is not None:
+                var_ds_ls = []
+                for var_path in var_paths_ls:
+                    files = glob.glob(var_path+"*.nc")
+                    full_var_ds = xr.open_mfdataset(files)
+
+                    var_ds = full_var_ds.sel(time=slice(start_date, end_date+relativedelta(months=1))).load()
+                    
+                    var_ds_ls.append(var_ds)
+                    
+
             for object_id in dict_.keys():
                 #print (object_id)
                 try:
                     ds = create_obj_from_dict(
-                        dict_, object_id, load_coordinates=load_coordinates, load_clusters=load_clusters, exp=exp
+                        dict_, object_id, load_coordinates=load_coordinates, load_clusters=load_clusters, exp=exp, var_dataset_ls=var_ds_ls, var_names_ls=var_names_ls
                     )
                 except ValueError as ex:
                     continue
@@ -246,11 +279,43 @@ def load_tracking_objects(
         if save_pkl:
             print(f"Saving {pkl_container_path}")
             save_as_pkl(IVTobj_ls, pkl_container_path)
+            
         
     
 
     return IVTobj_ls
 
 
-def add_variable_to_container():
-    pass
+
+def get_var_field(key, dict_, var_dataset,var_name):
+
+
+    lat_idx_slice = dict_[key]["lat_idx_slice"]
+    lon_idx_slice = dict_[key]["lon_idx_slice"]
+
+    lat_slice = GridPoint.rotated_lat_grid[lat_idx_slice, lon_idx_slice]
+    lon_slice = GridPoint.rotated_lon_grid[lat_idx_slice, lon_idx_slice]
+    
+    var_slice_temp = getattr(var_dataset.sel(time = dict_[key]["times"]), var_name)
+    var_slice =var_slice_temp.values[:,lat_idx_slice, lon_idx_slice]
+
+    indices = np.argwhere(~np.isnan(dict_[key]["data_slice"]))
+    time_steps = np.unique(indices[:, 0])
+
+    
+    ls = []
+    for tstep in time_steps:
+        idx = indices[indices[:, 0] == tstep][:, 1:]
+
+        sub_ls_lat = [lat_slice[tuple(x)] for x in idx]
+        sub_ls_lon = [lon_slice[tuple(x)] for x in idx]
+        sub_ls_var = [var_slice[tstep,x[0],x[1]] for x in idx]
+
+        sub_dict = {
+            RotatedGridPoint(lat, lon): str_to_variable_class(var_name)(var) for lat, lon, var in zip(sub_ls_lat, sub_ls_lon,sub_ls_var)
+        }
+        
+
+        ls.append(sub_dict)
+    return np.array(ls, dtype="object")
+

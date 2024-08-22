@@ -1,13 +1,8 @@
 from enum import Enum, IntEnum
 
-from src.Experiments_infos import (
-    ERA5,
-    ICON_CNRM_CONTROL,
-    ICON_CNRM_SSP,
-    ICON_ERA5,
-    ICON_NorESM_CONTROL,
-    ICON_NorESM_SSP,
-)
+from src.Experiments_infos import (ERA5, ICON_CNRM_CONTROL, ICON_CNRM_SSP,
+                                   ICON_ERA5, ICON_NorESM_CONTROL,
+                                   ICON_NorESM_SSP)
 from src.GridPoints import Domain
 
 
@@ -75,6 +70,6 @@ class Experiments(Enum):
 class Domains(Enum):
     NORTH_ATLANTIC = Domain(north=70, south=50, east=0, west=-60)
     NORTH_PACIFIC = Domain(north=70, south=40, east=-160, west=140)
-    CENTRAL_ARCTIC = Domain(north=90, south=75, east=180, west=-180)
+    CENTRAL_ARCTIC = Domain(north=90, south=85, east=180, west=-180)
     FRAM_STRAIT = Domain(north=81, south=77, east=10, west=-10)
     GREENLAND_SEA = Domain(north=80, south=75, east=10, west=-20)
