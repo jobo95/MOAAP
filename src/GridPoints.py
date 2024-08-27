@@ -153,7 +153,7 @@ class Domain:
         self.west = west
 
     def __contains__(self, p: RegularGridPoint):
-        """ 
+        """
         Check if RegularGridPoint is in Domain ("Gridpoint in Domain" syntax)
         """
 
@@ -177,9 +177,9 @@ class Domain:
                 and abs(p.lon) > self.east
             )
 
-    def get_gridpoint_field(self, regular:bool =True)-> list[GridPoints]:
+    def get_gridpoint_field(self, regular: bool = True) -> list[GridPoint]:
         """
-        Get all gridpoints that lie in the specific domain
+        Get all gridpoints that are in the specific domain
 
         Args:
             regular (bool, optional): If true return regular coordinates, else Rotated Coordinates. Defaults to True.
@@ -188,12 +188,17 @@ class Domain:
             list[GridPoint]: List of gridpoints inside the domain
         """
         gridpoints = RegularGridPoint.get_all_gridpoints()
-        
-        if regular:
-            return [gridpoint for gridpoint in gridpoints if self.__contains__(gridpoint)]
-        
-        return [gridpoint.to_rotated() for gridpoint in gridpoints if self.__contains__(gridpoint)]
 
+        if regular:
+            return [
+                gridpoint for gridpoint in gridpoints if self.__contains__(gridpoint)
+            ]
+
+        return [
+            gridpoint.to_rotated()
+            for gridpoint in gridpoints
+            if self.__contains__(gridpoint)
+        ]
 
 
 def get_Gridpoint_field(key, dict_):
@@ -221,3 +226,41 @@ def get_Gridpoint_field(key, dict_):
         gridpoint_ls.append(sub_gridpoint_ls)
     return np.array(gridpoint_ls, dtype="object")
     
+# @measure_time_func_lines
+def select_by_gridpoint_fraction(
+    obj: xr.Dataset,
+    domain_grid_point_field: list[RegularGridPoint],
+    domain_fraction: float = 0.5,
+    object_fraction: float = 0.8,
+    select_last_timesteps: bool = False,
+    step: int = 1,
+) -> xr.Dataset:
+    """Select only those objects that, at  any time step, cover a certain fraction of the domain OR whose overall object size lies within a certain fraction of the domain.
+
+    Args:
+        obj (xr.Dataset): IVT object
+        domain_grid_point_field (list[RegularGridPoint]): list of regular grid points that lie within the domain
+        domain_fraction (float, optional): Fraction of domain that has to be covered by object. Defaults to 0.5. If 0 all objects are selected.
+        object_fraction (float, optional): Fraction of object that has to lie inside the domain. Defaults to 0.8.
+        select_last_timesteps (bool, optional): If an object covers the domains at timestep i, then select only the i-th to the last timesteps of the object (if set to True). Defaults to False.
+        step (int, optional): . Defaults to 1.
+
+    Returns:
+        - xr.Dataset: selected objects or None if condition not met
+    """
+    points_domain = set(domain_grid_point_field)
+    points_domain_length = len(points_domain)
+    for i, points in enumerate(obj.gridpoints.values[::step]):
+        sel_points = set(points).intersection(points_domain)
+
+        # fraction of domain covered by  object grid points
+        frac1 = len(sel_points) / points_domain_length
+
+        # fraction of object grid points that are in the domain
+        frac2 = len(sel_points) / len(points)
+
+        if frac1 >= domain_fraction or frac2 >= object_fraction:
+            if select_last_timesteps:
+                return obj.isel(times=slice(i * step, None))
+            return obj
+

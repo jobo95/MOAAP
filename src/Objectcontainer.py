@@ -7,7 +7,7 @@ import pandas as pd
 import xarray as xr
 
 from src.Enumerations import Domains
-from src.utils import select_by_gridpoint_fraction
+from src.GridPoints import select_by_gridpoint_fraction
 
 
 class ObjectContainer(list):
@@ -32,14 +32,14 @@ class ObjectContainer(list):
             )
 
         super().__init__(iterable)
+
     def __getitem__(self, index):
         result = super().__getitem__(index)
         if isinstance(index, slice):
             return ObjectContainer(result)
         else:
             return result
-        
-        
+
     def append(self, item) -> None:
         """Append Tracking
 
@@ -55,7 +55,7 @@ class ObjectContainer(list):
         #    raise TypeError("Object container can only append xarray Dataset objects")
         return super().append(item)
 
-    def sel_season(self, season  ) -> ObjectContainer:
+    def sel_season(self, season) -> ObjectContainer:
         """Select tracking objects that start in a specific season
 
         Args:
@@ -100,7 +100,7 @@ class ObjectContainer(list):
             attr (str): Attribute name
 
         Returns:
-            Array-like: attribute's mean value for each individual Tracking object
+            Array-like: attribute's median value for each individual Tracking object
         """
         return np.squeeze([x.get.median(attr) for x in self])
 
@@ -182,42 +182,67 @@ class ObjectContainer(list):
 
         return ObjectContainer([x.isel(times=time_slice) for x in self])
 
-    def sel_by_time(self,time : np.datetime64) -> ObjectContainer:
+    def sel_by_time(self, time: np.datetime64) -> ObjectContainer:
         return ObjectContainer([x for x in self if time in x.times])
 
-    def sel_by_domain(self, domain: Domains, type_: str, domain_frac:float = 0.0, select_last_timesteps :bool = False) -> ObjectContainer:
-        """Select objects which trajectories are in a certain domain (at their origin, end or at any time)
+    def sel_by_domain(
+        self,
+        domain: Domains,
+        type_: str,
+        domain_frac: float = 0.0,
+        select_last_timesteps: bool = False,
+    ) -> ObjectContainer:
+        """Select objects which trajectories are in a certain domain (at their origin, end or at any time). Selections for "start" and "end" are currently only  based on regular tracks.
+
 
         Args:
             domain (Domains): Domain object
             type_ (str): Can be either 'origin', 'end' or 'anytime'
-            domain_frac (float, optional): Fraction of domain covered by object. Defaults to 0.0.
+            domain_frac (float, optional): Fraction of domain covered by object. If 0 , track is used for selection, if greater 0 than the spatial extend of the object is considered. Defaults to 0.0.
 
         Returns:
             ObjectContainer: Selected Object Container
         """
-        
-        if type_=="origin":
+
+        if type_ == "origin":
             return ObjectContainer(
                 [x for x in self if x.get.regular_track[0] in domain.value]
             )
-        elif type_=="end":
+        elif type_ == "end":
             return ObjectContainer(
                 [x for x in self if x.get.regular_track[-1] in domain.value]
             )
-        elif type_=="anytime":
+        elif type_ == "anytime":
             if domain_frac:
-                domain_grid_point_field = domain.value.get_gridpoint_field(regular=False)
-                
-                return ObjectContainer([select_by_gridpoint_fraction(x, domain_grid_point_field, domain_frac, select_last_timesteps=select_last_timesteps) for x in self if select_by_gridpoint_fraction(x, domain_grid_point_field, domain_frac, select_last_timesteps=select_last_timesteps is not None)])
-                
-            return ObjectContainer([x for x in self if any(y in domain.value for y in x.get.regular_track)])
-        
-        
-        
+                domain_grid_point_field = domain.value.get_gridpoint_field(
+                    regular=False
+                )
+
+                return ObjectContainer(
+                    [
+                        select_by_gridpoint_fraction(
+                            x,
+                            domain_grid_point_field,
+                            domain_frac,
+                            select_last_timesteps=select_last_timesteps,
+                        )
+                        for x in self
+                        if select_by_gridpoint_fraction(
+                            x,
+                            domain_grid_point_field,
+                            domain_frac,
+                            select_last_timesteps=select_last_timesteps,
+                        )
+                        is not None
+                    ]
+                )
+
+            return ObjectContainer(
+                [x for x in self if any(y in domain.value for y in x.get.regular_track)]
+            )
+
         else:
             raise ValueError("type_ has to be either 'origin', 'end' or 'anytime'")
-        
 
     def sel_by_regime(self, regime_name: str) -> ObjectContainer:
         def get_idx(obj_, regime_name):
@@ -230,11 +255,9 @@ class ObjectContainer(list):
         )
         return ObjectContainer([x for x in container if x.times.size > 0])
 
-    def get_index_by_id(self, obj_id :int) -> xr.Dataset:
-        for ind,obj in enumerate(self):
+    def get_index_by_id(self, obj_id: int) -> xr.Dataset:
+        for ind, obj in enumerate(self):
             if int(obj_id) == int(obj.id_):
                 return ind
             else:
                 continue
-            
-

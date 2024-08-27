@@ -349,5 +349,3 @@ def plot_tracks_rotated_grid(
                 color=color,
                 linewidth=2,
             )
-
-
