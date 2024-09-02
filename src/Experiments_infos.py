@@ -13,7 +13,7 @@ class ICONExperiment:
     clustering_target_grid: str = (
         "/work/aa0238/a271093/data/regridding_files/NH_-90_90_20_88_reglonlat_1degree.nc"
     )
-    IVT_thresh_path = "/work/aa0238/a271093/data/input/"
+    IVT_thresh_path = "/work/aa0238/a271093/data/input/IVT_thresholds/"
 
     slp_nc: str = "PMSL"
     lat_nc: str = "lat"
@@ -25,7 +25,7 @@ class ICONExperiment:
 
 @dataclass
 class SSP_EXPERIMENT:
-    year_start: int = 2015
+    year_start: int = 2014
     year_end: int = 2100
 
 
@@ -150,6 +150,9 @@ class ICON_CNRM_CONTROL(ICONExperiment, CONTROL_EXPERIMENT, CNRM_EXPERIMENT):
 class ICON_NorESM_SSP(ICONExperiment, NorESM_EXPERIMENT, SSP_EXPERIMENT):
     exp_name: str = "NorESM_ICON_SSP"
 
+    path_IVT: str = (
+        "/work/aa0238/a271093/data/Jan_runs/ICON_NorESM_ssp/NorESM_ssp_remapped_3x/"
+    )
     path_raw: str = (
         "/work/aa0049/a271109/spice-v2.2/chain/work/polarres_wp3_cmip_NorESM_ssp370/post/yearly/"
     )
@@ -159,6 +162,10 @@ class ICON_NorESM_SSP(ICONExperiment, NorESM_EXPERIMENT, SSP_EXPERIMENT):
     gph_path_raw_gcm: str = f"{path_raw_gcm}zg/gn/v20191108/"
     gph_files_raw_gcm: Tuple[str] = tuple(sorted(glob.glob(gph_path_raw_gcm + "*")))
     clustering_data_path: str = "/work/aa0238/a271093/data/clustering/NorESM_ssp/"
+    IVTobj_out_path: str = (
+        "/work/aa0238/a271093/results/MOAAP/IVT_Tracking/NorESM_ssp_remapped_3x/"
+    )
+    IVT_thresh_file_85: str = "IVT_85_percentiles_CNMR_ssp_3dx3dy.nc"
 
     BMU_file: str = (
         "NorESM_ICON_SSP_gph70000_2015_2100_reglonlat_-90_90_20_88_1deg_DJF_fldmean_detrend_del29feb_aac_20PCs_4clusters_Ref_ERA5KmeansPCA.csv"

@@ -12,7 +12,7 @@ class GridPoint(ABC):
     """
 
     input_field_grid = (
-        "/work/aa0238/a271093/data/input/IVT_85_percentiles_CNMR_control_3dx3dy.nc"
+        "/work/aa0238/a271093/data/input/IVT_thresholds/IVT_85_percentiles_CNMR_control_3dx3dy.nc"
     )
 
     grid_field = xr.open_dataset(input_field_grid, cache=True)

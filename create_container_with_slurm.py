@@ -29,7 +29,7 @@ input_file_name_temp_ERA5 = 'MOAPP_ERA5_100and85controlperc_remapped_3x'
 input_file_name_temp_ICON_ERA5 = 'MOAPP_ICON_ERA5_100and85ERA5perc_remapped_3x'
 
 first_year = 1979
-last_year = 2023
+last_year = 2022
 num_years = last_year-first_year
 
 IVT_objs_ERA5 = load_tracking_objects(input_path_ERA5,

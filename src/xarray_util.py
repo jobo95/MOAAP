@@ -19,6 +19,8 @@ from src.utils import (
     save_as_pkl,
     str_to_variable_class,
 )
+import sys
+#from memory_profiler import profile
 
 
 @xr.register_dataset_accessor("get")
@@ -209,7 +211,7 @@ def load_cluster_for_container(
 
     return selected_cluster
 
-
+#@profile
 def load_tracking_objects(
     input_path: str,
     input_file_name_temp: str,
@@ -250,6 +252,7 @@ def load_tracking_objects(
 
             dict_ = load_pkl(pickle_file_path)
 
+            var_ds_ls = None
             if var_paths_ls is not None:
                 var_ds_ls = []
                 for var_path in var_paths_ls:
@@ -278,6 +281,7 @@ def load_tracking_objects(
                     continue
 
                 IVTobj_ls.append(ds)
+                
 
         if save_pkl:
             print(f"Saving {pkl_container_path}")
@@ -305,8 +309,8 @@ def get_var_field(key, dict_, var_dataset, var_name):
     lat_idx_slice = dict_[key]["lat_idx_slice"]
     lon_idx_slice = dict_[key]["lon_idx_slice"]
 
-    lat_slice = GridPoint.rotated_lat_grid[lat_idx_slice, lon_idx_slice]
-    lon_slice = GridPoint.rotated_lon_grid[lat_idx_slice, lon_idx_slice]
+    #lat_slice = GridPoint.rotated_lat_grid[lat_idx_slice, lon_idx_slice]
+    #lon_slice = GridPoint.rotated_lon_grid[lat_idx_slice, lon_idx_slice]
 
     var_slice_temp = getattr(var_dataset.sel(time=dict_[key]["times"]), var_name)
     var_slice = var_slice_temp.values[:, lat_idx_slice, lon_idx_slice]
@@ -318,14 +322,17 @@ def get_var_field(key, dict_, var_dataset, var_name):
     for tstep in time_steps:
         idx = indices[indices[:, 0] == tstep][:, 1:]
 
-        sub_ls_lat = [lat_slice[tuple(x)] for x in idx]
-        sub_ls_lon = [lon_slice[tuple(x)] for x in idx]
+        #sub_ls_lat = [lat_slice[tuple(x)] for x in idx]
+        #sub_ls_lon = [lon_slice[tuple(x)] for x in idx]
         sub_ls_var = [var_slice[tstep, x[0], x[1]] for x in idx]
 
-        sub_dict = {
-            RotatedGridPoint(lat, lon): str_to_variable_class(var_name)(var)
-            for lat, lon, var in zip(sub_ls_lat, sub_ls_lon, sub_ls_var)
-        }
-
+        #sub_dict = {
+        #    RotatedGridPoint(lat, lon): str_to_variable_class(var_name)(var)
+        #    for lat, lon, var in zip(sub_ls_lat, sub_ls_lon, sub_ls_var)
+        #}
+        sub_dict = [
+            str_to_variable_class(var_name)(var)
+            for var in sub_ls_var
+        ]
         ls.append(sub_dict)
     return np.array(ls, dtype="object")

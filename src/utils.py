@@ -175,6 +175,51 @@ def calculate_average_ellapsed_time(
     return lon, lat, z
 
 
+def calculate_variable_sum(objs: ObjectContainer,
+                           attr :str, 
+                           average_per_object :bool = False,
+                           consider_history:bool = False
+                            ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+    # initialize counter with all grid point counts set to zero
+    counter_init_dict = dict.fromkeys(RotatedGridPoint.get_all_gridpoints(), 0)
+
+    grid_point_counter = Counter(counter_init_dict)
+    variable_dict = counter_init_dict
+
+    # iterate over all objects
+    for idx in range(len(objs)):
+        #get objects' grid points and variables
+        points = objs[idx].gridpoints.values
+        variable = getattr(objs[idx],attr).values
+
+        # iterate over all time steps of object
+        for tstep in range(len(points)):
+            
+            # count the absolute number of grid point occurrences
+            grid_point_counter.update(points[tstep])
+
+            # iterate over all grid points at time step  and add the variable value to dict
+            for i,point in enumerate(points[tstep]):
+                variable_dict[point] += variable[tstep][i]
+
+    z =list(variable_dict.values())
+
+    z = np.array([x.value if isinstance(x, str_to_variable_class(attr)) else x for x in z])
+    #z = np.array([x.value if isinstance(x, IWV) else x for x in z])
+
+    if average_per_object:
+        z = z.item()
+        z= np.array([val/point if point != 0 else -20 for val, point in zip(z, grid_point_counter.values())])
+
+    
+
+    grid_point_ls = list(grid_point_counter.keys())
+    lat = np.array([x.lat for x in grid_point_ls])
+    lon = np.array([x.lon for x in grid_point_ls])          
+    
+    return lon, lat, z 
+
 
 def read_cluster_csv(file_name: str) -> pd.DataFrame:
 

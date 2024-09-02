@@ -8,6 +8,7 @@ import xarray as xr
 
 from src.Enumerations import Domains
 from src.GridPoints import select_by_gridpoint_fraction
+from typing import Type
 
 
 class ObjectContainer(list):
@@ -78,6 +79,9 @@ class ObjectContainer(list):
             list: List with attribute values of individual Tracking Objects
         """
 
+        if  not isinstance(attr, str):
+            raise TypeError("attr must be a string")
+
         return [getattr(x.get, attr) for x in self]
 
     def obj_means(self, attr: str):
@@ -90,6 +94,10 @@ class ObjectContainer(list):
         Returns:
             Array-like: attribute's mean value for each individual Tracking object
         """
+
+        if not isinstance(attr, str):
+            raise TypeError("attr must be a string")
+        
         return np.squeeze([x.get.mean(attr) for x in self])
 
     def obj_medians(self, attr: str):
@@ -102,6 +110,8 @@ class ObjectContainer(list):
         Returns:
             Array-like: attribute's median value for each individual Tracking object
         """
+        if not isinstance(attr,str):
+            raise TypeError("attr must be a string")
         return np.squeeze([x.get.median(attr) for x in self])
 
     def max(self, attr: str) -> float:
@@ -114,6 +124,8 @@ class ObjectContainer(list):
         Returns:
             float: max value
         """
+        if  not isinstance(attr,str):
+            raise TypeError("attr must be a string")
         return float(np.max([getattr(x.get, attr) for x in self]))
 
     def quantile(self, attr: str, quant: float) -> float:
@@ -126,6 +138,14 @@ class ObjectContainer(list):
         Returns:
             float:quantile of attribute
         """
+        if not isinstance(attr,str):
+            raise TypeError("attr must be a string")
+        if quant < 0 or quant > 1:
+            raise ValueError("quant must be between 0 and 1")
+        if not isinstance(quant,float):
+            raise TypeError("quant must be a float")
+        
+        
         return np.quantile([x.get.mean(attr) for x in self], quant)
 
     def count(self) -> int:
@@ -136,11 +156,25 @@ class ObjectContainer(list):
         """
         return len(self)
 
-    def sortby(self, attr, reverse=False):
+    def sortby(self, attr:str, reverse:bool=False) -> ObjectContainer:
+        """Sort Objects in container according to some attribute
+
+        Args:
+            attr (str): Object attribute that should be used for sorting
+            reverse (bool, optional): If True, sort in descending order. Defaults to False.
+
+        Returns:
+            ObjectContainer: sorted Container
+        """
+        if not isinstance(attr, str):
+            raise TypeError("attr must be a string")
+
+        if not isinstance(reverse,bool):
+            raise TypeError("reverse must be a boolean")
 
         return self.sort(reverse=reverse, key=lambda x: getattr(x.get, attr))
 
-    def filter_by_median(self, threshold, attr, above=True) -> ObjectContainer:
+    def filter_by_median(self, threshold:float, attr:str, above:bool=True) -> ObjectContainer:
         """Select only those Tracking Objects in Container which attributes' median value are below/above a certain threshold
 
         Args:
@@ -151,13 +185,41 @@ class ObjectContainer(list):
         Returns:
             Object_container: Selected Tracking objects
         """
+        
+        if not isinstance(attr, str):
+            raise TypeError("attr must be a string")
+        if not isinstance(threshold,float):
+            raise TypeError("threshold must be a float")
+        if not isinstance(above,bool):
+            raise TypeError("above must be a boolean")
+        
         if above:
 
             return ObjectContainer([x for x in self if x.get.median(attr) > threshold])
         else:
             return ObjectContainer([x for x in self if x.get.median(attr) < threshold])
 
-    def filter_by_attr_category(self, attr, category) -> ObjectContainer:
+    def filter_by_attr_category(self, attr:str, category:str) -> ObjectContainer:
+        """Filter out only those elements, for which the median of a specific attribute falls into a certain category ("small", "medium", "large").
+            "small" refers to all objects with attributes value below the  0.33 quantiles (quantile determined from all objects)
+            "medium" refers to all objects with attributes value between 0.33 and 0.66 quantiles
+            "large" refers to all objects with attributes value above the 0.66 quantiles
+
+        Args:
+            attr (str): Attribute name
+            category (str): "small", "medium" or "large"
+
+        Returns:
+            ObjectContainer: Filtered Object Container
+        """
+        
+        if not isinstance(attr,str):
+            raise TypeError("attr must be a string")
+        if  not isinstance(category,str):
+            raise TypeError("category must be a string")
+        if category not in ["Small", "Medium", "Large"]:
+            raise ValueError("category must be one of 'Small', 'Medium' or 'Large'")
+        
         q033 = self.quantile(attr=attr, quant=0.33)
         q066 = self.quantile(attr=attr, quant=0.66)
 
@@ -178,16 +240,29 @@ class ObjectContainer(list):
         Args:
             time_slice (slice): time indices to be selected
 
+        Returns:
+            ObjectContainer: Object container with objects which time steps have been selected
         """
+        if not isinstance(time_slice, slice):
+            raise TypeError("time_slice must be a slice")
 
-        return ObjectContainer([x.isel(times=time_slice) for x in self])
+        return ObjectContainer([x.isel(times=time_slice) for x in self if x.isel(times=time_slice).times.size > 0])
 
     def sel_by_time(self, time: np.datetime64) -> ObjectContainer:
+        """Select only those object which live at a certain time stamp
+
+        Args:
+            time (np.datetime64): Time stamp
+
+        """
+        if not isinstance(time, np.datetime64):
+            raise TypeError("time must be a np.datetime64")
+        
         return ObjectContainer([x for x in self if time in x.times])
 
     def sel_by_domain(
         self,
-        domain: Domains,
+        domain: Type[Domains],
         type_: str,
         domain_frac: float = 0.0,
         select_last_timesteps: bool = False,
@@ -196,13 +271,30 @@ class ObjectContainer(list):
 
 
         Args:
-            domain (Domains): Domain object
+            domain (Type[Domains]): Domain object
             type_ (str): Can be either 'origin', 'end' or 'anytime'
             domain_frac (float, optional): Fraction of domain covered by object. If 0 , track is used for selection, if greater 0 than the spatial extend of the object is considered. Defaults to 0.0.
 
         Returns:
             ObjectContainer: Selected Object Container
         """
+        if not isinstance(domain, Domains.GREENLAND_SEA):
+            raise TypeError("domain must be of type {type(Domains.GREENLAND_SEA)}")
+
+        if not isinstance(type_, str):
+            raise TypeError("type_ must be a string")
+        if type_ not in ["origin", "end", "anytime"]:
+            raise ValueError("type_ must be one of 'origin', 'end' or 'anytime'")
+
+        if not isinstance(domain_frac, float):
+            raise TypeError("domain_frac must be a float")
+
+        if domain_frac < 0 or domain_frac > 1:
+            raise ValueError("domain_frac must be between 0 and 1")
+
+        if not isinstance(select_last_timesteps, bool):
+            raise TypeError("select_last_timesteps must be a boolean")
+        
 
         if type_ == "origin":
             return ObjectContainer(
@@ -256,6 +348,13 @@ class ObjectContainer(list):
         return ObjectContainer([x for x in container if x.times.size > 0])
 
     def get_index_by_id(self, obj_id: int) -> xr.Dataset:
+        """Get the objects index in the ObjectContainer list based on its object id
+
+        Args:
+            obj_id (int): Object id
+
+        """
+        
         for ind, obj in enumerate(self):
             if int(obj_id) == int(obj.id_):
                 return ind

@@ -7,7 +7,7 @@ from scipy.interpolate import griddata
 from src.Enumerations import Domains
 
 
-def plot_unstructured_rotated_grid(
+def plot_on_rotated_grid(
     lon,
     lat,
     z,
@@ -19,6 +19,7 @@ def plot_unstructured_rotated_grid(
     use_contourf: bool = True,
     title="",
     cbar_label=None,
+    font_size= 12,
     cmap="Blues",
     plot_domains: dict[Domains, str] = None,
     cbar: bool = True,
@@ -35,6 +36,7 @@ def plot_unstructured_rotated_grid(
         levels (int or array-like): Number and position of contour lines. Default to [1, 2, 3, 5,7,9,12,15,20,25,30].
         subplts (tuple): number/shape of subplots. Default to (4,1).
         pad (float): padding to align the colorbar
+        use_contourf (bool, optional): Plot withcontourf else use tricontourf. Defaults to True.
         index (int): index for subplots.
         title (bool, optional): Set title. Defaults to None.
         cbar_label (bool, optional): Add colorbar. Defaults to ''.
@@ -67,12 +69,12 @@ def plot_unstructured_rotated_grid(
         xlocs=range(-180, 180, 45),
         ylocs=range(-90, 90, 10),
         linestyle=":",
-    )  # draw_labels=True,
+    )  
     ax.coastlines(linewidth=0.3, color="black")
 
-    xx = lat.reshape((194, 193))
-    yy = lon.reshape((194, 193))
-    zz = z.reshape((194, 193))
+    #xx = lat.reshape((194, 193))
+    #yy = lon.reshape((194, 193))
+    #zz = z.reshape((194, 193))
     # plot = plt.contourf(
     #    xx,
     #    yy,
@@ -93,7 +95,7 @@ def plot_unstructured_rotated_grid(
         # grid_z_linear = griddata((x, y), z, (grid_x, grid_y), method='linear')
 
         # Interpolate using 'cubic' scheme
-        grid_z_cubic = griddata((x, y), z, (grid_x, grid_y), method="cubic")
+        grid_z_cubic = griddata((x, y), z, (grid_x, grid_y), method="linear")
 
         # Define a grid for interpolation
         grid_x, grid_y = np.mgrid[
@@ -106,6 +108,7 @@ def plot_unstructured_rotated_grid(
             levels=levels,
             cmap=cmap,
             transform=crs_arctic,
+            extend="both"
         )
     else:
         plot = plt.tricontourf(
@@ -115,6 +118,7 @@ def plot_unstructured_rotated_grid(
             levels=levels,
             cmap=cmap,
             transform=crs_arctic,
+            extend="both"
         )
     if plot_domains:
         for domain, color in plot_domains.items():
@@ -148,7 +152,7 @@ def plot_unstructured_rotated_grid(
                 linewidth=2,
             )
 
-    plt.title(title)
+    plt.title(title, fontsize=font_size)
 
     # if one_cbar:
     #    if (index + 1) % subplts[1] == 0:
@@ -168,7 +172,7 @@ def plot_unstructured_rotated_grid(
     #        cbar.set_label(cbar_label)
     if cbar:
         cbar = plt.colorbar(plot, ax=ax, pad=pad)
-        cbar.set_label(cbar_label)
+        cbar.set_label(cbar_label, fontsize=font_size)
 
     # plt.show()
 
@@ -232,6 +236,7 @@ def plot_contourf_rotated_grid(
         levels=levels,
         cmap=cmap,
         transform=crs_arctic,
+        extend = 'both'
     )
     if quiver_dat is not None:
         plot_dat_u = quiver_dat[0].flatten()
@@ -267,6 +272,7 @@ def plot_contourf_rotated_grid(
         )
 
     cbar = plt.colorbar(plot, ax=ax, pad=pad)
+    cbar.ax.tick_params(labelsize=font_size-5)
     cbar.set_label(cbar_label)
     plt.title(title)
 

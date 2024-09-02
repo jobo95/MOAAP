@@ -1,21 +1,28 @@
+import numbers
 import functools
 import math
-import numbers
+
+
+
+
+
+
+
 
 
 @functools.total_ordering
 class Variable(numbers.Integral):
+    """ 
+    
     """
-    Custom class that rounds input to nearest integer and creates singelton object for each unique value.
-    """
-
     ####TODO descriptor for fobridding value setting#####
     _instances = {}
+    
 
     def __new__(cls, value):
-
-        # value =cls._find_closest_value_in_bins(value, cls.bins)
-        value = cls._round_to_int(value)
+        
+        #value =cls._find_closest_value_in_bins(value, cls.bins)
+        value =cls._round_to_int(value)
         # Wenn eine Instanz für den Wert bereits existiert, wird diese zurückgegeben
         if value in cls._instances:
             return cls._instances[value]
@@ -23,30 +30,29 @@ class Variable(numbers.Integral):
         instance = super().__new__(cls)
         cls._instances[value] = instance
         return instance
-
+    
     def __init__(self, value) -> None:
-        # self.value = self._find_closest_value_in_bins(value, self.bins)
-        self.value = self._round_to_int(value)
-
+        #self.value = self._find_closest_value_in_bins(value, self.bins)
+        self.value =self._round_to_int(value)
+    
     def __str__(self) -> str:
         return f"{self.__class__.__name__}(value={self.value})"
-
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(value={self.value})"
-
+    
     def __hash__(self) -> int:
         return hash(self.value)
-
+    
     def __getnewargs__(self):
         return (self.value,)
-
+    
     @classmethod
-    def _round_to_int(cls, value):
+    def _round_to_int(cls,value):
         return float(round(value))
-
-    # @classmethod
-    # def _find_closest_value_in_bins(cls, value:float, bins:set)-> int:
+    #@classmethod
+    #def _find_closest_value_in_bins(cls, value:float, bins:set)-> int:
     #    return min(bins, key=lambda num: abs(num - value))
+    
 
     def __int__(self):
         return self.value
@@ -194,16 +200,15 @@ class Variable(numbers.Integral):
         return self.__class__(other | self.value)
 
     def __rxor__(self, other):
-        return self.__class__(other ^ self.value)
-
-
-# class Variable2(int):
+        return self.__class__(other ^ self.value)        
+        
+#class Variable2(int):
 #    ####TODO descriptor for fobridding value setting#####
 #    _instances = {}
-#
+#    
 #
 #    def __new__(cls, value):
-#
+#        
 #        #value =cls._find_closest_value_in_bins(value, cls.bins)
 #        value =cls._round_to_int(value)
 #        # Wenn eine Instanz für den Wert bereits existiert, wird diese zurückgegeben
@@ -213,30 +218,28 @@ class Variable(numbers.Integral):
 #        instance = super().__new__(cls, value)
 #        cls._instances[value] = instance
 #        return instance
-#
-#
+#    
+#    
 #    def __str__(self) -> str:
 #        return f"{self.__class__.__name__}({super().__str__()})"
-#
+#    
 #    def __repr__(self) -> str:
 #        return f"{self.__class__.__name__}({super().__repr__()})"
-#
+#    
 #    @classmethod
 #    def _round_to_int(cls,value):
 #        return float(round(value))
-
+ 
+        
 
 class IWV(Variable):
-    pass
-
+    _instances = {}
 
 class IVT(Variable):
-    pass
-
+    _instances = {}
 
 class IVTv(Variable):
-    pass
-
-
+    _instances = {}
 class T2M(Variable):
-    pass
+    _instances = {}
+
