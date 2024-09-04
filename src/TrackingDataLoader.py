@@ -5,6 +5,48 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from cdo import Cdo
+import glob
+
+
+def load_tracking_data(var_path: str, var_name: str, start_date: datetime, end_date: datetime) -> xr.Dataset:
+    """
+    Loads tracking data in chunks of 7 months.
+
+    Args:
+        var_path (str): General path to the IVT data
+        var_name (str): Name of the IVT variable (IVTu or IVTv)
+        start_date (datetime): start date of the chunk
+        end_date (datetime): end date of the chunk
+
+    Returns:
+        xr.Dataset: tracking dataset
+    """
+    files = glob.glob(f"{var_path}{var_name}/*.nc")
+    full_var_ds = xr.open_mfdataset(files)
+
+    ds = full_var_ds.sel(time=slice(start_date, end_date)).load()
+
+    return ds
+
+
+def get_datetime_array_from_ds(ds:xr.Dataset) -> np.ndarray[datetime]:
+    """get a list of datetime.datetime objects from a xarray Tracking Dataset
+
+    Args:
+        ds (xr.Dataset): Tracking Dataset
+
+    Returns:
+        np.ndarray[datetime]: 1-D array of datetimes
+    """
+    
+    time = ds.time.values
+    return np.array([x.astype("datetime64[s]").astype(datetime) for x in list(time)])
+
+
+
+
+#!!!!!!!!!!!!!!!Legacy!!!!!!!!!!!!!!!!!
+
 
 
 class TrackingDataLoader:
@@ -210,3 +252,4 @@ class TrackingDataLoader:
                 input=f"{self.path_var + self.filename_year1} {self.path_var + self.filename_year2}",
                 output=f"{self.scratch_path}{self.filename_merged}",
             )
+
