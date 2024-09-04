@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import xarray as xr
+import cartopy.crs as ccrs
 
 
 class GridPoint(ABC):
@@ -12,7 +13,7 @@ class GridPoint(ABC):
     """
 
     input_field_grid = (
-        "/work/aa0238/a271093/data/input/IVT_thresholds/IVT_85_percentiles_CNMR_control_3dx3dy.nc"
+        "/work/aa0238/a271093/data/Jan_runs/ICON_CNRM_control/CNRM_control_remapped_3x/IVTu/IVTu_1997010100-1997123123_remapped_3x.nc"
     )
 
     grid_field = xr.open_dataset(input_field_grid, cache=True)
@@ -66,6 +67,7 @@ class GridPoint(ABC):
     def get_all_gridpoints(cls) -> list[GridPoint]:
         pass
 
+   
 
 class RegularGridPoint(GridPoint):
     """
@@ -73,7 +75,14 @@ class RegularGridPoint(GridPoint):
     """
 
     _instances = {}
-
+    reg2rot_dict = {(lat,lon):(rlat,rlon) 
+                    for lat,lon,rlat,rlon in 
+                    zip(GridPoint.regular_lat_grid.flatten(),
+                        GridPoint.regular_lon_grid.flatten(),
+                        GridPoint.rotated_lat_grid.flatten(),
+                        GridPoint.rotated_lon_grid.flatten())}
+   
+    
     def __init__(self, lat, lon):
 
         if lon < -180 or lon > 180:
@@ -94,16 +103,8 @@ class RegularGridPoint(GridPoint):
         Returns:
             RotatedGridPoint: Corresponding rotated grid point instance
         """
-        lat_idx = np.argwhere(GridPoint.regular_lat_grid == self.lat)[0, 0]
-        lon_idx = np.argwhere(GridPoint.regular_lon_grid == self.lon)[0, 1]
-
-        lat = GridPoint.rotated_lat_grid[lat_idx, lon_idx]
-        lon = GridPoint.rotated_lon_grid[lat_idx, lon_idx]
-
-        # crs_target=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
-        # crs_source=ccrs.PlateCarree()
-        # lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
-        return RotatedGridPoint(lat, lon)
+        
+        return RotatedGridPoint(*self.reg2rot_dict[(self.lat, self.lon)])
 
 
 class RotatedGridPoint(GridPoint):
@@ -112,7 +113,14 @@ class RotatedGridPoint(GridPoint):
     """
 
     _instances = {}
+    rot2reg_dict = {(rlat,rlon):(lat,lon) 
+                    for rlat,rlon,lat,lon in 
+                    zip(GridPoint.rotated_lat_grid.flatten(),
+                        GridPoint.rotated_lon_grid.flatten(),
+                        GridPoint.regular_lat_grid.flatten(),
+                        GridPoint.regular_lon_grid.flatten())}
 
+   
     @classmethod
     def get_all_gridpoints(cls) -> list[RotatedGridPoint]:
         lats, lons = cls.rotated_lat_grid.flatten(), cls.rotated_lon_grid.flatten()
@@ -126,16 +134,7 @@ class RotatedGridPoint(GridPoint):
             RegularGridPoint: Corresponding regular grid point instance
         """
 
-        lat_idx = np.argwhere(GridPoint.rotated_lat_grid == self.lat)[0, 0]
-        lon_idx = np.argwhere(GridPoint.rotated_lon_grid == self.lon)[0, 1]
-
-        lat = GridPoint.regular_lat_grid[lat_idx, lon_idx]
-        lon = GridPoint.regular_lon_grid[lat_idx, lon_idx]
-
-        # crs_source=ccrs.RotatedPole(pole_longitude=0, pole_latitude=6.55)
-        # crs_target=ccrs.PlateCarree()
-        # lon,lat = crs_target.transform_point(self.lon, self.lat, src_crs=crs_source)
-        return RegularGridPoint(lat, lon)
+        return RegularGridPoint(*self.rot2reg_dict[(self.lat, self.lon)])
 
 
 class Domain:
@@ -170,11 +169,13 @@ class Domain:
             )
 
         else:
+            east_360 = (360 + self.east) % 360
+            p_360 = (360 + p.lon) % 360
             return (
                 p.lat > self.south
                 and p.lat < self.north
-                and abs(p.lon) > self.west
-                and abs(p.lon) > self.east
+                and p_360 > self.west
+                and p_360 < east_360
             )
 
     def get_gridpoint_field(self, regular: bool = True) -> list[GridPoint]:

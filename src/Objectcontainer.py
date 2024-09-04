@@ -6,9 +6,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from src.Enumerations import Domains
-from src.GridPoints import select_by_gridpoint_fraction
-from typing import Type
+from src.GridPoints import select_by_gridpoint_fraction, Domain
+
 
 
 class ObjectContainer(list):
@@ -262,7 +261,7 @@ class ObjectContainer(list):
 
     def sel_by_domain(
         self,
-        domain: Type[Domains],
+        domain: Domain,
         type_: str,
         domain_frac: float = 0.0,
         select_last_timesteps: bool = False,
@@ -271,15 +270,15 @@ class ObjectContainer(list):
 
 
         Args:
-            domain (Type[Domains]): Domain object
+            domain (Domain): Domain object
             type_ (str): Can be either 'origin', 'end' or 'anytime'
             domain_frac (float, optional): Fraction of domain covered by object. If 0 , track is used for selection, if greater 0 than the spatial extend of the object is considered. Defaults to 0.0.
 
         Returns:
             ObjectContainer: Selected Object Container
         """
-        if not isinstance(domain, Domains.GREENLAND_SEA):
-            raise TypeError("domain must be of type {type(Domains.GREENLAND_SEA)}")
+        if not isinstance(domain, Domain):
+            raise TypeError("domain must be of type {type(Domain)}")
 
         if not isinstance(type_, str):
             raise TypeError("type_ must be a string")
@@ -298,15 +297,15 @@ class ObjectContainer(list):
 
         if type_ == "origin":
             return ObjectContainer(
-                [x for x in self if x.get.regular_track[0] in domain.value]
+                [x for x in self if x.get.regular_track[0] in domain]
             )
         elif type_ == "end":
             return ObjectContainer(
-                [x for x in self if x.get.regular_track[-1] in domain.value]
+                [x for x in self if x.get.regular_track[-1] in domain]
             )
         elif type_ == "anytime":
             if domain_frac:
-                domain_grid_point_field = domain.value.get_gridpoint_field(
+                domain_grid_point_field = domain.get_gridpoint_field(
                     regular=False
                 )
 
@@ -330,7 +329,7 @@ class ObjectContainer(list):
                 )
 
             return ObjectContainer(
-                [x for x in self if any(y in domain.value for y in x.get.regular_track)]
+                [x for x in self if any(y in domain for y in x.get.regular_track)]
             )
 
         else:

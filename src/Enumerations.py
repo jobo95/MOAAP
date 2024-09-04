@@ -74,7 +74,9 @@ class Experiments(Enum):
 
 class Domains(Enum):
     NORTH_ATLANTIC = Domain(north=70, south=50, east=0, west=-60)
-    NORTH_PACIFIC = Domain(north=70, south=40, east=-160, west=140)
+    NORTH_PACIFIC = Domain(north=70, south=40, east=-140, west=160)
     CENTRAL_ARCTIC = Domain(north=90, south=80, east=180, west=-180)
     FRAM_STRAIT = Domain(north=81, south=77, east=10, west=-10)
     GREENLAND_SEA = Domain(north=80, south=75, east=10, west=-20)
+    BERING_STRAIT = Domain(north=70, south=65, east=-150, west=160)
+    

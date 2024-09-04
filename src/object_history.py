@@ -11,9 +11,10 @@ from src.Objectcontainer import ObjectContainer
 def compute_history(
     object_container: ObjectContainer, threshold: float = 3
 ) -> ObjectContainer:
-    """Computes the splitting/merging history of all objects and adds it to the object_container. First, algorithm determines for start/end time of each reference object which other objects live over the entire domain at the same time. Then,
-       Then the closest distance between all these objects and the reference object is calculated (in the rotated coordinate system) and all objects with distance less than threshold are filtered. From these filtered objects all objects that are smaller (total IVT)
+    """Computes the splitting/merging history of all objects and adds it to the object_container. First, algorithm determines for start/end time of each reference object which other objects live  at the same time.
+       Then the closest distance between all those objects and the reference object is calculated (in the rotated coordinate system) and all objects with distance less than threshold are filtered. From these filtered objects all objects that are smaller (total IVT)
        than the reference object are distributed and from these the object with the closest distance is finally choosen.
+       !!! Assumes that grid points are evenly spaced!!!
 
     Args:
         object_container (ObjectContainer)

@@ -94,6 +94,7 @@ def count_objs_grid_points(
     objs: ObjectContainer, normalization_factor: float = 24.0
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
+    Counts the absolute number of objects at each grid point over all objects' time steps
 
     Args:
         objs (ObjectContainer): Object Container with tracking objects.
@@ -128,7 +129,7 @@ def count_objs_grid_points(
 def calculate_average_ellapsed_time(
     objs: ObjectContainer, normalization_factor: float = 1
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Calculate the average ellapsed time an object needs to reach a certain grid point
+    """Calculate the average ellapsed time an object needs to reach a certain grid point (not the objects' track, but any grid point covered by the object)
 
     Args:
         objs (ObjectContainer): IVT Objects

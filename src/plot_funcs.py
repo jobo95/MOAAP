@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import griddata
 
-from src.Enumerations import Domains
 
+from src.GridPoints import Domain
 
 def plot_on_rotated_grid(
     lon,
@@ -21,7 +21,7 @@ def plot_on_rotated_grid(
     cbar_label=None,
     font_size= 12,
     cmap="Blues",
-    plot_domains: dict[Domains, str] = None,
+    plot_domains: dict[Domain, str] = None,
     cbar: bool = True,
 ):
     """
@@ -41,6 +41,7 @@ def plot_on_rotated_grid(
         title (bool, optional): Set title. Defaults to None.
         cbar_label (bool, optional): Add colorbar. Defaults to ''.
         cmap (str,optional). Colorscheme. Default is "Blues".
+        plot_domains (dict[Domain, str], optional): Specify domains that should be plotted. Provide a dictionary with domain as key and color as value. Defaults to None.
     """
 
     # TODO origin hier nicht festsetzen
@@ -122,31 +123,34 @@ def plot_on_rotated_grid(
         )
     if plot_domains:
         for domain, color in plot_domains.items():
-            d = domain.value
+            if domain.east > domain.west:
+                east_west = np.linspace(domain.east, domain.west)
+            else:
+                east_west = np.linspace(domain.west, 360-np.abs(domain.east)) 
             plt.plot(
-                np.linspace(d.west, d.west),
-                np.linspace(d.south, d.north),
+                np.linspace(domain.west, domain.west),
+                np.linspace(domain.south, domain.north),
                 transform=ccrs.PlateCarree(),
                 color=color,
                 linewidth=2,
             )
             plt.plot(
-                np.linspace(d.west, d.east),
-                np.linspace(d.north, d.north),
+                east_west,
+                np.linspace(domain.north, domain.north),
                 transform=ccrs.PlateCarree(),
                 color=color,
                 linewidth=2,
             )
             plt.plot(
-                np.linspace(d.east, d.east),
-                np.linspace(d.north, d.south),
+                np.linspace(domain.east, domain.east),
+                np.linspace(domain.north, domain.south),
                 transform=ccrs.PlateCarree(),
                 color=color,
                 linewidth=2,
             )
             plt.plot(
-                np.linspace(d.east, d.west),
-                np.linspace(d.south, d.south),
+                east_west,
+                np.linspace(domain.south, domain.south),
                 transform=ccrs.PlateCarree(),
                 color=color,
                 linewidth=2,
@@ -195,6 +199,7 @@ def plot_contourf_rotated_grid(
     quiver_thinning=5,
     quiver_scale=100,
     quiver_unit_scale=10,
+    font_size=9,
 ):
 
     # TODO origin hier nicht festsetzen
@@ -287,7 +292,7 @@ def plot_tracks_rotated_grid(
     title=None,
     cbar_label=None,
     subplts=(4, 1),
-    plot_domains: dict[str, Domains] = {},
+    plot_domains: dict[str, Domain] = {},
 ):
 
     pole_lon = 0
@@ -326,31 +331,30 @@ def plot_tracks_rotated_grid(
 
     if plot_domains:
         for domain, color in plot_domains.items():
-            d = domain.value
             plt.plot(
-                np.linspace(d.west, d.west),
-                np.linspace(d.south, d.north),
+                np.linspace(domain.west, domain.west),
+                np.linspace(domain.south, domain.north),
                 transform=ccrs.PlateCarree(),
                 color=color,
                 linewidth=2,
             )
             plt.plot(
-                np.linspace(d.west, d.east),
-                np.linspace(d.north, d.north),
+                np.linspace(domain.west, domain.east),
+                np.linspace(domain.north, domain.north),
                 transform=ccrs.PlateCarree(),
                 color=color,
                 linewidth=2,
             )
             plt.plot(
-                np.linspace(d.east, d.east),
-                np.linspace(d.north, d.south),
+                np.linspace(domain.east, domain.east),
+                np.linspace(domain.north, domain.south),
                 transform=ccrs.PlateCarree(),
                 color=color,
                 linewidth=2,
             )
             plt.plot(
-                np.linspace(d.east, d.west),
-                np.linspace(d.south, d.south),
+                np.linspace(domain.east, domain.west),
+                np.linspace(domain.south, domain.south),
                 transform=ccrs.PlateCarree(),
                 color=color,
                 linewidth=2,
