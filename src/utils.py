@@ -8,19 +8,19 @@ import pandas as pd
 import xarray as xr
 from dateutil import relativedelta
 
-from src.GridPoints import RegularGridPoint
-from src.Objectcontainer import ObjectContainer
-
 # from src.decorators import measure_time_func, measure_time_func_lines
-from src.GridPoints import RotatedGridPoint
+from src.GridPoints import RegularGridPoint, RotatedGridPoint
+from src.Objectcontainer import ObjectContainer
 from src.Variable_classes import *
 
 
-
-
 def create_datetime_lists(
-    first_year: int, last_year: int, months_step: int = 7, start_month_ls :list[int]= [1, 7], correct_last_endtime: bool = True
-)-> tuple[list[datetime.datetime], list[datetime.datetime]]:
+    first_year: int,
+    last_year: int,
+    months_step: int = 7,
+    start_month_ls: list[int] = [1, 7],
+    correct_last_endtime: bool = True,
+) -> tuple[list[datetime.datetime], list[datetime.datetime]]:
     """
        Creates two datetime lists with n-months overlap, where n is determined by setting months_step and start_month_ls
 
@@ -37,17 +37,11 @@ def create_datetime_lists(
     """
 
     start_year_ar = np.arange(first_year, last_year)
-    
-    
+
     start_month_ls = [1, 7]
-    
-    start_date_list = [
-        datetime.datetime(x, y, 1, 0, 0)
-        for x, y in product(start_year_ar, start_month_ls)
-    ]
-    end_date_list = [
-        x + relativedelta.relativedelta(months=months_step) for x in start_date_list
-    ]
+
+    start_date_list = [datetime.datetime(x, y, 1, 0, 0) for x, y in product(start_year_ar, start_month_ls)]
+    end_date_list = [x + relativedelta.relativedelta(months=months_step) for x in start_date_list]
 
     if correct_last_endtime:
         end_date_list[-1] = end_date_list[-1] - relativedelta.relativedelta(months=1)
@@ -96,9 +90,7 @@ def save_as_pkl(dict_, output_name) -> None:
         pickle.dump(dict_, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def count_objs_grid_points(
-    objs: ObjectContainer, normalization_factor: float = 24.0
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def count_objs_grid_points(objs: ObjectContainer, normalization_factor: float = 24.0) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Counts the absolute number of objects at each grid point over all objects' time steps
 
@@ -132,9 +124,7 @@ def count_objs_grid_points(
     return lon, lat, z
 
 
-def calculate_average_ellapsed_time(
-    objs: ObjectContainer, normalization_factor: float = 1
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def calculate_average_ellapsed_time(objs: ObjectContainer, normalization_factor: float = 1) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the average ellapsed time an object needs to reach a certain grid point (not the objects' track, but any grid point covered by the object)
 
     Args:
@@ -169,12 +159,7 @@ def calculate_average_ellapsed_time(
     z_normal = np.array(list(grid_point_counter_normal.values()))
 
     # compute the average time from the sumed up times and the average number of grid points occurrences
-    z = np.array(
-        [
-            i / j / normalization_factor if j != 0 else -20
-            for i, j in zip(z_time, z_normal)
-        ]
-    )
+    z = np.array([i / j / normalization_factor if j != 0 else -20 for i, j in zip(z_time, z_normal)])
 
     lat = np.array([x.lat for x in grid_point_ls])
     lon = np.array([x.lon for x in grid_point_ls])
@@ -182,11 +167,7 @@ def calculate_average_ellapsed_time(
     return lon, lat, z
 
 
-def calculate_variable_sum(objs: ObjectContainer,
-                           attr :str, 
-                           average_per_object :bool = False,
-                           consider_history:bool = False
-                            ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def calculate_variable_sum(objs: ObjectContainer, attr: str, average_per_object: bool = False, consider_history: bool = False) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     # initialize counter with all grid point counts set to zero
     counter_init_dict = dict.fromkeys(RotatedGridPoint.get_all_gridpoints(), 0)
@@ -196,36 +177,34 @@ def calculate_variable_sum(objs: ObjectContainer,
 
     # iterate over all objects
     for idx in range(len(objs)):
-        #get objects' grid points and variables
+        # get objects' grid points and variables
         points = objs[idx].gridpoints.values
-        variable = getattr(objs[idx],attr).values
+        variable = getattr(objs[idx], attr).values
 
         # iterate over all time steps of object
         for tstep in range(len(points)):
-            
+
             # count the absolute number of grid point occurrences
             grid_point_counter.update(points[tstep])
 
             # iterate over all grid points at time step  and add the variable value to dict
-            for i,point in enumerate(points[tstep]):
+            for i, point in enumerate(points[tstep]):
                 variable_dict[point] += variable[tstep][i]
 
-    z =list(variable_dict.values())
+    z = list(variable_dict.values())
 
     z = np.array([x.value if isinstance(x, str_to_variable_class(attr)) else x for x in z])
-    #z = np.array([x.value if isinstance(x, IWV) else x for x in z])
+    # z = np.array([x.value if isinstance(x, IWV) else x for x in z])
 
     if average_per_object:
         z = z.item()
-        z= np.array([val/point if point != 0 else -20 for val, point in zip(z, grid_point_counter.values())])
-
-    
+        z = np.array([val / point if point != 0 else -20 for val, point in zip(z, grid_point_counter.values())])
 
     grid_point_ls = list(grid_point_counter.keys())
     lat = np.array([x.lat for x in grid_point_ls])
-    lon = np.array([x.lon for x in grid_point_ls])          
-    
-    return lon, lat, z 
+    lon = np.array([x.lon for x in grid_point_ls])
+
+    return lon, lat, z
 
 
 def read_cluster_csv(file_name: str) -> pd.DataFrame:

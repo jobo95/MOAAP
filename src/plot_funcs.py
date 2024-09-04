@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import griddata
 
-
 from src.GridPoints import Domain
+
 
 def plot_on_rotated_grid(
     lon,
@@ -19,7 +19,7 @@ def plot_on_rotated_grid(
     use_contourf: bool = True,
     title="",
     cbar_label=None,
-    font_size= 12,
+    font_size=12,
     cmap="Blues",
     plot_domains: dict[Domain, str] = None,
     cbar: bool = True,
@@ -49,9 +49,7 @@ def plot_on_rotated_grid(
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(
-        subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0, 90)
-    )
+    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0, 90))
 
     # ax = plt.axes(projection=crs_arctic)
 
@@ -70,12 +68,12 @@ def plot_on_rotated_grid(
         xlocs=range(-180, 180, 45),
         ylocs=range(-90, 90, 10),
         linestyle=":",
-    )  
+    )
     ax.coastlines(linewidth=0.3, color="black")
 
-    #xx = lat.reshape((194, 193))
-    #yy = lon.reshape((194, 193))
-    #zz = z.reshape((194, 193))
+    # xx = lat.reshape((194, 193))
+    # yy = lon.reshape((194, 193))
+    # zz = z.reshape((194, 193))
     # plot = plt.contourf(
     #    xx,
     #    yy,
@@ -88,9 +86,7 @@ def plot_on_rotated_grid(
     if use_contourf:
         x = lon
         y = lat
-        grid_x, grid_y = np.mgrid[
-            np.min(lon) : np.max(lon) : 100j, np.min(lat) : np.max(lat) : 100j
-        ]
+        grid_x, grid_y = np.mgrid[np.min(lon) : np.max(lon) : 100j, np.min(lat) : np.max(lat) : 100j]
 
         # Interpolate using 'linear' scheme
         # grid_z_linear = griddata((x, y), z, (grid_x, grid_y), method='linear')
@@ -99,34 +95,16 @@ def plot_on_rotated_grid(
         grid_z_cubic = griddata((x, y), z, (grid_x, grid_y), method="linear")
 
         # Define a grid for interpolation
-        grid_x, grid_y = np.mgrid[
-            np.min(lon) : np.max(lon) : 100j, np.min(lat) : np.max(lat) : 100j
-        ]
-        plot = plt.contourf(
-            grid_x,
-            grid_y,
-            grid_z_cubic,
-            levels=levels,
-            cmap=cmap,
-            transform=crs_arctic,
-            extend="both"
-        )
+        grid_x, grid_y = np.mgrid[np.min(lon) : np.max(lon) : 100j, np.min(lat) : np.max(lat) : 100j]
+        plot = plt.contourf(grid_x, grid_y, grid_z_cubic, levels=levels, cmap=cmap, transform=crs_arctic, extend="both")
     else:
-        plot = plt.tricontourf(
-            lon,
-            lat,
-            z,
-            levels=levels,
-            cmap=cmap,
-            transform=crs_arctic,
-            extend="both"
-        )
+        plot = plt.tricontourf(lon, lat, z, levels=levels, cmap=cmap, transform=crs_arctic, extend="both")
     if plot_domains:
         for domain, color in plot_domains.items():
             if domain.east > domain.west:
                 east_west = np.linspace(domain.east, domain.west)
             else:
-                east_west = np.linspace(domain.west, 360-np.abs(domain.east)) 
+                east_west = np.linspace(domain.west, 360 - np.abs(domain.east))
             plt.plot(
                 np.linspace(domain.west, domain.west),
                 np.linspace(domain.south, domain.north),
@@ -207,9 +185,7 @@ def plot_contourf_rotated_grid(
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(
-        subplts[0], subplts[1], index + 1, projection=ccrs.NorthPolarStereo()
-    )
+    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.NorthPolarStereo())
 
     # ax = plt.axes(projection=crs_arctic)
     xx, yy = np.meshgrid(lon, lat)
@@ -234,15 +210,7 @@ def plot_contourf_rotated_grid(
     )  # draw_labels=True,
     ax.coastlines(linewidth=0.3, color="black")
 
-    plot = ax.contourf(
-        xx,
-        yy,
-        z,
-        levels=levels,
-        cmap=cmap,
-        transform=crs_arctic,
-        extend = 'both'
-    )
+    plot = ax.contourf(xx, yy, z, levels=levels, cmap=cmap, transform=crs_arctic, extend="both")
     if quiver_dat is not None:
         plot_dat_u = quiver_dat[0].flatten()
         plot_dat_v = quiver_dat[1].flatten()
@@ -277,7 +245,7 @@ def plot_contourf_rotated_grid(
         )
 
     cbar = plt.colorbar(plot, ax=ax, pad=pad)
-    cbar.ax.tick_params(labelsize=font_size-5)
+    cbar.ax.tick_params(labelsize=font_size - 5)
     cbar.set_label(cbar_label)
     plt.title(title)
 
@@ -299,9 +267,7 @@ def plot_tracks_rotated_grid(
     pole_lat = 6.55
     crs_arctic = ccrs.RotatedPole(pole_longitude=pole_lon, pole_latitude=pole_lat)
 
-    ax = fig.add_subplot(
-        subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0, 90)
-    )
+    ax = fig.add_subplot(subplts[0], subplts[1], index + 1, projection=ccrs.Orthographic(0, 90))
 
     # ax = plt.axes(projection=crs_arctic)
     ax.set_extent([-180, 180, 58, 90], crs=ccrs.PlateCarree())

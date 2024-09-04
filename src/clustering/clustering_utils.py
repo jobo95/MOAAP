@@ -33,9 +33,7 @@ def load_clustering_data(path_in: str, file_name: str):
     data_xr = xr.load_dataset(path_in + file_name)
     data_aux = np.squeeze(data_xr.zg.values)
 
-    data_ar = np.reshape(
-        data_aux, (data_aux.shape[0], data_aux.shape[1] * data_aux.shape[2])
-    )
+    data_ar = np.reshape(data_aux, (data_aux.shape[0], data_aux.shape[1] * data_aux.shape[2]))
 
     lat = data_xr.lat.values
     lon = data_xr.lon.values
@@ -65,13 +63,9 @@ def plot_cluster(
     xx, yy = np.meshgrid(lon, lat)
     fig_cluster = plt.figure(figsize=plot_size)
     for j, val in enumerate(sort):
-        ax = fig_cluster.add_subplot(
-            plot_shape[0], plot_shape[1], j + 1, projection=ccrs.NorthPolarStereo()
-        )
+        ax = fig_cluster.add_subplot(plot_shape[0], plot_shape[1], j + 1, projection=ccrs.NorthPolarStereo())
 
-        theta = np.linspace(
-            -np.radians(lon[0]) + np.pi, -np.radians(lon[-1] + 1.125) + np.pi, 100
-        )
+        theta = np.linspace(-np.radians(lon[0]) + np.pi, -np.radians(lon[-1] + 1.125) + np.pi, 100)
         center, radius = [0.5, 0.5], 0.5
 
         verts = np.vstack([np.sin(theta), np.cos(theta)]).T
@@ -94,9 +88,7 @@ def plot_cluster(
             extend="both",
             transform=ccrs.PlateCarree(),
         )
-        cbar = plt.colorbar(
-            g, ax=ax, ticks=cbar_ticks, orientation="horizontal", shrink=cbar_size
-        )
+        cbar = plt.colorbar(g, ax=ax, ticks=cbar_ticks, orientation="horizontal", shrink=cbar_size)
         cbar.set_label(unit, size=font_size)
         cbar.ax.tick_params(labelsize=font_size)
         if set_title:
@@ -169,9 +161,7 @@ def plot_cluster_3D(
             linewidths=1,
         )
 
-        cbar = plt.colorbar(
-            g, ax=ax, ticks=cbar_ticks, orientation="horizontal", shrink=cbar_size
-        )
+        cbar = plt.colorbar(g, ax=ax, ticks=cbar_ticks, orientation="horizontal", shrink=cbar_size)
         cbar.set_label(unit, size=font_size)
         cbar.ax.tick_params(labelsize=font_size)
 
@@ -198,8 +188,6 @@ def plot_cluster_3D(
         path_lat = list(itertools.chain(path1_lat, path2_lat, path3_lat, path4_lat))
         path_lon = list(itertools.chain(path1_lon, path2_lon, path3_lon, path4_lon))
 
-        plt.plot(
-            path_lon, path_lat, linewidth=1, transform=ccrs.PlateCarree(), color="black"
-        )
+        plt.plot(path_lon, path_lat, linewidth=1, transform=ccrs.PlateCarree(), color="black")
     # plt.tight_layout()
     return fig_cluster

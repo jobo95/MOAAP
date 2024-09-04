@@ -1,3 +1,4 @@
+import glob
 import os
 from datetime import datetime
 
@@ -5,7 +6,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from cdo import Cdo
-import glob
 
 
 def load_tracking_data(var_path: str, var_name: str, start_date: datetime, end_date: datetime) -> xr.Dataset:
@@ -29,7 +29,7 @@ def load_tracking_data(var_path: str, var_name: str, start_date: datetime, end_d
     return ds
 
 
-def get_datetime_array_from_ds(ds:xr.Dataset) -> np.ndarray[datetime]:
+def get_datetime_array_from_ds(ds: xr.Dataset) -> np.ndarray[datetime]:
     """get a list of datetime.datetime objects from a xarray Tracking Dataset
 
     Args:
@@ -38,15 +38,12 @@ def get_datetime_array_from_ds(ds:xr.Dataset) -> np.ndarray[datetime]:
     Returns:
         np.ndarray[datetime]: 1-D array of datetimes
     """
-    
+
     time = ds.time.values
     return np.array([x.astype("datetime64[s]").astype(datetime) for x in list(time)])
 
 
-
-
 #!!!!!!!!!!!!!!!Legacy!!!!!!!!!!!!!!!!!
-
 
 
 class TrackingDataLoader:
@@ -229,11 +226,7 @@ class TrackingDataLoader:
     @staticmethod
     def _create_time_array(ds):
 
-        return np.array(
-            pd.DataFrame(ds.time.values, columns=["Datetime"])["Datetime"]
-            .values.astype("datetime64[s]")
-            .tolist()
-        )
+        return np.array(pd.DataFrame(ds.time.values, columns=["Datetime"])["Datetime"].values.astype("datetime64[s]").tolist())
 
     def merge_ncfiles(self):
         """
@@ -244,12 +237,9 @@ class TrackingDataLoader:
 
             cdo = Cdo()
 
-            print(
-                f"Mergetime {self.path_var + self.filename_year1} {self.path_var + self.filename_year2}  {self.scratch_path}{self.filename_merged}"
-            )
+            print(f"Mergetime {self.path_var + self.filename_year1} {self.path_var + self.filename_year2}  {self.scratch_path}{self.filename_merged}")
 
             cdo.mergetime(
                 input=f"{self.path_var + self.filename_year1} {self.path_var + self.filename_year2}",
                 output=f"{self.scratch_path}{self.filename_merged}",
             )
-

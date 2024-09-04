@@ -1,7 +1,7 @@
 import time
 from functools import wraps
 
-#from line_profiler import LineProfiler
+# from line_profiler import LineProfiler
 
 
 def measure_time_func(func):
@@ -21,7 +21,7 @@ def measure_time_func(func):
     return wrapper
 
 
-#def measure_time_func_lines(func):
+# def measure_time_func_lines(func):
 #    """
 #    Decorator that measures and prints the execution time of  each line in a function
 #    """

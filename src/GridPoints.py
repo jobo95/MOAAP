@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
+import cartopy.crs as ccrs
 import numpy as np
 import xarray as xr
-import cartopy.crs as ccrs
 
 
 class GridPoint(ABC):
@@ -12,9 +12,7 @@ class GridPoint(ABC):
     Base class for grid points.
     """
 
-    input_field_grid = (
-        "/work/aa0238/a271093/data/Jan_runs/ICON_CNRM_control/CNRM_control_remapped_3x/IVTu/IVTu_1997010100-1997123123_remapped_3x.nc"
-    )
+    input_field_grid = "/work/aa0238/a271093/data/Jan_runs/ICON_CNRM_control/CNRM_control_remapped_3x/IVTu/IVTu_1997010100-1997123123_remapped_3x.nc"
 
     grid_field = xr.open_dataset(input_field_grid, cache=True)
 
@@ -32,9 +30,7 @@ class GridPoint(ABC):
         """
 
         if cls is GridPoint:
-            raise TypeError(
-                "Can only create Regular-or Rotated Gridpoint instances, no instances of the GridPoint parent class."
-            )
+            raise TypeError("Can only create Regular-or Rotated Gridpoint instances, no instances of the GridPoint parent class.")
 
         coord = (lat, lon)
         if coord in cls._instances:
@@ -67,7 +63,6 @@ class GridPoint(ABC):
     def get_all_gridpoints(cls) -> list[GridPoint]:
         pass
 
-   
 
 class RegularGridPoint(GridPoint):
     """
@@ -75,20 +70,20 @@ class RegularGridPoint(GridPoint):
     """
 
     _instances = {}
-    reg2rot_dict = {(lat,lon):(rlat,rlon) 
-                    for lat,lon,rlat,rlon in 
-                    zip(GridPoint.regular_lat_grid.flatten(),
-                        GridPoint.regular_lon_grid.flatten(),
-                        GridPoint.rotated_lat_grid.flatten(),
-                        GridPoint.rotated_lon_grid.flatten())}
-   
-    
+    reg2rot_dict = {
+        (lat, lon): (rlat, rlon)
+        for lat, lon, rlat, rlon in zip(
+            GridPoint.regular_lat_grid.flatten(),
+            GridPoint.regular_lon_grid.flatten(),
+            GridPoint.rotated_lat_grid.flatten(),
+            GridPoint.rotated_lon_grid.flatten(),
+        )
+    }
+
     def __init__(self, lat, lon):
 
         if lon < -180 or lon > 180:
-            raise ValueError(
-                "Longitude of RegularGridPoint object has to stay between -180 and 180."
-            )
+            raise ValueError("Longitude of RegularGridPoint object has to stay between -180 and 180.")
         super().__init__(lat, lon)
 
     @classmethod
@@ -103,7 +98,7 @@ class RegularGridPoint(GridPoint):
         Returns:
             RotatedGridPoint: Corresponding rotated grid point instance
         """
-        
+
         return RotatedGridPoint(*self.reg2rot_dict[(self.lat, self.lon)])
 
 
@@ -113,14 +108,16 @@ class RotatedGridPoint(GridPoint):
     """
 
     _instances = {}
-    rot2reg_dict = {(rlat,rlon):(lat,lon) 
-                    for rlat,rlon,lat,lon in 
-                    zip(GridPoint.rotated_lat_grid.flatten(),
-                        GridPoint.rotated_lon_grid.flatten(),
-                        GridPoint.regular_lat_grid.flatten(),
-                        GridPoint.regular_lon_grid.flatten())}
+    rot2reg_dict = {
+        (rlat, rlon): (lat, lon)
+        for rlat, rlon, lat, lon in zip(
+            GridPoint.rotated_lat_grid.flatten(),
+            GridPoint.rotated_lon_grid.flatten(),
+            GridPoint.regular_lat_grid.flatten(),
+            GridPoint.regular_lon_grid.flatten(),
+        )
+    }
 
-   
     @classmethod
     def get_all_gridpoints(cls) -> list[RotatedGridPoint]:
         lats, lons = cls.rotated_lat_grid.flatten(), cls.rotated_lon_grid.flatten()
@@ -157,26 +154,14 @@ class Domain:
         """
 
         if not isinstance(p, RegularGridPoint):
-            raise TypeError(
-                "Can only check if RegularGridPoint objects are located within the domain."
-            )
+            raise TypeError("Can only check if RegularGridPoint objects are located within the domain.")
         if self.east > self.west:
-            return (
-                p.lat > self.south
-                and p.lat < self.north
-                and p.lon > self.west
-                and p.lon < self.east
-            )
+            return p.lat > self.south and p.lat < self.north and p.lon > self.west and p.lon < self.east
 
         else:
             east_360 = (360 + self.east) % 360
             p_360 = (360 + p.lon) % 360
-            return (
-                p.lat > self.south
-                and p.lat < self.north
-                and p_360 > self.west
-                and p_360 < east_360
-            )
+            return p.lat > self.south and p.lat < self.north and p_360 > self.west and p_360 < east_360
 
     def get_gridpoint_field(self, regular: bool = True) -> list[GridPoint]:
         """
@@ -191,15 +176,9 @@ class Domain:
         gridpoints = RegularGridPoint.get_all_gridpoints()
 
         if regular:
-            return [
-                gridpoint for gridpoint in gridpoints if self.__contains__(gridpoint)
-            ]
+            return [gridpoint for gridpoint in gridpoints if self.__contains__(gridpoint)]
 
-        return [
-            gridpoint.to_rotated()
-            for gridpoint in gridpoints
-            if self.__contains__(gridpoint)
-        ]
+        return [gridpoint.to_rotated() for gridpoint in gridpoints if self.__contains__(gridpoint)]
 
 
 def get_Gridpoint_field(key, dict_):
@@ -220,13 +199,12 @@ def get_Gridpoint_field(key, dict_):
         sub_ls_lat = [lat_slice[tuple(x)] for x in idx]
         sub_ls_lon = [lon_slice[tuple(x)] for x in idx]
 
-        sub_gridpoint_ls = [
-            RotatedGridPoint(lat, lon) for lat, lon in zip(sub_ls_lat, sub_ls_lon)
-        ]
+        sub_gridpoint_ls = [RotatedGridPoint(lat, lon) for lat, lon in zip(sub_ls_lat, sub_ls_lon)]
 
         gridpoint_ls.append(sub_gridpoint_ls)
     return np.array(gridpoint_ls, dtype="object")
-    
+
+
 # @measure_time_func_lines
 def select_by_gridpoint_fraction(
     obj: xr.Dataset,
@@ -264,4 +242,3 @@ def select_by_gridpoint_fraction(
             if select_last_timesteps:
                 return obj.isel(times=slice(i * step, None))
             return obj
-

@@ -38,15 +38,13 @@ for EXP in Experiments:
         if exp.exp_name == "ERA5":
             cdo.remapbil(
                 exp.clustering_target_grid,
-                input=f"-selmon,{months}  -selyear,{year_start}/{year_end}  -fillmiss -mergetime  "
-                + " ".join(exp.gph_files_raw_gcm),
+                input=f"-selmon,{months}  -selyear,{year_start}/{year_end}  -fillmiss -mergetime  " + " ".join(exp.gph_files_raw_gcm),
                 output=f"{out_string}.nc",
             )
         else:
             cdo.remapbil(
                 exp.clustering_target_grid,
-                input=f"-selmon,{months}  -selyear,{year_start}/{year_end} -fillmiss -sellevel,{level} -mergetime  "
-                + " ".join(exp.gph_files_raw_gcm),
+                input=f"-selmon,{months}  -selyear,{year_start}/{year_end} -fillmiss -sellevel,{level} -mergetime  " + " ".join(exp.gph_files_raw_gcm),
                 output=f"{out_string}.nc",
             )
 
@@ -102,9 +100,7 @@ for EXP in Experiments:
         )
 
         # subtract annual cycle from detrended data without 29feb
-        print(
-            f"{exp.control_aac_file_del29feb}{season.name}_fldmean_detrend_ydaymean_del29feb.nc"
-        )
+        print(f"{exp.control_aac_file_del29feb}{season.name}_fldmean_detrend_ydaymean_del29feb.nc")
         cdo.sub(
             input=f"  {out_string}_fldmean_detrend_del29feb.nc {exp.control_aac_file_del29feb}{season.name}_fldmean_detrend_ydaymean_del29feb.nc",
             output=f"{out_string}_fldmean_detrend_del29feb_aac.nc",

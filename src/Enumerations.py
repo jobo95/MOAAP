@@ -1,14 +1,8 @@
 from enum import Enum, IntEnum
 
-from src.Experiments_infos import (
-    ERA5,
-    ICON_CNRM_CONTROL,
-    ICON_CNRM_SSP,
-    ICON_ERA5,
-    ICON_NorESM_CONTROL,
-    ICON_NorESM_SSP,
-    ICON_NWP_refined
-)
+from src.Experiments_infos import (ERA5, ICON_CNRM_CONTROL, ICON_CNRM_SSP,
+                                   ICON_ERA5, ICON_NorESM_CONTROL,
+                                   ICON_NorESM_SSP, ICON_NWP_refined)
 from src.GridPoints import Domain
 
 
@@ -68,7 +62,7 @@ class Experiments(Enum):
     ICON_NORESM_SSP = ICON_NorESM_SSP  # ICON_CNRM_EXP = ICON_CNRM_CONTROL
     ERA5 = ERA5
     ICON_ERA5 = ICON_ERA5
-    ICON_NWP_REFINED =      ICON_NWP_refined
+    ICON_NWP_REFINED = ICON_NWP_refined
 
     def __getitem__(self, index):
         return self._value_[index]
@@ -81,4 +75,3 @@ class Domains(Enum):
     FRAM_STRAIT = Domain(north=81, south=77, east=10, west=-10)
     GREENLAND_SEA = Domain(north=80, south=75, east=10, west=-20)
     BERING_STRAIT = Domain(north=70, south=65, east=-150, west=160)
-    

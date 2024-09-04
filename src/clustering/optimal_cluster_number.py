@@ -6,9 +6,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import calinski_harabasz_score
 
 
-def get_lag_autocorrelation(
-    time_series_collection: np.ndarray, lag: int = 1
-) -> List[float]:
+def get_lag_autocorrelation(time_series_collection: np.ndarray, lag: int = 1) -> List[float]:
     """Compute the  lagged autocorrelation of individual time series
 
     Args:
@@ -23,10 +21,7 @@ def get_lag_autocorrelation(
     shifted_series = np.roll(time_series_collection, lag, axis=0)
 
     # Compute the Pearson correlation coefficient between each original and shifted time series
-    lag1_correlations = [
-        np.corrcoef(time_series_collection[:, i], shifted_series[:, i])[0, 1]
-        for i in range(time_series_collection.shape[1])
-    ]
+    lag1_correlations = [np.corrcoef(time_series_collection[:, i], shifted_series[:, i])[0, 1] for i in range(time_series_collection.shape[1])]
 
     return lag1_correlations
 
@@ -52,9 +47,7 @@ def create_AR1_timeseries(time_series_collection: np.ndarray) -> np.ndarray:
     return x
 
 
-def compute_synthetic_variance_ratios(
-    time_series: np.ndarray, M: int, cluster_range: List[int]
-) -> pd.DataFrame:
+def compute_synthetic_variance_ratios(time_series: np.ndarray, M: int, cluster_range: List[int]) -> pd.DataFrame:
     """compute the kmeans clustering calinski_harabasz variance ratio for different  synthetic AR1 time series for different cluster numbers.
 
     Args:
@@ -76,17 +69,11 @@ def compute_synthetic_variance_ratios(
     for n, n_clusters in enumerate(cluster_range):
         print(f"{n_clusters=}")
         original_kmeans = KMeans(n_clusters=n_clusters, init="random").fit(time_series)
-        df.loc[n_clusters, "original_time_series"] = calinski_harabasz_score(
-            time_series, original_kmeans.labels_
-        )  # original_kmeans.inertia_
+        df.loc[n_clusters, "original_time_series"] = calinski_harabasz_score(time_series, original_kmeans.labels_)  # original_kmeans.inertia_
 
         for m in range(M):
             synthetic_time_series = create_AR1_timeseries(time_series)
-            kmeans = KMeans(n_clusters=n_clusters, init="random").fit(
-                synthetic_time_series
-            )
-            df.loc[n_clusters, f"sample_{m}"] = calinski_harabasz_score(
-                synthetic_time_series, kmeans.labels_
-            )  # kmeans.inertia_
+            kmeans = KMeans(n_clusters=n_clusters, init="random").fit(synthetic_time_series)
+            df.loc[n_clusters, f"sample_{m}"] = calinski_harabasz_score(synthetic_time_series, kmeans.labels_)  # kmeans.inertia_
 
     return df

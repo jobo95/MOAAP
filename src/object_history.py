@@ -8,9 +8,7 @@ from src.GridPoints import RotatedGridPoint
 from src.Objectcontainer import ObjectContainer
 
 
-def compute_history(
-    object_container: ObjectContainer, threshold: float = 3
-) -> ObjectContainer:
+def compute_history(object_container: ObjectContainer, threshold: float = 3) -> ObjectContainer:
     """Computes the splitting/merging history of all objects and adds it to the object_container. First, algorithm determines for start/end time of each reference object which other objects live  at the same time.
        Then the closest distance between all those objects and the reference object is calculated (in the rotated coordinate system) and all objects with distance less than threshold are filtered. From these filtered objects all objects that are smaller (total IVT)
        than the reference object are distributed and from these the object with the closest distance is finally choosen.
@@ -47,28 +45,20 @@ def compute_history(
             for obj2 in objs_at_time:
 
                 obj2 = obj2.sel(times=time)
-                distance = calc_min_distance_between_objs(
-                    obj.gridpoints.values, obj2.gridpoints.values
-                )
+                distance = calc_min_distance_between_objs(obj.gridpoints.values, obj2.gridpoints.values)
                 if distance < threshold and distance != 0:
                     objs_closest[distance] = obj2
 
             if not objs_closest:
                 continue
-            objs_closest = {
-                key: value
-                for key, value in objs_closest.items()
-                if value.total_IVT > obj.total_IVT
-            }
+            objs_closest = {key: value for key, value in objs_closest.items() if value.total_IVT > obj.total_IVT}
 
             if not objs_closest:
                 continue
             largest_closest_obj = objs_closest[min(objs_closest.keys())]
 
             obj_index = object_container.get_index_by_id(obj.id_)
-            largest_closest_obj_index = object_container.get_index_by_id(
-                largest_closest_obj.id_
-            )
+            largest_closest_obj_index = object_container.get_index_by_id(largest_closest_obj.id_)
 
             object_container = edit_obj_history(
                 object_container,
@@ -81,9 +71,7 @@ def compute_history(
     return object_container
 
 
-def calc_min_distance_between_objs(
-    p1: ndarray[list[RotatedGridPoint]], p2: ndarray[list[RotatedGridPoint]]
-) -> float:
+def calc_min_distance_between_objs(p1: ndarray[list[RotatedGridPoint]], p2: ndarray[list[RotatedGridPoint]]) -> float:
     """Calculate the minimal distance between to Gridobject point clouds.
 
     Returns:

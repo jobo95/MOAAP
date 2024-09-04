@@ -6,8 +6,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from src.GridPoints import select_by_gridpoint_fraction, Domain
-
+from src.GridPoints import Domain, select_by_gridpoint_fraction
 
 
 class ObjectContainer(list):
@@ -27,9 +26,7 @@ class ObjectContainer(list):
         """
 
         if not all(map(lambda x: isinstance(x, xr.Dataset), iterable)):
-            raise TypeError(
-                "Object container can only be initialized with a sequence that only contains xarray Datasets"
-            )
+            raise TypeError("Object container can only be initialized with a sequence that only contains xarray Datasets")
 
         super().__init__(iterable)
 
@@ -64,9 +61,7 @@ class ObjectContainer(list):
         Returns:
             ObjectContainer
         """
-        return ObjectContainer(
-            [x for x in self if pd.to_datetime(x.get.start_date).month in season]
-        )
+        return ObjectContainer([x for x in self if pd.to_datetime(x.get.start_date).month in season])
 
     def get_attributes(self, attr: str) -> List:
         """Get  a specific attribute from all Tracking objects in Container.
@@ -78,7 +73,7 @@ class ObjectContainer(list):
             list: List with attribute values of individual Tracking Objects
         """
 
-        if  not isinstance(attr, str):
+        if not isinstance(attr, str):
             raise TypeError("attr must be a string")
 
         return [getattr(x.get, attr) for x in self]
@@ -96,7 +91,7 @@ class ObjectContainer(list):
 
         if not isinstance(attr, str):
             raise TypeError("attr must be a string")
-        
+
         return np.squeeze([x.get.mean(attr) for x in self])
 
     def obj_medians(self, attr: str):
@@ -109,7 +104,7 @@ class ObjectContainer(list):
         Returns:
             Array-like: attribute's median value for each individual Tracking object
         """
-        if not isinstance(attr,str):
+        if not isinstance(attr, str):
             raise TypeError("attr must be a string")
         return np.squeeze([x.get.median(attr) for x in self])
 
@@ -123,7 +118,7 @@ class ObjectContainer(list):
         Returns:
             float: max value
         """
-        if  not isinstance(attr,str):
+        if not isinstance(attr, str):
             raise TypeError("attr must be a string")
         return float(np.max([getattr(x.get, attr) for x in self]))
 
@@ -137,14 +132,13 @@ class ObjectContainer(list):
         Returns:
             float:quantile of attribute
         """
-        if not isinstance(attr,str):
+        if not isinstance(attr, str):
             raise TypeError("attr must be a string")
         if quant < 0 or quant > 1:
             raise ValueError("quant must be between 0 and 1")
-        if not isinstance(quant,float):
+        if not isinstance(quant, float):
             raise TypeError("quant must be a float")
-        
-        
+
         return np.quantile([x.get.mean(attr) for x in self], quant)
 
     def count(self) -> int:
@@ -155,7 +149,7 @@ class ObjectContainer(list):
         """
         return len(self)
 
-    def sortby(self, attr:str, reverse:bool=False) -> ObjectContainer:
+    def sortby(self, attr: str, reverse: bool = False) -> ObjectContainer:
         """Sort Objects in container according to some attribute
 
         Args:
@@ -168,12 +162,12 @@ class ObjectContainer(list):
         if not isinstance(attr, str):
             raise TypeError("attr must be a string")
 
-        if not isinstance(reverse,bool):
+        if not isinstance(reverse, bool):
             raise TypeError("reverse must be a boolean")
 
         return self.sort(reverse=reverse, key=lambda x: getattr(x.get, attr))
 
-    def filter_by_median(self, threshold:float, attr:str, above:bool=True) -> ObjectContainer:
+    def filter_by_median(self, threshold: float, attr: str, above: bool = True) -> ObjectContainer:
         """Select only those Tracking Objects in Container which attributes' median value are below/above a certain threshold
 
         Args:
@@ -184,21 +178,21 @@ class ObjectContainer(list):
         Returns:
             Object_container: Selected Tracking objects
         """
-        
+
         if not isinstance(attr, str):
             raise TypeError("attr must be a string")
-        if not isinstance(threshold,float):
+        if not isinstance(threshold, float):
             raise TypeError("threshold must be a float")
-        if not isinstance(above,bool):
+        if not isinstance(above, bool):
             raise TypeError("above must be a boolean")
-        
+
         if above:
 
             return ObjectContainer([x for x in self if x.get.median(attr) > threshold])
         else:
             return ObjectContainer([x for x in self if x.get.median(attr) < threshold])
 
-    def filter_by_attr_category(self, attr:str, category:str) -> ObjectContainer:
+    def filter_by_attr_category(self, attr: str, category: str) -> ObjectContainer:
         """Filter out only those elements, for which the median of a specific attribute falls into a certain category ("small", "medium", "large").
             "small" refers to all objects with attributes value below the  0.33 quantiles (quantile determined from all objects)
             "medium" refers to all objects with attributes value between 0.33 and 0.66 quantiles
@@ -211,14 +205,14 @@ class ObjectContainer(list):
         Returns:
             ObjectContainer: Filtered Object Container
         """
-        
-        if not isinstance(attr,str):
+
+        if not isinstance(attr, str):
             raise TypeError("attr must be a string")
-        if  not isinstance(category,str):
+        if not isinstance(category, str):
             raise TypeError("category must be a string")
         if category not in ["Small", "Medium", "Large"]:
             raise ValueError("category must be one of 'Small', 'Medium' or 'Large'")
-        
+
         q033 = self.quantile(attr=attr, quant=0.33)
         q066 = self.quantile(attr=attr, quant=0.66)
 
@@ -226,9 +220,7 @@ class ObjectContainer(list):
             return self.filter_by_median(threshold=q033, attr=attr, above=False)
 
         if category == "Medium":
-            return self.filter_by_median(
-                threshold=q033, attr=attr, above=True
-            ).filter_by_median(threshold=q066, attr=attr, above=False)
+            return self.filter_by_median(threshold=q033, attr=attr, above=True).filter_by_median(threshold=q066, attr=attr, above=False)
 
         if category == "Large":
             return self.filter_by_median(threshold=q066, attr=attr, above=True)
@@ -256,7 +248,7 @@ class ObjectContainer(list):
         """
         if not isinstance(time, np.datetime64):
             raise TypeError("time must be a np.datetime64")
-        
+
         return ObjectContainer([x for x in self if time in x.times])
 
     def sel_by_domain(
@@ -293,21 +285,14 @@ class ObjectContainer(list):
 
         if not isinstance(select_last_timesteps, bool):
             raise TypeError("select_last_timesteps must be a boolean")
-        
 
         if type_ == "origin":
-            return ObjectContainer(
-                [x for x in self if x.get.regular_track[0] in domain]
-            )
+            return ObjectContainer([x for x in self if x.get.regular_track[0] in domain])
         elif type_ == "end":
-            return ObjectContainer(
-                [x for x in self if x.get.regular_track[-1] in domain]
-            )
+            return ObjectContainer([x for x in self if x.get.regular_track[-1] in domain])
         elif type_ == "anytime":
             if domain_frac:
-                domain_grid_point_field = domain.get_gridpoint_field(
-                    regular=False
-                )
+                domain_grid_point_field = domain.get_gridpoint_field(regular=False)
 
                 return ObjectContainer(
                     [
@@ -328,9 +313,7 @@ class ObjectContainer(list):
                     ]
                 )
 
-            return ObjectContainer(
-                [x for x in self if any(y in domain for y in x.get.regular_track)]
-            )
+            return ObjectContainer([x for x in self if any(y in domain for y in x.get.regular_track)])
 
         else:
             raise ValueError("type_ has to be either 'origin', 'end' or 'anytime'")
@@ -341,9 +324,7 @@ class ObjectContainer(list):
             idx = [i for i in range(len(list_)) if list_[i] == regime_name]
             return idx
 
-        container = ObjectContainer(
-            [obj_.isel(times=get_idx(obj_, regime_name)) for obj_ in self]
-        )
+        container = ObjectContainer([obj_.isel(times=get_idx(obj_, regime_name)) for obj_ in self])
         return ObjectContainer([x for x in container if x.times.size > 0])
 
     def get_index_by_id(self, obj_id: int) -> xr.Dataset:
@@ -353,7 +334,7 @@ class ObjectContainer(list):
             obj_id (int): Object id
 
         """
-        
+
         for ind, obj in enumerate(self):
             if int(obj_id) == int(obj.id_):
                 return ind

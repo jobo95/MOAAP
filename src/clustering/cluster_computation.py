@@ -4,11 +4,8 @@ import numpy as np
 import pandas as pd
 from sklearn import cluster, decomposition
 
-from src.clustering.clustering_utils import (
-    cosine_cor,
-    inv_cosine_cor,
-    load_clustering_data,
-)
+from src.clustering.clustering_utils import (cosine_cor, inv_cosine_cor,
+                                             load_clustering_data)
 from src.Enumerations import Experiments, Season
 from src.utils import load_pkl, save_as_pkl
 
@@ -86,9 +83,7 @@ def compute_and_save_cluster(
     data_ar = fitted_pca.transform(data_ar)
 
     if save_pca:
-        save_pca_file = (
-            f"{path_out}regime_output/PCA/PCA_{file_name[0:-3]}_{n_components}PCs"
-        )
+        save_pca_file = f"{path_out}regime_output/PCA/PCA_{file_name[0:-3]}_{n_components}PCs"
         save_as_pkl(fitted_pca, save_pca_file)
         print(f"saved pca {save_pca_file}")
 
@@ -129,9 +124,7 @@ def compute_and_save_cluster(
         BMU_df.index.name = "time"
         BMU_df.columns = ["cluster_id"]
         if cluster_names_dict:
-            BMU_df["cluster_name"] = BMU_df.apply(
-                lambda row: cluster_names_dict[row["cluster_id"]], axis=1
-            )
+            BMU_df["cluster_name"] = BMU_df.apply(lambda row: cluster_names_dict[row["cluster_id"]], axis=1)
             print("added regime names to BMU Dataframe")
         BMU_df.to_csv(BMU_file)
         print(f"saved BMUs in {BMU_file}")

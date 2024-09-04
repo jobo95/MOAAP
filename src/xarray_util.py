@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import glob
 import os
+import sys
 from datetime import datetime
 
 import numpy as np
@@ -12,15 +13,10 @@ from dateutil.relativedelta import relativedelta
 from src.GridPoints import GridPoint, RotatedGridPoint, get_Gridpoint_field
 from src.object_history import compute_history
 from src.Objectcontainer import ObjectContainer
-from src.utils import (
-    create_datetime_lists,
-    get_datetime_str,
-    load_pkl,
-    save_as_pkl,
-    str_to_variable_class,
-)
-import sys
-#from memory_profiler import profile
+from src.utils import (create_datetime_lists, get_datetime_str, load_pkl,
+                       save_as_pkl, str_to_variable_class)
+
+# from memory_profiler import profile
 
 
 @xr.register_dataset_accessor("get")
@@ -174,12 +170,7 @@ def create_obj_from_dict(
 
     if var_names_ls is not None:
         # ds = ds.assign(**{var_name: (["times"], get_var_field(key, dict_, var_dataset, var_name)) for var_name in var_names})
-        ds = ds.assign(
-            **{
-                var_name: (["times"], get_var_field(key, dict_, var_dataset, var_name))
-                for var_name, var_dataset in zip(var_names_ls, var_dataset_ls)
-            }
-        )
+        ds = ds.assign(**{var_name: (["times"], get_var_field(key, dict_, var_dataset, var_name)) for var_name, var_dataset in zip(var_names_ls, var_dataset_ls)})
 
     if load_clusters:
         ds = ds.assign(
@@ -192,9 +183,7 @@ def create_obj_from_dict(
     return ds
 
 
-def load_cluster_for_container(
-    df: pd.Dataframe, times: np.ndarray[datetime]
-) -> list[str]:
+def load_cluster_for_container(df: pd.Dataframe, times: np.ndarray[datetime]) -> list[str]:
     date_list = pd.to_datetime(times).normalize()
     df["time"] = pd.to_datetime(df["time"])
     df["date"] = df["time"].dt.normalize()
@@ -211,7 +200,8 @@ def load_cluster_for_container(
 
     return selected_cluster
 
-#@profile
+
+# @profile
 def load_tracking_objects(
     input_path: str,
     input_file_name_temp: str,
@@ -229,9 +219,7 @@ def load_tracking_objects(
     suffix: str = "",
 ):
 
-    start_date_list, end_date_list = create_datetime_lists(
-        first_year, last_year, months=6, correct_last_endtime=correct_last_endtime
-    )
+    start_date_list, end_date_list = create_datetime_lists(first_year, last_year, months=6, correct_last_endtime=correct_last_endtime)
     pkl_container_path = f"{exp.path_IVT_tracking}{exp.container_pkl_file}_{first_year}-{last_year}{suffix}"
     if load_clusters:
         pkl_container_path = pkl_container_path + "_withClusters"
@@ -259,9 +247,7 @@ def load_tracking_objects(
                     files = glob.glob(var_path + "*.nc")
                     full_var_ds = xr.open_mfdataset(files)
 
-                    var_ds = full_var_ds.sel(
-                        time=slice(start_date, end_date + relativedelta(months=1))
-                    ).load()
+                    var_ds = full_var_ds.sel(time=slice(start_date, end_date + relativedelta(months=1))).load()
 
                     var_ds_ls.append(var_ds)
 
@@ -281,7 +267,6 @@ def load_tracking_objects(
                     continue
 
                 IVTobj_ls.append(ds)
-                
 
         if save_pkl:
             print(f"Saving {pkl_container_path}")
@@ -309,8 +294,8 @@ def get_var_field(key, dict_, var_dataset, var_name):
     lat_idx_slice = dict_[key]["lat_idx_slice"]
     lon_idx_slice = dict_[key]["lon_idx_slice"]
 
-    #lat_slice = GridPoint.rotated_lat_grid[lat_idx_slice, lon_idx_slice]
-    #lon_slice = GridPoint.rotated_lon_grid[lat_idx_slice, lon_idx_slice]
+    # lat_slice = GridPoint.rotated_lat_grid[lat_idx_slice, lon_idx_slice]
+    # lon_slice = GridPoint.rotated_lon_grid[lat_idx_slice, lon_idx_slice]
 
     var_slice_temp = getattr(var_dataset.sel(time=dict_[key]["times"]), var_name)
     var_slice = var_slice_temp.values[:, lat_idx_slice, lon_idx_slice]
@@ -322,17 +307,14 @@ def get_var_field(key, dict_, var_dataset, var_name):
     for tstep in time_steps:
         idx = indices[indices[:, 0] == tstep][:, 1:]
 
-        #sub_ls_lat = [lat_slice[tuple(x)] for x in idx]
-        #sub_ls_lon = [lon_slice[tuple(x)] for x in idx]
+        # sub_ls_lat = [lat_slice[tuple(x)] for x in idx]
+        # sub_ls_lon = [lon_slice[tuple(x)] for x in idx]
         sub_ls_var = [var_slice[tstep, x[0], x[1]] for x in idx]
 
-        #sub_dict = {
+        # sub_dict = {
         #    RotatedGridPoint(lat, lon): str_to_variable_class(var_name)(var)
         #    for lat, lon, var in zip(sub_ls_lat, sub_ls_lon, sub_ls_var)
-        #}
-        sub_dict = [
-            str_to_variable_class(var_name)(var)
-            for var in sub_ls_var
-        ]
+        # }
+        sub_dict = [str_to_variable_class(var_name)(var) for var in sub_ls_var]
         ls.append(sub_dict)
     return np.array(ls, dtype="object")
