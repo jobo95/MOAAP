@@ -7,6 +7,7 @@ from src.Experiments_infos import (
     ICON_ERA5,
     ICON_NorESM_CONTROL,
     ICON_NorESM_SSP,
+    ICON_NWP_refined
 )
 from src.GridPoints import Domain
 
@@ -67,6 +68,7 @@ class Experiments(Enum):
     ICON_NORESM_SSP = ICON_NorESM_SSP  # ICON_CNRM_EXP = ICON_CNRM_CONTROL
     ERA5 = ERA5
     ICON_ERA5 = ICON_ERA5
+    ICON_NWP_REFINED =      ICON_NWP_refined
 
     def __getitem__(self, index):
         return self._value_[index]

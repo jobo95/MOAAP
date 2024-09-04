@@ -16,17 +16,20 @@ from src.GridPoints import RotatedGridPoint
 from src.Variable_classes import *
 
 
+
+
 def create_datetime_lists(
-    first_year: int, last_year: int, months: int = 7, correct_last_endtime: bool = True
-):
+    first_year: int, last_year: int, months_step: int = 7, start_month_ls :list[int]= [1, 7], correct_last_endtime: bool = True
+)-> tuple[list[datetime.datetime], list[datetime.datetime]]:
     """
-       Creates two lists with 1-month overlap
+       Creates two datetime lists with n-months overlap, where n is determined by setting months_step and start_month_ls
 
     Args:
         first_year (datetime): First year
         last_year (datetime): Last year
-        months (int, optional):time step in months between subseuent dates. Defaults to 7.
-        correct_last_endtime (bool, optional): If true, set. Defaults to True.
+        months_step (int, optional):time step in months between subseuent dates. Defaults to 7.
+        start_month_ls (list[int], optional): List of start months. Defaults to [1, 7].
+        correct_last_endtime (bool, optional): . Defaults to True.
 
     Returns:
         - start_date_list
@@ -34,13 +37,16 @@ def create_datetime_lists(
     """
 
     start_year_ar = np.arange(first_year, last_year)
-    start_month_ar = [1, 7]
+    
+    
+    start_month_ls = [1, 7]
+    
     start_date_list = [
         datetime.datetime(x, y, 1, 0, 0)
-        for x, y in product(start_year_ar, start_month_ar)
+        for x, y in product(start_year_ar, start_month_ls)
     ]
     end_date_list = [
-        x + relativedelta.relativedelta(months=months) for x in start_date_list
+        x + relativedelta.relativedelta(months=months_step) for x in start_date_list
     ]
 
     if correct_last_endtime:

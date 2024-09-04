@@ -250,12 +250,12 @@ def select_by_gridpoint_fraction(
         - xr.Dataset: selected objects or None if condition not met
     """
     points_domain = set(domain_grid_point_field)
-    points_domain_length = len(points_domain)
+    points_domain_total = len(points_domain)
     for i, points in enumerate(obj.gridpoints.values[::step]):
         sel_points = set(points).intersection(points_domain)
 
         # fraction of domain covered by  object grid points
-        frac1 = len(sel_points) / points_domain_length
+        frac1 = len(sel_points) / points_domain_total
 
         # fraction of object grid points that are in the domain
         frac2 = len(sel_points) / len(points)

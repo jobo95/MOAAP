@@ -261,6 +261,18 @@ class ICON_ERA5(ICONExperiment):
     IVT_thresh_file_85: str = (
         "ivt_percentile_mlauer_removed-ens-lev_remapbilWP3domain_3dx3dy.nc"
     )
+    
+@dataclass
+class ICON_NWP_refined(ICONExperiment):
+    year_start: int = 1985
+    year_end: int = 2014
+    exp_name: str = "ICON-NWP-Refined"
+    path_IVT: str = "/work/aa0238/a271093/data/Raphael_runs/ICON_NWP_refined/ICON_NWP_refined_remapped_3x/"
+    path_IVT_tracking: str = "/work/aa0238/a271093/results/MOAAP/IVT_Tracking/ICON_NWP_refined_remapped_3x/"
+
+    IVT_thresh_file_85: str = (
+        "ivt_percentile_mlauer_removed-ens-lev_remapbilWP3domain_3dx3dy.nc"
+    )
 
 
 @dataclass
