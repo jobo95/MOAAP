@@ -13,8 +13,13 @@ from dateutil.relativedelta import relativedelta
 from src.GridPoints import GridPoint, RotatedGridPoint, get_Gridpoint_field
 from src.object_history import compute_history
 from src.Objectcontainer import ObjectContainer
-from src.utils import (create_datetime_lists, get_datetime_str, load_pkl,
-                       save_as_pkl, str_to_variable_class)
+from src.utils import (
+    create_datetime_lists,
+    get_datetime_str,
+    load_pkl,
+    save_as_pkl,
+    str_to_variable_class,
+)
 
 # from memory_profiler import profile
 
@@ -130,7 +135,16 @@ def create_obj_from_dict(
     """
     cluster_allocations_DJF = pd.read_csv(exp.BMU_path + exp.BMU_file_DJF)
     cluster_allocations_MAM = pd.read_csv(exp.BMU_path + exp.BMU_file_MAM)
-    cluster_allocations = pd.concat([cluster_allocations_DJF, cluster_allocations_MAM])
+    cluster_allocations_JJA = pd.read_csv(exp.BMU_path + exp.BMU_file_JJA)
+    cluster_allocations_SON = pd.read_csv(exp.BMU_path + exp.BMU_file_SON)
+    cluster_allocations = pd.concat(
+        [
+            cluster_allocations_DJF,
+            cluster_allocations_MAM,
+            cluster_allocations_JJA,
+            cluster_allocations_SON,
+        ]
+    )
 
     ds = xr.Dataset(
         data_vars=dict(
@@ -191,13 +205,13 @@ def load_cluster_for_container(df: pd.Dataframe, times: np.ndarray[datetime]) ->
     selected_cluster = []
     for x in date_list:
         app = df[df["date"] == x].cluster_name.values
+        
         if len(app) == 1:
             selected_cluster.append(df[df["date"] == x].cluster_name.values.item())
         else:
             selected_cluster.append(np.nan)
 
     # [df[df["date"] == x].cluster_name.values.item() for x in date_list] or 0
-
     return selected_cluster
 
 
@@ -219,8 +233,8 @@ def load_tracking_objects(
     suffix: str = "",
 ):
 
-    start_date_list, end_date_list = create_datetime_lists(first_year, last_year, months=6, correct_last_endtime=correct_last_endtime)
-    pkl_container_path = f"{exp.path_IVT_tracking}{exp.container_pkl_file}_{first_year}-{last_year}{suffix}"
+    start_date_list, end_date_list = create_datetime_lists(first_year, last_year, months_step=6, correct_last_endtime=correct_last_endtime)
+    pkl_container_path = f"{exp.IVTobj_out_path}{exp.container_pkl_file}_{first_year}-{last_year}{suffix}"
     if load_clusters:
         pkl_container_path = pkl_container_path + "_withClusters"
 
@@ -232,6 +246,7 @@ def load_tracking_objects(
         IVTobj_ls = load_pkl(pkl_container_path)
 
     else:
+        print (f"{pkl_container_path} does not exist. Creating...")
         IVTobj_ls = ObjectContainer([])
 
         for start_date, end_date in zip(start_date_list, end_date_list):

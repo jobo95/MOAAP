@@ -1,8 +1,14 @@
 from enum import Enum, IntEnum
 
-from src.Experiments_infos import (ERA5, ICON_CNRM_CONTROL, ICON_CNRM_SSP,
-                                   ICON_ERA5, ICON_NorESM_CONTROL,
-                                   ICON_NorESM_SSP, ICON_NWP_refined)
+from src.Experiments_infos import (
+    ERA5,
+    ICON_CNRM_CONTROL,
+    ICON_CNRM_SSP,
+    ICON_ERA5,
+    ICON_NorESM_CONTROL,
+    ICON_NorESM_SSP,
+    ICON_NWP_refined,
+)
 from src.GridPoints import Domain
 
 
@@ -40,19 +46,27 @@ class GPH700_4Cluster(Enum):
 
 
 class GPH700_5Cluster_DJF(Enum):
-    NAO_PLUS = "NAO+"
-    NAO_MINUS = "NAO-"
-    ATL_MINUS = "ATL-"
-    SCAN = "SCAN"
-    DIP = "DIP"
+    NAO_PLUS = "WINTER-NAO+"
+    NAO_MINUS = "WINTER-NAO-"
+    ATL_MINUS = "WINTER-ATL-"
+    SCAN = "WINTER-SCAN"
+    DIP = "WINTER-DIP"
+
+
+class GPH700_5Cluster_JJA(Enum):
+    NAO_PLUS = "SUMMER-NAO+"
+    NAO_MINUS = "SUMMER-NAO-"
+    ATL_MINUS = "SUMMER-ATL-"
+    SCAN = "SUMMER-SCAN"
+    DIP = "SUMMER-DIP"
 
 
 class GPH700_5Cluster_MAM(Enum):
-    NAO_PLUS = "SP-NAO+"
-    NAO_MINUS = "SP-NAO-"
-    ATL_MINUS = "SP-ATL+"
-    SCAN = "SP-SCAN"
-    DIP = "SP-DIP"
+    NAO_PLUS = "SPRING-NAO+"
+    NAO_MINUS = "SPRING-NAO-"
+    ATL_MINUS = "SPRING-ATL+"
+    SCAN = "SPRING-SCAN"
+    DIP = "SPRING-DIP"
 
 
 class Experiments(Enum):
@@ -71,7 +85,11 @@ class Experiments(Enum):
 class Domains(Enum):
     NORTH_ATLANTIC = Domain(north=70, south=50, east=0, west=-60)
     NORTH_PACIFIC = Domain(north=70, south=40, east=-140, west=160)
-    CENTRAL_ARCTIC = Domain(north=90, south=80, east=180, west=-180)
+    CENTRAL_ARCTIC = Domain(north=90, south=70, east=180, west=-180)
     FRAM_STRAIT = Domain(north=81, south=77, east=10, west=-10)
     GREENLAND_SEA = Domain(north=80, south=75, east=10, west=-20)
     BERING_STRAIT = Domain(north=70, south=65, east=-150, west=160)
+    BAFFIN_BAY = Domain(north=75, south=65, east=-55, west=-80)
+    ARCTIC_ENTRANCE_NA = Domain(north=72, south=69, east=20, west=-25)
+    NORTH_AMERICA = Domain(north=70, south=60, east=-80, west=-140)
+    SIBERIA = Domain(north=70, south=60, east=135, west=75)

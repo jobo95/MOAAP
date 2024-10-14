@@ -4,8 +4,11 @@ import numpy as np
 import pandas as pd
 from sklearn import cluster, decomposition
 
-from src.clustering.clustering_utils import (cosine_cor, inv_cosine_cor,
-                                             load_clustering_data)
+from src.clustering.clustering_utils import (
+    cosine_cor,
+    inv_cosine_cor,
+    load_clustering_data,
+)
 from src.Enumerations import Experiments, Season
 from src.utils import load_pkl, save_as_pkl
 
@@ -28,7 +31,6 @@ def compute_and_save_cluster(
     BMU_projection_flag: str = "",
 ) -> dict[str, np.ndarray]:
     """Compute and/or save circulation regimes with kmeans.
-
     Args:
         EXP (Experiments): Experiment Type
         num_cluster (int, optional): Number of clusters if kmeans is fitted. Defaults to 4.

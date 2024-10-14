@@ -255,16 +255,20 @@ class ObjectContainer(list):
         self,
         domain: Domain,
         type_: str,
-        domain_frac: float = 0.0,
+        domain_frac: float = None,
+        object_frac: float = None,
         select_last_timesteps: bool = False,
     ) -> ObjectContainer:
         """Select objects which trajectories are in a certain domain (at their origin, end or at any time). Selections for "start" and "end" are currently only  based on regular tracks.
+        If "domain_frac" and "object_frac" are not set, the track is used for selection. If one of "domain_frac" or "object_frac" is set, both parameters have to be set.
 
 
         Args:
             domain (Domain): Domain object
             type_ (str): Can be either 'origin', 'end' or 'anytime'
-            domain_frac (float, optional): Fraction of domain covered by object. If 0 , track is used for selection, if greater 0 than the spatial extend of the object is considered. Defaults to 0.0.
+            domain_frac (float, optional): Fraction of domain covered by object. If set than the spatial extend of the object is considered. Defaults to None.
+            object_frac (float, optional): Fraction of total object size that is inside the Domain. Defaults to None.
+            select_last_timesteps (bool, optional): If True, only the last timesteps of each object, that is the time steps after entering the domain, are selected. Defaults to False.
 
         Returns:
             ObjectContainer: Selected Object Container
@@ -286,12 +290,19 @@ class ObjectContainer(list):
         if not isinstance(select_last_timesteps, bool):
             raise TypeError("select_last_timesteps must be a boolean")
 
+
+
         if type_ == "origin":
             return ObjectContainer([x for x in self if x.get.regular_track[0] in domain])
         elif type_ == "end":
             return ObjectContainer([x for x in self if x.get.regular_track[-1] in domain])
         elif type_ == "anytime":
-            if domain_frac:
+            if domain_frac or object_frac:
+                if not domain_frac:
+                    raise ValueError("domain_frac must be set if object_frac has been set")
+                if not object_frac:
+                    raise ValueError("object_frac must be set if domain_frac has been set")
+                
                 domain_grid_point_field = domain.get_gridpoint_field(regular=False)
 
                 return ObjectContainer(
@@ -300,6 +311,7 @@ class ObjectContainer(list):
                             x,
                             domain_grid_point_field,
                             domain_frac,
+                            object_frac,
                             select_last_timesteps=select_last_timesteps,
                         )
                         for x in self
@@ -307,6 +319,7 @@ class ObjectContainer(list):
                             x,
                             domain_grid_point_field,
                             domain_frac,
+                            object_frac,
                             select_last_timesteps=select_last_timesteps,
                         )
                         is not None
@@ -340,3 +353,4 @@ class ObjectContainer(list):
                 return ind
             else:
                 continue
+             

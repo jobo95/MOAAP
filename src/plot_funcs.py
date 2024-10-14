@@ -96,7 +96,15 @@ def plot_on_rotated_grid(
 
         # Define a grid for interpolation
         grid_x, grid_y = np.mgrid[np.min(lon) : np.max(lon) : 100j, np.min(lat) : np.max(lat) : 100j]
-        plot = plt.contourf(grid_x, grid_y, grid_z_cubic, levels=levels, cmap=cmap, transform=crs_arctic, extend="both")
+        plot = plt.contourf(
+            grid_x,
+            grid_y,
+            grid_z_cubic,
+            levels=levels,
+            cmap=cmap,
+            transform=crs_arctic,
+            extend="max",
+        )
     else:
         plot = plt.tricontourf(lon, lat, z, levels=levels, cmap=cmap, transform=crs_arctic, extend="both")
     if plot_domains:
