@@ -33,11 +33,12 @@ def compute_history(object_container: ObjectContainer, threshold: float = 3) -> 
             all_objs = object_container.seltimesteps(slice(-1, None))
 
         for i, obj in enumerate(all_objs):
-            # print (str(100*i/len(all_objs))+"%")
+            if i % 500 == 0:
+                print (str(100*i/len(all_objs)/2.)+"%")
             objs_closest = {}
 
             time = obj.times
-            objs_at_time = object_container[i - 500 : i + 500]
+            objs_at_time = object_container[i - 25 : i + 25]
             objs_at_time = objs_at_time.sel_by_time(time.values[0])
             # objs_at_time =object_container.sel_by_time(time.values[0])
             # print (len(objs_at_time))
@@ -157,6 +158,7 @@ def create_empty_history(obj_container: ObjectContainer) -> ObjectContainer:
         ObjectContainer
     """
     for i in range(len(obj_container)):
+        
         history = ("times", np.zeros(len(obj_container[i].times)).astype("int"))
 
         obj_container[i] = obj_container[i].assign(history=history)

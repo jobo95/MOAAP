@@ -43,6 +43,17 @@ def get_datetime_array_from_ds(ds: xr.Dataset) -> np.ndarray[datetime]:
     return np.array([x.astype("datetime64[s]").astype(datetime) for x in list(time)])
 
 
+
+
+
+
+
+
+
+
+
+
+
 #!!!!!!!!!!!!!!!Legacy!!!!!!!!!!!!!!!!!
 
 
