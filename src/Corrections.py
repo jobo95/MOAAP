@@ -62,7 +62,6 @@ def cleanup_dicts(
     print(f"clean up {output_path}{type_}_{output_file_name_temp}_{get_datetime_str(file_start_date)}-{get_datetime_str(file_end_date)}.pkl")
 
     for i, key in enumerate(dict_bak.keys()):
-        print (i, key)
         obj_start_date = dict_bak[key]["times"][0]
         obj_end_date = dict_bak[key]["times"][-1]
 
