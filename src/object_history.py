@@ -6,6 +6,7 @@ from sklearn.neighbors import KDTree
 
 from src.GridPoints import RotatedGridPoint
 from src.Objectcontainer import ObjectContainer
+from timeit import default_timer as timer
 
 
 def compute_history(object_container: ObjectContainer, threshold: float = 3) -> ObjectContainer:
@@ -32,17 +33,23 @@ def compute_history(object_container: ObjectContainer, threshold: float = 3) -> 
         if type_ == "end":
             all_objs = object_container.seltimesteps(slice(-1, None))
 
+        start=0
+        end = 0
         for i, obj in enumerate(all_objs):
             if i % 500 == 0:
+                end = timer()
+                print ("ellapsed time: ",end-start)
+                start = timer()
                 print (str(100*i/len(all_objs)/2.)+"%")
             objs_closest = {}
 
             time = obj.times
-            objs_at_time = object_container[i - 25 : i + 25]
-            objs_at_time = objs_at_time.sel_by_time(time.values[0])
-            # objs_at_time =object_container.sel_by_time(time.values[0])
-            # print (len(objs_at_time))
-
+            if i % 50 == 0:
+                objs_at_time_presel = object_container[i - 500 : i + 500]
+            objs_at_time = objs_at_time_presel.sel_by_time(time.values[0])
+       #     # objs_at_time =object_container.sel_by_time(time.values[0])
+       #     # print (len(objs_at_time))
+       
             for obj2 in objs_at_time:
 
                 obj2 = obj2.sel(times=time)
@@ -58,8 +65,8 @@ def compute_history(object_container: ObjectContainer, threshold: float = 3) -> 
                 continue
             largest_closest_obj = objs_closest[min(objs_closest.keys())]
 
-            obj_index = object_container.get_index_by_id(obj.id_)
-            largest_closest_obj_index = object_container.get_index_by_id(largest_closest_obj.id_)
+            obj_index = object_container.get_index_by_id(int(obj.id_))
+            largest_closest_obj_index = object_container.get_index_by_id(int(largest_closest_obj.id_))
 
             object_container = edit_obj_history(
                 object_container,

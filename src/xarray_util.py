@@ -244,6 +244,7 @@ def load_tracking_objects(
     if os.path.isfile(pkl_container_path + ".pkl"):
         print(f"{pkl_container_path} exists. Loading...")
         IVTobj_ls = load_pkl(pkl_container_path)
+        
 
     else:
         print (f"{pkl_container_path} does not exist. Creating...")

@@ -137,45 +137,42 @@ def calculate_average_ellapsed_time(objs: ObjectContainer, normalization_factor:
 
     # initialize counter with all grid point counts set to zero
     counter_init_dict = dict.fromkeys(RotatedGridPoint.get_all_gridpoints(), 0)
-    grid_point_counter_time = Counter(counter_init_dict)
+    
+    grid_point_counter_time = Counter(counter_init_dict) 
     grid_point_counter_normal = Counter(counter_init_dict)
-    grid_point_counter_objects = Counter(counter_init_dict)
 
     # iterate over all objects
     for idx in range(len(objs)):
         points = objs[idx].gridpoints.values
-        points_flattened = set(chain.from_iterable(points))
-        grid_point_counter_objects.update(points_flattened)
+        #points_flattened = set(chain.from_iterable(points))
 
+        #set of Gridpoints already visited at some previous time step of the object
         visited_points = set()
 
         # iterate over all time steps of object
         for j in range(len(points)):
-            # if points[j] in visited_points:
-            #    continue
-            if j == 0:
-                print(set(points[j]))
-                print(visited_points)
-            p1 = set(points[j]).difference_update(visited_points)
-            print(p1, "Hi")
+            
+            # get the Gridpoints of the current time step that have not been visited by the object before
+            p1 = set(points[j])
+            p1.difference_update(visited_points)
             if p1:
-                grid_point_counter_time.update(p1[j] * (j + 1))
-                grid_point_counter_normal.update(p1[j])
-                visited_points.update(p1[j])
-            # save the ellapsed time the object needed to reach the grid points
-            # grid_point_counter_time.update(points[j] * (j + 1))
+            
+                # save the ellapsed time the object needed to reach the grid points
+                grid_point_counter_time.update(list(p1) * (j+1))
+                # count the absolute number of grid points visited by objects
+                grid_point_counter_normal.update(p1)
+                
+                visited_points.update(p1)
 
-            # count the absolute number of grid point occurrences
-            # grid_point_counter_normal.update(points[j])
 
     grid_point_ls = list(grid_point_counter_normal.keys())
 
     z_time = np.array(list(grid_point_counter_time.values()))
     z_normal = np.array(list(grid_point_counter_normal.values()))
-    z_objects = np.array(list(grid_point_counter_objects.values()))
 
     # compute the average time from the sumed up times and the average number of grid points occurrences
-    z = [i / j / normalization_factor if j != 0 else np.nan for i, j in zip(z_time, z_normal)]
+    #z = [i / j / normalization_factor if j != 0 else np.nan for i, j in zip(z_time, z_normal)]
+    z = [i / j / normalization_factor if j >= 5 else np.nan for i, j in zip(z_time, z_normal)]
     # z = [i if k >= 5 else np.nan for i, k in zip(z, z_objects)]
 
     z = np.array(z)
@@ -239,3 +236,5 @@ def read_cluster_csv(file_name: str) -> pd.DataFrame:
 def str_to_variable_class(class_name: str):
 
     return globals()[class_name]
+
+    

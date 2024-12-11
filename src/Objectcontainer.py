@@ -15,6 +15,7 @@ class ObjectContainer(list):
     Implements  custom  methods to conveniently access and compute statistics of attributes of Tracking objects.
     """
 
+
     def __init__(self, iterable) -> None:
         """Initialize container instance.
 
@@ -24,6 +25,7 @@ class ObjectContainer(list):
         Raises:
             TypeError: If Sequence objects are not  xr.Dataset objects
         """
+
 
         if not all(map(lambda x: isinstance(x, xr.Dataset), iterable)):
             raise TypeError("Object container can only be initialized with a sequence that only contains xarray Datasets")
@@ -148,6 +150,22 @@ class ObjectContainer(list):
             int: Number of Tracking objects in Container
         """
         return len(self)
+    
+    def drop_variables(self, variables: list[str]) -> ObjectContainer:
+        """Remove the given variables from all Tracking Objects inside the Container
+
+        Args:
+            variables (list): list of variables
+
+        """
+
+        return ObjectContainer([x.drop_vars(variables) for x in self])
+    
+    def sel_years(self, year_start: int, year_end: int) -> ObjectContainer:
+        """Select tracking objects that start between year_start and year_end
+
+        """
+        return ObjectContainer([x for x in self if (x.get.start_date.astype('datetime64[Y]').astype(int)+1970) in range(year_start, year_end)])
 
     def sortby(self, attr: str, reverse: bool = False) -> ObjectContainer:
         """Sort Objects in container according to some attribute
@@ -340,17 +358,29 @@ class ObjectContainer(list):
         container = ObjectContainer([obj_.isel(times=get_idx(obj_, regime_name)) for obj_ in self])
         return ObjectContainer([x for x in container if x.times.size > 0])
 
-    def get_index_by_id(self, obj_id: int) -> xr.Dataset:
+    def get_index_by_id(self, obj_id: int, update_id2idx_dict :bool = False) -> int:
         """Get the objects index in the ObjectContainer list based on its object id
 
         Args:
             obj_id (int): Object id
+            
 
         """
+        if update_id2idx_dict:
+            self.create_id2idx_dict()
+        
+        try:
+            return self.id2idx_dict[obj_id]
+        except AttributeError:
+            self.create_id2idx_dict()
+     
+            return self.id2idx_dict[obj_id]
 
-        for ind, obj in enumerate(self):
-            if int(obj_id) == int(obj.id_):
-                return ind
-            else:
-                continue
+
+    def create_id2idx_dict(self):
+        
+        print ("... create id2idx_dict")
+        self.id2idx_dict = {int(obj.id_) : int(idx) for idx,obj in enumerate(self)}
+
+
              

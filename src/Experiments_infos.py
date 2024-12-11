@@ -174,6 +174,7 @@ class ERA5(ICONExperiment):
     slp_path: str = "/work/aa0238/a271093/data/ERA5/1984-2014/remapped_ICON_reg_30km/slp/"
     slp_path_raw: str = "/work/bm1159/XCES/data4xces/reanalysis/reanalysis/ECMWF/IFS/ERA5/1hr/atmos/psl/r1i1p1/"
     slp_nc: str = "psl"
+    IVT_thresh_file_85: str = "ivt_percentile_mlauer_removed-ens-lev_remapbilWP3domain_3dx3dy.nc"
 
     gph_path_raw_gcm: str = "/work/bm1159/XCES/data4xces/reanalysis/reanalysis/ECMWF/IFS/ERA5/day/atmos/zg/r1i1p1-070000Pa/"
 
@@ -216,6 +217,10 @@ class ICON_NWP_refined(ICONExperiment):
 
     IVT_thresh_file_85: str = "ivt_percentile_mlauer_removed-ens-lev_remapbilWP3domain_3dx3dy.nc"
 
+    BMU_file_DJF: str = "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_DJF_fldmean_detrend_del29feb_aac_20PCs_5clusters_Ref_ERA5KmeansPCA.csv"
+    BMU_file_MAM: str = "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_MAM_fldmean_detrend_del29feb_aac_20PCs_5clusters_Ref_ERA5KmeansPCA.csv"
+    BMU_file_JJA: str = "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_JJA_fldmean_detrend_del29feb_aac_20PCs_5clusters_Ref_ERA5KmeansPCA.csv"
+    BMU_file_SON: str = "ERA5_gph70000_1984_2014_reglonlat_-90_90_20_88_1deg_SON_fldmean_detrend_del29feb_aac_20PCs_5clusters_Ref_ERA5KmeansPCA.csv"
 
 @dataclass
 class Data:

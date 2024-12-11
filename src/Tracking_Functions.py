@@ -5204,7 +5204,7 @@ def moaap(
 
         grIVTs = calc_object_characteristics(
             IVT_objects,  # feature object file
-            IVT,  # original file used for feature detection
+            IVT,  # nal file used for feature detection
             OutputFolder + "IVT_" + SetupString,
             Time,  # timesteps of the data
             Lat,  # 2D latidudes

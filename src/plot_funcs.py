@@ -23,6 +23,7 @@ def plot_on_rotated_grid(
     cmap="Blues",
     plot_domains: dict[Domain, str] = None,
     cbar: bool = True,
+    extend="max"
 ):
     """
     Plot data field over the regional ICON domain using rotated coordinates.
@@ -103,10 +104,10 @@ def plot_on_rotated_grid(
             levels=levels,
             cmap=cmap,
             transform=crs_arctic,
-            extend="max",
+            extend=extend,
         )
     else:
-        plot = plt.tricontourf(lon, lat, z, levels=levels, cmap=cmap, transform=crs_arctic, extend="both")
+        plot = plt.tricontourf(lon, lat, z, levels=levels, cmap=cmap, transform=crs_arctic, extend=extend)
     if plot_domains:
         for domain, color in plot_domains.items():
             if domain.east > domain.west:
